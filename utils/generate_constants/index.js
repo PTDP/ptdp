@@ -1,22 +1,29 @@
 const rimraf = require("rimraf");
 const fs = require("fs");
 const moment = require("moment");
+const states = require("us-state-codes");
+const { v4: uuidv4 } = require('uuid');
 
 const governorPhones = require("./governor_phones");
-const stateFips = require("./state_fips");
+const stateIdentifiers = require("./state_identifiers");
 const phoneAssignment = require("./phone_assignment");
 
 const scraperInput = async () => {
-  const result = {};
+  const result = {
+      uuid: uuidv4(),
+      createdAt: Date.now(),
+      data: {}
+  };
+
   const govPhones = await governorPhones();
-  const sFips = await stateFips();
+  const stateIdent = await stateIdentifiers();
   const outStatePhones = phoneAssignment.outState(govPhones);
 
   Object.entries(govPhones).forEach(([state, govPhone]) => {
-    result[state] = {
-      state_fips: sFips[state],
+    result.data[state] = {
       in_state_phone: govPhone,
       out_state_phone: outStatePhones[state],
+      ...stateIdent[state]
     };
   });
 

@@ -14,6 +14,7 @@
     "jsdom": "^16.4.0",
     "moment": "^2.29.1",
     "rimraf": "^3.0.2",
-    "us-state-codes": "^1.1.2"
+    "us-state-codes": "^1.1.2",
+    "uuid": "^8.3.2"
   }
 }

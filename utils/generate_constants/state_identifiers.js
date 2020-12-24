@@ -15,8 +15,12 @@ module.exports = async () => {
       .forEach((e, i) => {
         if (i === 0) return;
 
-        const [STATE, STUSAB] = e;
-        t[STUSAB] = STATE;
+        const [STATE, STUSAB, STATE_NAME] = e;
+        t[STUSAB] = {
+            state_fips: STATE,
+            stusab: STUSAB,
+            state_name: STATE_NAME
+        };
       });
   }
 
