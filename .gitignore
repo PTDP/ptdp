@@ -9,4 +9,4 @@ package-lock.json
 # file in Git for documentation purposes.
 **/apify_storage/datasets
 **/apify_storage/request_queues
-**/apify_storage/key_value_stores/default/OUTPUT.json
+**/apify_storage/key_value_stores/default/**

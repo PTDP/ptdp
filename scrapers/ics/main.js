@@ -5,22 +5,30 @@
 const Apify = require('apify');
 
 Apify.main(async () => {
-    // Get input of the actor.
-    // If you'd like to have your input checked and generate a user interface
-    // for it, add INPUT_SCHEMA.json file to your actor.
-    // For more information, see https://apify.com/docs/actor/input-schema
+
+    // const requestList = await Apify.openRequestList(
+    //     "my-list", ["http://proxy.apify.com/?format=json"]
+    // );
+
+    // const proxyConfiguration = await Apify.createProxyConfiguration();
+
     const input = await Apify.getInput();
     console.log('Input:');
-    console.dir(input);
+    console.log(input);
+    const output = [];
 
-    // Do something useful here...
+    // const crawler = new Apify.PuppeteerCrawler({
+    //     requestList,
+    //     proxyConfiguration,
+    //     handlePageFunction: async ({ page, request, proxyInfo }) => {
+    //         console.log(await page.content())
 
-    // Save output
-    const output = {
-        receivedInput: input,
-        message: 'Hello sir!',
-    };
-    console.log('Output:');
-    console.dir(output);
+    //         output.push({
+                
+    //         });
+    //     }
+    // });
+
+    // await crawler.run();
     await Apify.setValue('OUTPUT', output);
 });
