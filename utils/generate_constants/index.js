@@ -45,6 +45,7 @@ const main = async () => {
   try {
     rimraf.sync("./constants");
     fs.mkdirSync("./constants");
+
     fs.writeFileSync(
       "./constants/scraper_input.json",
       JSON.stringify(await scraperInput())
