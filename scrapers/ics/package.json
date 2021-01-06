@@ -1,11 +1,9 @@
 {
-  "name": "actor-quick-start",
+  "name": "ics",
   "version": "0.0.1",
   "private": true,
   "dependencies": {
-    "apify": "^0.20.0",
-    "path-to-regexp": "^6.2.0",
-    "pending-xhr-puppeteer": "^2.3.3"
+    "apify": "^0.20.0"
   },
   "devDependencies": {
     "cross-env": "^7.0.2"
