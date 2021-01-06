@@ -281,7 +281,7 @@ Apify.main(async () => {
     // proxyConfiguration,
     handlePageTimeoutSecs: 36000,
     handlePageFunction: async ({ page, request, proxyInfo }) => {
-      const states = [input.data["AL"], input.data["AZ"]];
+      const states = input.data;
       await page.waitFor(selectors.agency_name_input);
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
