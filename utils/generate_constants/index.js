@@ -21,8 +21,8 @@ const scraperInput = async () => {
 
   Object.entries(govPhones).forEach(([state, govPhone]) => {
     result.data[state] = {
-      in_state_phone: govPhone,
-      out_state_phone: outStatePhones[state],
+      in_state_phone: `1${govPhone.split('-').join("")}`,
+      out_state_phone: `1${outStatePhones[state].split('-').join("")}`,
       ...stateIdent[state]
     };
   });
