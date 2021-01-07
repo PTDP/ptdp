@@ -1,6 +1,8 @@
 const Apify = require("apify");
 const PendingXHR = require("./pendingXHR.js");
 
+const COMPANY = 'ics';
+
 const rateDetailSel = async (text, page) => {
   const handle = (
     await page.$x(
@@ -200,6 +202,7 @@ const processFacility = async (facility, agency, state, scraper, page) => {
           facility: facility.label,
           agency,
           seconds: 15 * 60,
+          company: COMPANY
         })
       );
     } else if (isFailureResp) {
@@ -219,6 +222,7 @@ const processFacility = async (facility, agency, state, scraper, page) => {
           agency,
           seconds: 15 * 60,
           error: resp.result,
+          company: COMPANY
         })
       );
     }

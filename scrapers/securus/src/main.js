@@ -11,6 +11,8 @@ const env = {
   BASE_URL: "https://securustech.online",
 };
 
+const COMPANY = 'securus';
+
 const login = (page) => {};
 
 const login_selectors = {
@@ -160,6 +162,7 @@ const oncomplete = async (
         scraper,
         facility: facility.label,
         seconds: 60,
+        company: COMPANY
       })
     );
   } else if (isFailureResp) {
@@ -178,6 +181,7 @@ const oncomplete = async (
         facility: facility.label,
         seconds: 60,
         error: resp.errorMsg,
+        company: COMPANY
       })
     );
   }
