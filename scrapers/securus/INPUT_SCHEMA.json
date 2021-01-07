@@ -4,14 +4,23 @@
   "type": "object",
   "schemaVersion": 1,
   "properties": {
-    "startUrls": {
-      "title": "Start URLs",
-      "type": "array",
-      "description": "URLs to start with.",
-      "editor": "requestListSources"
+    "uuid": {
+      "title": "uuid",
+      "description": "Dataset ID",
+      "type": "string",
+      "editor": "textfield"
+    },
+    "createdAt": {
+      "title": "createdAt",
+      "description": "Dataset creation time",
+      "type": "integer",
+      "editor": "number"
+    },
+    "data": {
+      "title": "data",
+      "description": "Input to scraper",
+      "type": "object",
+      "editor": "json"
     }
-  },
-  "required": [
-    "startUrls"
-  ]
+  }
 }
