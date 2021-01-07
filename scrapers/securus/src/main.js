@@ -75,7 +75,7 @@ const process = async (page, input, output) => {
   const states = Object.values(input.data).map((s) => {
       const raw = states_raw.find((r_s) => r_s.value === s.stusab);
       return raw ? { ...s, ...raw} : null;
-  }).filter(Boolean).slice(0,2);
+  }).filter(Boolean);
 
   for (const state of states) {
     try {
