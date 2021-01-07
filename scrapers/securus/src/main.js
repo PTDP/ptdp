@@ -75,8 +75,6 @@ const process = async (page, input, output) => {
       return raw ? { ...s, ...raw} : null;
   }).filter(Boolean).slice(0,2);
 
-  console.log(states);
-
   for (const state of states) {
     try {
       await processState(state, page, input, output);
