@@ -85,7 +85,7 @@ const processState = async (state, scraper, page) => {
 
   // If no results in 5 seconds, move onto next state
   await Promise.race[
-    (page.waitFor(selectors.agency_name_dropdown),
+    (page.waitForTimeout(selectors.agency_name_dropdown),
     new Promise((resolve, reject) => {
       noAgenciesTimeout = setTimeout(() => {
         output.errors.push({
@@ -125,7 +125,7 @@ const processAgency = async (agency, state, scraper, page) => {
 
     await page.type(selectors.agency_name_input, agency);
     await page.keyboard.press("Enter");
-    await page.waitFor(selectors.rates);
+    await page.waitForTimeout(selectors.rates);
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -243,7 +243,7 @@ const processFacility = async (facility, agency, state, scraper, page) => {
       );
 
       await sleepInRange(500, 1500);
-      await page.waitFor(selectors.calculate_button);
+      await page.waitForTimeout(selectors.calculate_button);
       await page.click(selectors.calculate_button);
 
       await page.waitForFunction(
@@ -267,7 +267,7 @@ const processFacility = async (facility, agency, state, scraper, page) => {
 };
 
 Apify.main(async () => {
-  const requestList = await Apify.openRequestList("ics", [
+  const requestList = await Apify.openRequestList('start-urls', [
     "https://icsonline.icsolutions.com/rates",
   ]);
 
@@ -280,11 +280,15 @@ Apify.main(async () => {
     requestList,
     // proxyConfiguration,
     handlePageTimeoutSecs: 36000,
+    launchPuppeteerOptions: {
+      useChrome: true,
+      stealth: true,
+  },
     handlePageFunction: async ({ page, request, proxyInfo }) => {
-      const states = input.data;
-      await page.waitFor(selectors.agency_name_input);
+        
+      const states = Object.values(input.data);
+      await page.waitForTimeout(selectors.agency_name_input);
       await new Promise((resolve) => setTimeout(resolve, 1000));
-
       for (let i = 0; i < states.length; i++) {
         const results = await processState(states[i], input.uuid, page);
         output[states[i].stusab] = [...results];
