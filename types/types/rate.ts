@@ -17,9 +17,6 @@ type ICS = {
     seconds: number
 }
 
-type SecurusServices = "AdvancedConnect" | "Direct Bill" | "Inmate Debit" | "Traditional Collect" | "Voicemail";
-type Service = SecurusServices | "Default";
-
 type Securus = {
     additionalAmount: string,
     feeName: string | null,
@@ -36,7 +33,10 @@ type Securus = {
     seconds: number
 }
 
-interface Rate {
+type SecurusServices = "AdvancedConnect" | "Direct Bill" | "Inmate Debit" | "Traditional Collect" | "Voicemail";
+type Service = SecurusServices | "Default";
+
+export type Rate = {
     initialAmount: number,
     additionalAmount: number,
     initialDuration: number,

@@ -1,15 +1,17 @@
 {
-    "compilerOptions": {
-      "target": "es5",
-      "module": "commonjs",
-      "lib": ["es2017", "es7", "es6", "dom"],
-      "declaration": true,
-      "outDir": "dist",
-      "strict": true,
-      "esModuleInterop": true
-    },
-    "exclude": [
-      "node_modules",
-      "dist"
-    ]
-  }
+  "compilerOptions": {
+    "module": "commonjs",
+    "lib": ["es6", "dom"],
+    "noImplicitAny": true,
+    "noImplicitThis": false,
+    "strictNullChecks": true,
+    "strictFunctionTypes": false,
+    "baseUrl": "../",
+    "typeRoots": ["../"],
+    "types": [],
+    "noEmit": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "preserve"
+  },
+  "files": ["index.d.ts"]
+}

@@ -11,17 +11,22 @@
     "watch": "./node_modules/.bin/tsc --watch"
   },
   "engines": {
-    "node": "8"
+    "node": "10"
   },
   "main": "lib/index.js",
   "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
     "firebase-admin": "^8.6.0",
     "firebase-functions": "^3.3.0"
   },
   "devDependencies": {
+    "@ptdp/types": "^1.0.3",
+    "firebase-functions-test": "^0.1.6",
+    "husky": "^4.3.7",
+    "pretty-quick": "^3.1.0",
     "tslint": "^5.12.0",
-    "typescript": "^3.2.2",
-    "firebase-functions-test": "^0.1.6"
+    "typescript": "^3.2.2"
   },
   "private": true
 }
