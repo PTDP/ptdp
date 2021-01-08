@@ -1,3 +1,3 @@
 export const Collections = {
-    facilities: 'facilities'
-}
+  facilities: "facilities",
+};
