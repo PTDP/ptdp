@@ -1,8 +1,8 @@
 import * as express from "express";
-import facilities from "./controllers/facilities";
+import load from "./controllers/etl";
 
 const app = express();
 
-app.use("/facilities", facilities);
+app.use("/load", load);
 
 export default app;

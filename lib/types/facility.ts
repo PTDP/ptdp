@@ -1,15 +1,14 @@
-import { Company } from './company';
-import { Agency } from './agency';
-import { DocumentReference } from '@firebase/firestore-types';
-
 export type Facility = {
-    createdAt: number,
-    updatedAt: number,
-    company: Company,
-    congressionalFips: number,
-    stateFips: number,
-    countyFips: number,
+    created_at: Date,
+    updated_at: Date,
+    
+    raw_name: string;
+    name: string,
+    congressional_fips: number,
+    state_fips: number,
+    county_fips: number,
     longitude: number,
     latitude: number,
-    agency: DocumentReference<Agency> | null
+
+    agency_id: number
 }
