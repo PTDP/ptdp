@@ -1,7 +1,7 @@
 import * as express from "express";
 import * as admin from "firebase-admin";
 import { Facility } from "@ptdp/lib/types";
-import { Collections } from "../../constants";
+import * as loaders from './loaders';
 
 const router = express.Router();
 
@@ -16,8 +16,23 @@ const facilityConverter = {
   },
 };
 
-router.post("/", (req: express.Request, res: express.Response) => {
-  res.status(200).send(`Hello ${req.body.name}!`);
+
+router.post("/etl", async (req: express.Request, res: express.Response) => {
+  const { company } = req.body;
+
+  try {
+    switch(company) {
+      case 'ics':
+        await loaders.ics(req.body);
+      case 'securus':
+          await loaders.securus(req.body);
+      default: 
+        throw new Error(`ETL for ${company} not found.`)
+    }
+    res.status(200).send({});
+  } catch(err) {
+    res.status(404).send({error: err.toString()});
+  }
 });
 
 router.get("/:id", async (req: express.Request, res: express.Response) => {

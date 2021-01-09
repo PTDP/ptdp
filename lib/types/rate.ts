@@ -1,8 +1,6 @@
-import { Company } from './company';
-import { Agency } from './agency';
-import { DocumentReference } from '@firebase/firestore-types';
+import { SecurusServices } from './service';
 
-type ICS = {
+export type ICSRate = {
     tariffBand: string
     initialDuration: string,
     initialCost: number,
@@ -17,7 +15,7 @@ type ICS = {
     seconds: number
 }
 
-type Securus = {
+export type SecurusRate = {
     additionalAmount: string,
     feeName: string | null,
     initalAmount: string,
@@ -33,20 +31,26 @@ type Securus = {
     seconds: number
 }
 
-type SecurusServices = "AdvancedConnect" | "Direct Bill" | "Inmate Debit" | "Traditional Collect" | "Voicemail";
-type Service = SecurusServices | "Default";
+export type Stusab = "AL"|"AK"|"AZ"|"AR"|"CA"|"CO"|"CT"|"DE"|"FL"|"GA"|"HI"|"ID"|"IL"|"IN"|"IA"|"KS"|"KY"|"LA"|"ME"|"MD"|"MA"|"MI"|"MN"|"MS"|"MO"|"MT"|"NE"|"NV"|"NH"|"NJ"|"NM"|"NY"|"NC"|"ND"|"OH"|"OK"|"OR"|"PA"|"RI"|"SC"|"SD"|"TN"|"TX"|"UT"|"VT"|"VA"|"WA"|"WV"|"WI"|"WY";
+
+export type ScrapeResult<T> = {
+    errors: string[]
+} & {
+    [K in Stusab]?: T[]
+}
 
 export type Rate = {
-    initialAmount: number,
-    additionalAmount: number,
-    initialDuration: number,
-    overDuration: number,
+    initial_amount: number,
+    additional_amount: number,
+    initial_duration: number,
+    over_duration: number,
     tax: number,
-    phoneNumber: number,
-    service: Service,
-    canonicalFacility: DocumentReference<Agency>,
-    company: Company,
-    raw: Securus | ICS,
-    createdAt: number,
-    scraper: string
+    raw: ICSRate | SecurusRate,
+    raw_sha1: string;
+    created_at: number,
+    phone_number: number,
+    service_id: number,
+    facility_id: number,
+    company_id: number,
+    scraper_id: number
 }
