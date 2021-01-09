@@ -1,6 +1,6 @@
 {
-  "name": "@ptdp/types",
-  "version": "1.0.3",
+  "name": "@ptdp/lib",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -10,6 +10,7 @@
   "author": "prison.telcom.data.project@gmail.com",
   "license": "ISC",
   "devDependencies": {
+    "@firebase/firestore-types": "^2.1.0",
     "dtslint": "github:Microsoft/dtslint#production",
     "prettier": "^1.14.3",
     "typescript": "^3.3.1"
@@ -19,7 +20,5 @@
       "pre-commit": "pretty-quick --staged"
     }
   },
-  "dependencies": {
-    "@firebase/firestore-types": "^2.1.0"
-  }
+  "dependencies": {}
 }
