@@ -1,6 +1,6 @@
 import * as express from "express";
 import * as admin from "firebase-admin";
-import { Facility } from "@ptdp/types";
+import { Facility } from "@ptdp/lib/types";
 import { Collections } from "../../constants";
 
 const router = express.Router();
