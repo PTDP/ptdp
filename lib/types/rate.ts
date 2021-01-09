@@ -4,7 +4,7 @@ export type ICSRate = {
     tariffBand: string
     initialDuration: string,
     initialCost: number,
-    overDuration: number,
+    overDuration: string,
     overCost: number,
     tax: number,
     finalCost: number,
@@ -40,11 +40,11 @@ export type ScrapeResult<T> = {
 }
 
 export type Rate = {
-    initial_amount: number,
-    additional_amount: number,
-    initial_duration: number,
-    over_duration: number,
-    tax: number,
+    initial_amount: number | null,
+    additional_amount: number | null,
+    initial_duration: number | null,
+    over_duration: number | null,
+    tax: number | null,
     raw: ICSRate | SecurusRate,
     raw_sha1: string;
     created_at: number,
