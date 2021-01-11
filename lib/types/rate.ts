@@ -1,29 +1,31 @@
 import { SecurusServices } from './service';
+import { Stringified } from './json';
 
 export type ICSRate = {
-    tariffBand: string
-    initialDuration: string,
-    initialCost: number,
-    overDuration: string,
-    overCost: number,
-    tax: number,
-    finalCost: number,
+    tariffBand?: string
+    initialDuration?: string,
+    initialCost?: number,
+    overDuration?: string,
+    overCost?: number,
+    tax?: number,
+    finalCost?: number,
     number: string,
     createdAt: number,
     scraper: string,
     agency: string,
-    seconds: number
+    facility: string,
+    seconds: number,
 }
 
 export type SecurusRate = {
-    additionalAmount: string,
+    additionalAmount?: string,
     feeName: string | null,
     initalAmount: string,
-    quoteRule: boolean,
-    ratePerMinute: number,
-    surCharge: number,
-    totalAmount: string,
-    number: string,
+    quoteRule?: boolean,
+    ratePerMinute?: number,
+    surCharge?: number,
+    totalAmount?: string,
+    number?: string,
     service: SecurusServices,
     createdAt: number,
     scraper: string,
@@ -40,17 +42,20 @@ export type ScrapeResult<T> = {
 }
 
 export type Rate = {
+    created_at?: string,
+    updated_at?: string,
+
     initial_amount: number | null,
     additional_amount: number | null,
     initial_duration: number | null,
     over_duration: number | null,
     tax: number | null,
-    raw: ICSRate | SecurusRate,
+    raw: Stringified<ICSRate | SecurusRate>,
     raw_sha1: string;
-    created_at: number,
+    scraped_at: string,
     phone_number: number,
     service_id: number,
-    facility_id: number,
+    facility_id: number | null,
     company_id: number,
     scraper_id: number
 }
