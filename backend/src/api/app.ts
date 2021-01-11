@@ -1,8 +1,8 @@
-import * as express from "express";
-import load from "./controllers/etl";
+import express from "express";
+import etl from "./controllers/etl";
 
 const app = express();
 
-app.use("/load", load);
+app.use("/etl", etl);
 
 export default app;

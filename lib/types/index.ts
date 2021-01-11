@@ -4,3 +4,4 @@ export * from './facility';
 export * from './rate';
 export * from './scraper';
 export * from './service';
+export * from './json';

@@ -1,53 +1,29 @@
 import * as express from "express";
-import * as admin from "firebase-admin";
-import { Facility } from "@ptdp/lib/types";
 import * as loaders from './loaders';
+import axios from 'axios';
 
 const router = express.Router();
 
-const facilityConverter = {
-  toFirestore(facility: Facility): admin.firestore.DocumentData {
-    return facility;
-  },
-  fromFirestore(
-    snapshot: admin.firestore.QueryDocumentSnapshot<Facility>
-  ): Facility {
-    return snapshot.data();
-  },
-};
-
-
-router.post("/etl", async (req: express.Request, res: express.Response) => {
-  const { company } = req.body;
+router.post("/", async (req: express.Request, res: express.Response) => {
+  const { company, results_url } = req.body;
 
   try {
+    const data = await (await axios.get(results_url)).data;
+
     switch(company) {
       case 'ics':
-        await loaders.ics(req.body);
+        await loaders.ics(data);
+        break;
       case 'securus':
-          await loaders.securus(req.body);
+        await loaders.securus(data);
+        break;
       default: 
         throw new Error(`ETL for ${company} not found.`)
     }
+
     res.status(200).send({});
   } catch(err) {
     res.status(404).send({error: err.toString()});
-  }
-});
-
-router.get("/:id", async (req: express.Request, res: express.Response) => {
-  try {
-    const facility = await admin
-      .firestore()
-      .collection(Collections.facilities)
-      .doc(req.params.id)
-      .withConverter(facilityConverter)
-      .get();
-    console.log(facility);
-
-    res.status(200).send("hello");
-  } catch (err) {
-    res.status(400).send({ error: err.toString() });
   }
 });
 
