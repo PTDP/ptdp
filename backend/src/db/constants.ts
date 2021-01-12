@@ -4,5 +4,6 @@ export const Tables = {
   agencies: "agencies",
   companies: "companies",
   services: "services",
-  scrapers: "scrapers"
+  scrapers: "scrapers",
+  canonical_rates: "canonical_rates",
 };

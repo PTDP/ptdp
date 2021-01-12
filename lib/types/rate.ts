@@ -50,12 +50,24 @@ export type Rate = {
     initial_duration: number | null,
     over_duration: number | null,
     tax: number | null,
-    raw: Stringified<ICSRate | SecurusRate>,
+    raw: Stringified<Omit<ICSRate | SecurusRate, "createdAt">>,
     raw_sha1: string;
-    scraped_at: string,
-    phone_number: number,
-    service_id: number,
-    facility_id: number | null,
-    company_id: number,
+    seen_at: string[],
+    phone_number: string,
+    disabled?: boolean;
+
     scraper_id: number
+    canonical_rate_id: number;
+}
+
+export type CanonicalRate = {
+    created_at?: string,
+    updated_at?: string,
+
+    phone_number: string;
+    company_id: number,
+    facility_id: number;
+    service_id: number;
+    notes: string;
+    disabled?: boolean;
 }

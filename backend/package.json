@@ -20,7 +20,7 @@
   },
   "main": "lib/index.js",
   "dependencies": {
-    "@ptdp/lib": "^1.0.11",
+    "@ptdp/lib": "^1.0.22",
     "axios": "^0.21.1",
     "body-parser": "^1.19.0",
     "express": "^4.17.1",

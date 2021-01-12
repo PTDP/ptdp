@@ -1,5 +1,5 @@
 import * as functions from "firebase-functions";
-import './db/index';
+import "./db/index";
 
 import app from "./api/app";
 
