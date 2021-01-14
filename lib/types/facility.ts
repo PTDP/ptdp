@@ -4,11 +4,15 @@ export type Facility = {
     
     raw_name: string;
     name: string,
-    congressional_fips: number,
-    state_fips: number,
-    county_fips: number,
+    google_name: string;
+    google_place_id: string;
+    formatted_address: string;
+
     longitude: number,
     latitude: number,
 
     agency_id: number
+    congressional_id: number;
+    state_id: number;
+    county_id: number;
 }

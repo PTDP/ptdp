@@ -1,5 +1,7 @@
 import * as express from "express";
 import * as loaders from "./loaders";
+import * as geocode from './transformers/geocode';
+
 import axios from "axios";
 
 const router = express.Router();
@@ -23,8 +25,26 @@ router.post("/", async (req: express.Request, res: express.Response) => {
 
     res.status(200).send({});
   } catch (err) {
-    res.status(404).send({ error: err.toString() });
+    res.status(400).send({ error: err.toString() });
   }
 });
+
+router.post("/geocode/:model", async (req: express.Request, res: express.Response) => {
+  const { model } = req.params;
+  const { force } = req.query;
+
+  try {
+    switch(model) {
+      case 'facilities':
+        await geocode.facilities();
+        break;
+        default:
+          throw new Error(`No geocode transformer found for ${model}`)
+    }
+  } catch(err) {
+    res.status(400).send({ error: err.toString() });
+  }
+
+})
 
 export default router;
