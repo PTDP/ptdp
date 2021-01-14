@@ -5,3 +5,4 @@ export * from './rate';
 export * from './scraper';
 export * from './service';
 export * from './json';
+export * from './geo';

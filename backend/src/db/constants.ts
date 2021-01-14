@@ -6,4 +6,7 @@ export const Tables = {
   services: "services",
   scrapers: "scrapers",
   canonical_rates: "canonical_rates",
+  states: "states",
+  counties: "counties",
+  congressional_districts: "congressional_districts"
 };
