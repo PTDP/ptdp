@@ -5,7 +5,7 @@ require("ts-node/register");
 
 console.log("functions.config()", functions.config());
 
-module.exports = {
+export default {
   client: "pg",
   connection: CONNECTION_STRING,
   migrations: {
