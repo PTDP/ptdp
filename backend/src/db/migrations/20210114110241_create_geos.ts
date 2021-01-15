@@ -6,7 +6,7 @@ export async function up(knex: Knex): Promise<void> {
     table.increments();
     table.timestamps(true, true);
 
-    table.integer("fips");
+    table.text("fips");
     table.text("name");
   });
 
@@ -14,7 +14,7 @@ export async function up(knex: Knex): Promise<void> {
     table.increments();
     table.timestamps(true, true);
 
-    table.integer("fips");
+    table.text("fips");
     table.text("stusab");
     table.text("name");
   });
@@ -23,7 +23,8 @@ export async function up(knex: Knex): Promise<void> {
     table.increments();
     table.timestamps(true, true);
 
-    table.integer("fips");
+    table.text("fips");
+    table.text("state_fips");
     table.text("name");
   });
 }

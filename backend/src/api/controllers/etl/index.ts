@@ -36,7 +36,7 @@ router.post("/geocode/:model", async (req: express.Request, res: express.Respons
   try {
     switch(model) {
       case 'facilities':
-        await geocode.facilities();
+        await geocode.facilities(!!force);
         break;
         default:
           throw new Error(`No geocode transformer found for ${model}`)

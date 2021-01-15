@@ -20,16 +20,19 @@
   },
   "main": "lib/index.js",
   "dependencies": {
-    "@ptdp/lib": "^1.0.25",
+    "@ptdp/lib": "^1.0.26",
     "axios": "^0.21.1",
     "body-parser": "^1.19.0",
+    "csv": "^5.3.2",
+    "csv-parse": "^4.14.2",
     "express": "^4.17.1",
     "firebase-admin": "^8.6.0",
     "firebase-functions": "^3.3.0",
     "knex": "^0.21.15",
     "objection": "^2.2.6",
     "pg": "^8.5.1",
-    "ts-node": "^9.1.1"
+    "ts-node": "^9.1.1",
+    "xlsx": "^0.16.9"
   },
   "devDependencies": {
     "@ptdp/types": "^1.0.3",

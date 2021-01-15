@@ -12,7 +12,7 @@ export async function up(knex: Knex): Promise<void> {
       .integer("company_id")
       .references("id")
       .inTable(Tables.companies)
-      .onDelete("CASCADE");
+      .onDelete("SET NULL");
   });
 }
 

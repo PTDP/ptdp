@@ -1,7 +1,7 @@
-import PLACES_KEY from functions.config().google.places;
-import axios from 'axios';
+// import PLACES_KEY from functions.config().google.places;
+// import axios from 'axios';
 
-const BASEURL = 'https://maps.googleapis.com/maps/api/place/textsearch/json?query=';
+// const BASEURL = 'https://maps.googleapis.com/maps/api/place/textsearch/json?query=';
 
 export const facilities = async (force = false) => {
     // get all facilities, 
