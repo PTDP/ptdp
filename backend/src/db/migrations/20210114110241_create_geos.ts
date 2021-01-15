@@ -7,6 +7,7 @@ export async function up(knex: Knex): Promise<void> {
     table.timestamps(true, true);
 
     table.text("fips");
+    table.text("state_fips");
     table.text("name");
   });
 

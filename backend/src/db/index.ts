@@ -1,6 +1,6 @@
 import knex from "knex";
 import { Model } from "objection";
-const knexConfig = require("./knexfile.js");
+import knexConfig from "./knexfile";
 
 const connection = knex(knexConfig as any);
 Model.knex(connection);

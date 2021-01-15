@@ -8,5 +8,5 @@ export const Tables = {
   canonical_rates: "canonical_rates",
   states: "states",
   counties: "counties",
-  congressional_districts: "congressional_districts"
+  congressional_districts: "congressional_districts",
 };

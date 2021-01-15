@@ -1,6 +1,7 @@
 export type Congressional = {
     fips: string;
     name: string;
+    state_fips: string;
 }
 
 export type State = {
@@ -12,4 +13,5 @@ export type State = {
 export type County = {
     fips: string;
     name: string;
+    state_fips: string;
 }
