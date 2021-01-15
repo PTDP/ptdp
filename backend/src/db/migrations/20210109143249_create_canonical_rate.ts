@@ -6,9 +6,9 @@ export async function up(knex: Knex): Promise<void> {
     table.increments();
     table.timestamps(true, true);
 
-    table.integer("company_id").references("id").inTable(Tables.companies);
-    table.integer("facility_id").references("id").inTable(Tables.facilities);
-    table.integer("service_id").references("id").inTable(Tables.services);
+    table.integer("company_id").references("id").inTable(Tables.companies).onDelete("SET NULL");
+    table.integer("facility_id").references("id").inTable(Tables.facilities).onDelete("SET NULL");
+    table.integer("service_id").references("id").inTable(Tables.services).onDelete("SET NULL");
 
     table.text("phone_number");
     table.text("notes");

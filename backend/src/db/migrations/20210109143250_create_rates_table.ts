@@ -21,12 +21,12 @@ export async function up(knex: Knex): Promise<void> {
       .integer("scraper_id")
       .references("id")
       .inTable(Tables.scrapers)
-      .onDelete("CASCADE");
+      .onDelete("SET NULL");
     table
       .integer("canonical_rate_id")
       .references("id")
       .inTable(Tables.canonical_rates)
-      .onDelete("CASCADE");
+      .onDelete("SET NULL");
   });
 }
 

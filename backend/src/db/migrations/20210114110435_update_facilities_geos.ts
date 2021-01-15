@@ -8,9 +8,9 @@ export async function up(knex: Knex): Promise<void> {
     t.string("google_name");
 
     t.integer("congressional_id").references("id")
-    .inTable(Tables.congressional_districts)
-    t.integer("state_id").references("id").inTable(Tables.states);
-    t.integer("county_id").references("id").inTable(Tables.counties);
+    .inTable(Tables.congressional_districts).onDelete("SET NULL");
+    t.integer("state_id").references("id").inTable(Tables.states).onDelete("SET NULL");
+    t.integer("county_id").references("id").inTable(Tables.counties).onDelete("SET NULL");
 
   });
 }
