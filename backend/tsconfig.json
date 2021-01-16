@@ -8,7 +8,12 @@
     "strict": true,
     "target": "es2017",
     "esModuleInterop": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "lib": [
+      "esnext",
+      "es2016",
+      "dom"
+    ]
   },
   "compileOnSave": true,
   "include": ["src"]
