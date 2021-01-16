@@ -43,8 +43,9 @@ router.post(
         default:
           throw new Error(`No geocode transformer found for ${model}`);
       }
+      res.status(200).send({ success: true });
     } catch (err) {
-      res.status(400).send({ error: err.toString() });
+      res.status(400).send({ error: err.toString(), success: false });
     }
   }
 );

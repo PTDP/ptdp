@@ -213,7 +213,7 @@ const securusTransform = async (
     .findOne("raw_name", "=", rate.facility)
     .select("id");
 
-  let service = await Service.query().findOne("id", "=", rate.service);
+  let service = await Service.query().findOne("name", "=", rate.service);
 
   if (!facility) facility = await createFacility(rate.facility, state);
 
@@ -242,8 +242,12 @@ const securusTransform = async (
   const tax_rate = 0;
 
   return {
-    initial_amount: parseFloat(rate.initalAmount.replace("$", "")) * 100,
-    additional_amount: parseFloat(rate.initalAmount.replace("$", "")) * 100,
+    initial_amount: rate.initalAmount
+      ? parseFloat(rate.initalAmount.replace("$", "")) * 100
+      : null,
+    additional_amount: rate.additionalAmount
+      ? parseFloat(rate.additionalAmount.replace("$", "")) * 100
+      : null,
     initial_duration: rate.seconds, //60
     over_duration: rate.seconds, // 60
     // get 60 second tax rate
