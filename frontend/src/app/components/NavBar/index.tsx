@@ -8,10 +8,8 @@ import { PageWrapper } from '../PageWrapper';
 export function NavBar() {
   return (
     <Wrapper>
-      <PageWrapper>
-        <Logo />
-        <Nav />
-      </PageWrapper>
+      {/* <Logo /> */}
+      <Nav />
     </Wrapper>
   );
 }
@@ -29,10 +27,10 @@ const Wrapper = styled.header`
   @supports (backdrop-filter: blur(10px)) {
     backdrop-filter: blur(10px);
     background-color: ${p =>
-      p.theme.background.replace(
-        /rgba?(\(\s*\d+\s*,\s*\d+\s*,\s*\d+)(?:\s*,.+?)?\)/,
-        'rgba$1,0.75)',
-      )};
+    p.theme.background.replace(
+      /rgba?(\(\s*\d+\s*,\s*\d+\s*,\s*\d+)(?:\s*,.+?)?\)/,
+      'rgba$1,0.75)',
+    )};
   }
 
   ${PageWrapper} {
