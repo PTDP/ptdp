@@ -18,7 +18,7 @@ export function HomePage() {
       <NavBar />
       {/* <PageWrapper> */}
       <Masthead />
-      <Features />
+      {/* <Features /> */}
       {/* </PageWrapper> */}
     </>
   );
