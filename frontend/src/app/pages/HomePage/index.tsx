@@ -4,6 +4,7 @@ import { NavBar } from 'app/components/NavBar';
 import { Masthead } from './Masthead';
 import { Features } from './Features';
 import { PageWrapper } from 'app/components/PageWrapper';
+import NationalMap from '../NationalMap';
 
 export function HomePage() {
   return (
@@ -18,6 +19,9 @@ export function HomePage() {
       <NavBar />
       {/* <PageWrapper> */}
       <Masthead />
+      <div style={{ height: '100vh', width: '100vw', display: 'block', position: 'relative' }}>
+        <NationalMap />
+      </div>
       {/* <Features /> */}
       {/* </PageWrapper> */}
     </>
