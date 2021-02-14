@@ -3,13 +3,18 @@ import { ScatterplotLayer, HexagonLayer } from 'deck.gl';
 const PICKUP_COLOR = [114, 19, 108];
 const DROPOFF_COLOR = [243, 185, 72];
 
+// const HEATMAP_COLORS = [
+//   [255, 255, 204],
+//   [199, 233, 180],
+//   [127, 205, 187],
+//   [65, 182, 196],
+//   [44, 127, 184],
+//   [37, 52, 148],
+// ];
+
 const HEATMAP_COLORS = [
-  [255, 255, 204],
-  [199, 233, 180],
-  [127, 205, 187],
-  [65, 182, 196],
-  [44, 127, 184],
-  [37, 52, 148],
+  [7, 217, 37],
+  [0, 116, 200],
 ];
 
 const LIGHT_SETTINGS = {
@@ -21,7 +26,7 @@ const LIGHT_SETTINGS = {
   numberOfLights: 2,
 };
 
-const elevationRange = [0, 1000];
+const elevationRange = [0, 100];
 
 export function renderLayers(props) {
   const { data, onHover, settings } = props;
@@ -45,11 +50,30 @@ export function renderLayers(props) {
         id: 'heatmap',
         colorRange: HEATMAP_COLORS,
         elevationRange,
-        elevationScale: 5,
+        elevationScale: 2000,
         extruded: true,
         getPosition: d => [d.longitude, d.latitude],
         lightSettings: LIGHT_SETTINGS,
-        opacity: 0.8,
+        getElevationValue: d => {
+          return (
+            14 *
+              (d[0]?.canonicalRatesByFacilityId.nodes?.[0]
+                ?.ratesByCanonicalRateId.nodes?.[0]?.additionalAmount || 0) +
+            (d[0]?.canonicalRatesByFacilityId.nodes?.[0]?.ratesByCanonicalRateId
+              .nodes?.[0]?.initalAmount || 0)
+          );
+        },
+
+        getColorValue: d => {
+          return (
+            d[0]?.canonicalRatesByFacilityId.nodes?.[0]?.companyByCompanyId?.[
+              'name'
+            ]
+              .trim()
+              .charCodeAt(0) + 200
+          );
+        },
+        opacity: 0.25,
         pickable: true,
         data,
         onHover,
