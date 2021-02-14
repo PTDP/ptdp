@@ -16,10 +16,10 @@ export function HomePage() {
         />
       </Helmet>
       <NavBar />
-      <PageWrapper>
-        <Masthead />
-        <Features />
-      </PageWrapper>
+      {/* <PageWrapper> */}
+      <Masthead />
+      <Features />
+      {/* </PageWrapper> */}
     </>
   );
 }
