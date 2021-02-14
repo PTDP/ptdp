@@ -15,7 +15,7 @@ export const FACILITIES_QUERY = gql`
             companyByCompanyId {
               name
             }
-            ratesByCanonicalRateId {
+            ratesByCanonicalRateId(orderBy: UPDATED_AT_DESC) {
               nodes {
                 initialAmount
                 additionalAmount

@@ -19,7 +19,7 @@ const INITIAL_VIEW_STATE = {
   zoom: 4,
   minZoom: 1,
   maxZoom: 16,
-  pitch: 0,
+  pitch: 50,
   bearing: 0,
 };
 
@@ -136,11 +136,53 @@ export default props => {
   }
 
   const _onHover = props => {
-    console.log(props);
     const { x, y, object } = props;
+    const d = object?.points?.[0]?.source;
+
+    console.log(
+      d?.canonicalRatesByFacilityId.nodes?.[0]?.companyByCompanyId?.name,
+    );
+
+    const seen =
+      d?.canonicalRatesByFacilityId.nodes?.[0]?.ratesByCanonicalRateId
+        .nodes?.[0]?.seenAt;
+
+    let str = '';
+    if (seen) {
+      const latest = seen?.[seen.length - 1];
+      str = new Date(latest).toLocaleString('en-US', { timeZone: 'UTC' });
+    }
+
     const label = object
       ? object.points
-        ? `${object.points[0].source.name} `
+        ? `
+          <div>
+          Facility: ${d?.name}
+          </div>
+          <div>
+           Agency: ${d?.agencyByAgencyId?.name || 'Unknown'}
+           </div>
+           <div>
+           15 Minute Rate: $${(
+             (14 *
+               (d?.canonicalRatesByFacilityId.nodes?.[0]?.ratesByCanonicalRateId
+                 .nodes?.[0]?.additionalAmount || 0) +
+               (d?.canonicalRatesByFacilityId.nodes?.[0]?.ratesByCanonicalRateId
+                 .nodes?.[0]?.initalAmount || 0)) /
+             100
+           ).toFixed(2)}
+           </div>
+           <div>
+           Company: ${
+             d?.canonicalRatesByFacilityId.nodes?.[0]?.companyByCompanyId?.[
+               'name'
+             ]
+           }
+           </div>
+           <div>
+           Rate Collected At: ${str}
+           </div>
+           `
         : null
       : null;
 
@@ -199,7 +241,7 @@ export default props => {
                 transform: `translate(${hover.x}px, ${hover.y}px)`,
               }}
             >
-              <div>{hover.label}</div>
+              <div dangerouslySetInnerHTML={{ __html: hover.label }}></div>
             </div>
           )}
           <MapStylePicker
