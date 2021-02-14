@@ -19,9 +19,7 @@ export function HomePage() {
       <NavBar />
       {/* <PageWrapper> */}
       <Masthead />
-      <div style={{ height: '100vh', width: '100vw', display: 'block', position: 'relative' }}>
-        <NationalMap />
-      </div>
+      <NationalMap />
       {/* <Features /> */}
       {/* </PageWrapper> */}
     </>
