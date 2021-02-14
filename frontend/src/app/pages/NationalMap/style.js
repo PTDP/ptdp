@@ -14,7 +14,7 @@ export const mapStylePicker = {
   position: 'absolute',
   top: '20px',
   left: '20px',
-  zIndex: 100,
+  zIndex: 45,
 };
 
 export const layerControl = {
@@ -29,7 +29,7 @@ export const layerControl = {
   top: '20px',
   right: '20px',
   padding: '20px',
-  zIndex: 100,
+  zIndex: 45,
   background: 'white',
 };
 
@@ -47,7 +47,7 @@ export const charts = {
   left: 20,
   bottom: 20,
   width: 500,
-  zIndex: 100,
+  zIndex: 45,
 };
 
 export const spinner = {
