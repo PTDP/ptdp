@@ -134,60 +134,62 @@ export default class App extends Component {
     }
     const { hover, settings } = this.state;
     return (
-      <main
-        id="map-container"
-        style={{
-          height: '100vh',
-          width: '100vw',
-        }}
-      >
-        <div class="text-5xl font-extrabold mb-8">National Map</div>
-        <div id="national-map" class="relative w-full h-full">
-          {hover.hoveredObject && (
-            <div
-              style={{
-                ...tooltipStyle,
-                transform: `translate(${hover.x}px, ${hover.y}px)`,
-              }}
-            >
-              <div>{hover.label}</div>
-            </div>
-          )}
-          <MapStylePicker
-            onStyleChange={this.onStyleChange}
-            currentStyle={this.state.style}
-          />
-          <LayerControls
-            settings={this.state.settings}
-            propTypes={HEXAGON_CONTROLS}
-            onChange={settings => this._updateLayerSettings(settings)}
-          />
-          <DeckGL
-            {...this.state.settings}
-            onWebGLInitialized={this._onWebGLInitialize}
-            layers={renderLayers({
-              data: this.state.points,
-              onHover: hover => this._onHover(hover),
-              settings: this.state.settings,
-            })}
-            initialViewState={INITIAL_VIEW_STATE}
-            viewState={viewState}
-            controller={controller}
-          >
-            <StaticMap
-              mapStyle={this.state.style}
-              mapboxApiAccessToken={
-                'pk.eyJ1Ijoic2VjdXJ1cy12aXN1YWxpemVyIiwiYSI6ImNrZzJlMGpuMDA3Nncyd213OThpczd6ejYifQ.02um_OvAOYmVzyHUxCUFuQ'
-              }
+      <div name="national-map">
+        <main
+          id="map-container"
+          style={{
+            height: '100vh',
+            width: '100vw',
+          }}
+        >
+          <div class="text-5xl font-extrabold mb-8">National Map</div>
+          <div id="national-map" class="relative w-full h-full">
+            {hover.hoveredObject && (
+              <div
+                style={{
+                  ...tooltipStyle,
+                  transform: `translate(${hover.x}px, ${hover.y}px)`,
+                }}
+              >
+                <div>{hover.label}</div>
+              </div>
+            )}
+            <MapStylePicker
+              onStyleChange={this.onStyleChange}
+              currentStyle={this.state.style}
             />
-          </DeckGL>
-          <Charts
-            {...this.state}
-            highlight={hour => this._onHighlight(hour)}
-            select={hour => this._onSelect(hour)}
-          />
-        </div>
-      </main>
+            <LayerControls
+              settings={this.state.settings}
+              propTypes={HEXAGON_CONTROLS}
+              onChange={settings => this._updateLayerSettings(settings)}
+            />
+            <DeckGL
+              {...this.state.settings}
+              onWebGLInitialized={this._onWebGLInitialize}
+              layers={renderLayers({
+                data: this.state.points,
+                onHover: hover => this._onHover(hover),
+                settings: this.state.settings,
+              })}
+              initialViewState={INITIAL_VIEW_STATE}
+              viewState={viewState}
+              controller={controller}
+            >
+              <StaticMap
+                mapStyle={this.state.style}
+                mapboxApiAccessToken={
+                  'pk.eyJ1Ijoic2VjdXJ1cy12aXN1YWxpemVyIiwiYSI6ImNrZzJlMGpuMDA3Nncyd213OThpczd6ejYifQ.02um_OvAOYmVzyHUxCUFuQ'
+                }
+              />
+            </DeckGL>
+            <Charts
+              {...this.state}
+              highlight={hour => this._onHighlight(hour)}
+              select={hour => this._onSelect(hour)}
+            />
+          </div>
+        </main>
+      </div>
     );
   }
 }
