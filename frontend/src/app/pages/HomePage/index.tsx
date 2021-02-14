@@ -10,10 +10,10 @@ export function HomePage() {
   return (
     <>
       <Helmet>
-        <title>Home Page</title>
+        <title></title>
         <meta
           name="description"
-          content="A React Boilerplate application homepage"
+          content=""
         />
       </Helmet>
       <NavBar />

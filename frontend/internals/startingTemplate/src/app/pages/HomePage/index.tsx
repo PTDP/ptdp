@@ -5,10 +5,10 @@ export function HomePage() {
   return (
     <>
       <Helmet>
-        <title>Home Page</title>
-        <meta name="description" content="A Boilerplate application homepage" />
+        {/* <title>Home Page</title> */}
+        <meta name="description" content="" />
       </Helmet>
-      <span>HomePage container</span>
+      <span></span>
     </>
   );
 }
