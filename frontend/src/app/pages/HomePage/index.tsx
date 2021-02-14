@@ -4,7 +4,7 @@ import { NavBar } from 'app/components/NavBar';
 import { Masthead } from './Masthead';
 import { Features } from './Features';
 import { PageWrapper } from 'app/components/PageWrapper';
-import NationalMap from '../NationalMap';
+import NationalMap from "./Features/NationalMap";
 
 export function HomePage() {
   return (

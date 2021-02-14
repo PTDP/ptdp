@@ -29,7 +29,7 @@ export function renderLayers(props) {
     settings.showScatterplot &&
       new ScatterplotLayer({
         id: 'scatterplot',
-        getPosition: d => d.position,
+        getPosition: d => [d.longitude, d.latitude],
         getColor: d => (d.pickup ? PICKUP_COLOR : DROPOFF_COLOR),
         getRadius: d => 5,
         opacity: 0.5,
@@ -47,7 +47,7 @@ export function renderLayers(props) {
         elevationRange,
         elevationScale: 5,
         extruded: true,
-        getPosition: d => d.position,
+        getPosition: d => [d.longitude, d.latitude],
         lightSettings: LIGHT_SETTINGS,
         opacity: 0.8,
         pickable: true,
