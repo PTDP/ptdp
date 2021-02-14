@@ -23,27 +23,35 @@ export const HEXAGON_CONTROLS = {
     min: 0,
     max: 1,
   },
-  upperPercentile: {
-    displayName: 'Hexagon Upper Percentile',
+  // upperPercentile: {
+  //   displayName: 'Hexagon Upper Percentile',
+  //   type: 'range',
+  //   value: 100,
+  //   step: 0.1,
+  //   min: 80,
+  //   max: 100,
+  // },
+  elevationLowerPercentile: {
+    displayName: '15 Minute Rate Lower Percentile',
     type: 'range',
-    value: 100,
+    value: 0,
     step: 0.1,
-    min: 80,
+    min: 0,
     max: 100,
   },
-  showScatterplot: {
-    displayName: 'Show Scatterplot',
-    type: 'boolean',
-    value: true,
-  },
-  radiusScale: {
-    displayName: 'Scatterplot Radius',
-    type: 'range',
-    value: 5,
-    step: 5,
-    min: 1,
-    max: 200,
-  },
+  // showScatterplot: {
+  //   displayName: 'Show Scatterplot',
+  //   type: 'boolean',
+  //   value: true,
+  // },
+  // radiusScale: {
+  //   displayName: 'Scatterplot Radius',
+  //   type: 'range',
+  //   value: 5,
+  //   step: 5,
+  //   min: 1,
+  //   max: 200,
+  // },
 };
 
 export const SCATTERPLOT_CONTROLS = {
