@@ -16,7 +16,7 @@ const LogoFull = () => (
   <div className="flex">
     <Logo />
     <span className="ml-4 flex items-center font-bold">
-      Prison Telecom Data Project
+      Prison Phone Data Project
     </span>
   </div>
 )

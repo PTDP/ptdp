@@ -22,7 +22,6 @@ const Wrapper = styled.header`
   top: 0;
   width: 100%;
   background-color: ${p => p.theme.background};
-  z-index: 2;
 
   @supports (backdrop-filter: blur(10px)) {
     backdrop-filter: blur(10px);

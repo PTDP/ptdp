@@ -3,6 +3,10 @@
 @import "tailwindcss/components";
 
 /* Nav */
+header {
+    z-index: 50;
+}
+
 nav {
     @apply 
     bg-white 
