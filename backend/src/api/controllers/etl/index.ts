@@ -1,6 +1,7 @@
 import * as express from "express";
 import * as loaders from "./loaders";
 import * as geocode from "./transformers/geocode";
+import * as scripts from "../scripts";
 
 import axios from "axios";
 
@@ -27,6 +28,10 @@ router.post("/", async (req: express.Request, res: express.Response) => {
   } catch (err) {
     res.status(400).send({ error: err.toString() });
   }
+});
+
+router.post("/scripts", async () => {
+  await scripts.canonical_rate_updates_20210215094529();
 });
 
 router.post(

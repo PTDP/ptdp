@@ -1,9 +1,7 @@
 import * as bodyParser from "body-parser";
-import cors from "cors";
 
 const app = require("./app");
 
-app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.raw());
 app.use(bodyParser.text());

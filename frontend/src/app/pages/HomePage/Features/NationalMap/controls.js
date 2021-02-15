@@ -2,19 +2,24 @@ import React, { Component } from 'react';
 import { mapStylePicker, layerControl } from './style';
 
 export const HEXAGON_CONTROLS = {
-  showHexagon: {
-    displayName: 'Show Hexagon',
+  showInState: {
+    displayName: 'Show In State',
     type: 'boolean',
     value: true,
   },
-  radius: {
-    displayName: 'Hexagon Radius',
-    type: 'range',
-    value: 10000,
-    step: 50,
-    min: 1000,
-    max: 10000,
+  showOutState: {
+    displayName: 'Show Out State',
+    type: 'boolean',
+    value: false,
   },
+  // radius: {
+  //   displayName: 'Hexagon Radius',
+  //   type: 'range',
+  //   value: 10000,
+  //   step: 50,
+  //   min: 1000,
+  //   max: 10000,
+  // },
   coverage: {
     displayName: 'Hexagon Coverage',
     type: 'range',
@@ -67,6 +72,14 @@ export const SCATTERPLOT_CONTROLS = {
     step: 10,
     min: 10,
     max: 200,
+  },
+};
+
+export const DATA_FILTER_CONTROLS = {
+  showInState: {
+    displayName: 'Show In State',
+    type: 'boolean',
+    value: true,
   },
 };
 
@@ -140,6 +153,7 @@ export class LayerControls extends Component {
           <div key={key}>
             <label>{propTypes[key].displayName}</label>
             <div style={{ display: 'inline-block', float: 'right' }}>
+              {console.log('<><><><>', settings[key])}
               {settings[key]}
             </div>
             <Setting
@@ -148,6 +162,46 @@ export class LayerControls extends Component {
               propType={propTypes[key]}
               onChange={this._onValueChange.bind(this)}
             />
+          </div>
+        ))}
+      </div>
+    );
+  }
+}
+
+export class DataFilterControls extends Component {
+  // _onValueChange(settingName, newValue) {
+  //   const { settings } = this.props;
+  //   // Only update if we have a confirmed change
+  //   if (settings[settingName] !== newValue) {
+  //     // Create a new object so that shallow-equal detects a change
+  //     const newSettings = {
+  //       ...this.props.settings,
+  //       [settingName]: newValue,
+  //     };
+
+  //     this.props.onChange(newSettings);
+  //   }
+  // }
+
+  render() {
+    const { title, settings, propTypes = {} } = this.props;
+
+    return (
+      <div className="layer-controls" style={layerControl}>
+        {title && <h4>{title}</h4>}
+        {Object.keys(settings).map(key => (
+          <div key={key}>
+            <label>{propTypes[key].displayName}</label>
+            <div style={{ display: 'inline-block', float: 'right' }}>
+              {/* {settings[key]} */}
+            </div>
+            {/* <Setting
+              settingName={key}
+              value={settings[key]}
+              propType={propTypes[key]}
+              onChange={this._onValueChange.bind(this)}
+            /> */}
           </div>
         ))}
       </div>

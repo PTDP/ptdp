@@ -12,6 +12,8 @@ export const FACILITIES_QUERY = gql`
         }
         canonicalRatesByFacilityId {
           nodes {
+            inState
+            phoneNumber
             companyByCompanyId {
               name
             }
