@@ -1,7 +1,9 @@
 import * as express from "express";
-import * as loaders from "./loaders";
+// import * as db from "../../csv_db";
+import * as db from "../../csv_db";
 import * as geocode from "./transformers/geocode";
 import * as scripts from "../scripts";
+import * as loaders from "./loaders";
 
 import axios from "axios";
 
@@ -12,13 +14,14 @@ router.post("/", async (req: express.Request, res: express.Response) => {
 
   try {
     const data = await (await axios.get(results_url)).data;
+    console.log(data);
 
     switch (company) {
       case "ics":
         await loaders.ics(data);
         break;
       case "securus":
-        await loaders.securus(data);
+        // await loaders.securus(data);
         break;
       default:
         throw new Error(`ETL for ${company} not found.`);
@@ -54,5 +57,40 @@ router.post(
     }
   }
 );
+
+router.post("/query", async (req: express.Request, res: express.Response) => {
+  try {
+    // const r = await db.Facility.query();
+    // console.log(r);
+    await db.Facility.insert([
+      {
+        id: "sdfs",
+        name: "sdf",
+        jurisdiction: "state",
+        agency: "sdf",
+        createdAt: "sdf",
+        source: "sdf",
+        populationFeb20: 23,
+        residentsPopulation: 23,
+        state: "US",
+        address: "23",
+        zipcode: 91103,
+        city: "Test",
+        county: "test",
+        latitude: 123.123,
+        longitude: 323.323,
+        countyFIPS: 343,
+        HIFLID: 2334,
+        rawName: "sdf",
+      },
+    ]);
+    // const cs = await db.Facility.serialize(r);
+    // console.log(cs);
+    await res.status(200).send({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(400).send({ error: err.toString(), success: false });
+  }
+});
 
 export default router;
