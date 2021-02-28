@@ -1,16 +1,7 @@
 import crypto from "crypto";
-import { ICSRate, SecurusRate } from "@ptdp/lib";
 
-const sha1 = (str: string) =>
-  crypto.createHash("sha1").update(str).digest("hex");
+// Arizona - Arizona Department of Corrections => Arizona Department of Corrections
+export const trimAgency = (agency: string) => agency.split("-")[1].trim();
 
-export const rawToSha = (raw: ICSRate | SecurusRate) =>
-  sha1(JSON.stringify(removeMetadata(raw)));
-
-export const removeMetadata = (
-  raw: ICSRate | SecurusRate
-): Omit<ICSRate | SecurusRate, "createdAt"> => {
-  const r: ICSRate | SecurusRate = { ...raw };
-  delete (r as any).createdAt;
-  return r;
-};
+export const sha256 = (str: string) =>
+  crypto.createHash("sha256").update(str).digest("hex");
