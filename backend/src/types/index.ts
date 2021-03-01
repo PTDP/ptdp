@@ -2,7 +2,7 @@ export interface IFacility {
   id: string;
   name: string;
   jurisdiction?: "state" | "county" | "federal" | "immigration";
-  agency: string;
+  agency?: string;
   createdAt: string; //
   populationFeb20?: number;
   residentsPopulation?: number;
@@ -18,6 +18,15 @@ export interface IFacility {
   rawName: string;
 }
 
+export enum Service {
+  "Default" = 1,
+  "AdvancedConnect" = 2,
+  "Direct Bill" = 3,
+  "Inmate Debit" = 4,
+  "Traditional Collect" = 5,
+  "Voicemail" = 6,
+}
+
 export interface IRate {
   id: string;
   durationInitial?: number;
@@ -26,14 +35,8 @@ export interface IRate {
   amountAdditional?: number;
   amountTax?: number;
   phone: string;
-  inState: boolean;
+  inState: number;
   facility: string;
   updatedAt: string;
-  service:
-    | "Default Phone"
-    | "AdvancedConnect"
-    | "Direct Bill"
-    | "Inmate Debit"
-    | "Traditional Collect"
-    | "Voicemail";
+  service: Service;
 }

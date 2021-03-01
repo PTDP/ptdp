@@ -19,6 +19,17 @@ const duplicatePrimaryKey = (arr: any[]) => {
   return dupes.length ? dupes : false;
 };
 
+const removeDuplicates = (arr: any[]) => {
+  const seen = new Set();
+  const filteredArr = arr.filter((el) => {
+    const duplicate = seen.has(el.id);
+    seen.add(el.id);
+    return !duplicate;
+  });
+  console.warn("Removed ", arr.length - filteredArr.length, " duplicates");
+  return filteredArr;
+};
+
 export const sha256 = (str: string) =>
   crypto.createHash("sha256").update(str).digest("hex");
 
@@ -34,7 +45,7 @@ abstract class Model<T> {
   validate(data: T[]) {
     const dupes = duplicatePrimaryKey(data);
     if (dupes) {
-      throw new Error("Duplicates: " + JSON.stringify(dupes));
+      throw new Error("Found duplicates " + dupes);
     }
     return true;
   }
@@ -76,13 +87,18 @@ abstract class Model<T> {
     });
   }
 
+  fix(current: T[]) {
+    return removeDuplicates(current);
+  }
+
   async insert(inserts: T[]) {
-    const current = await this.query();
+    let current = await this.query();
 
     inserts.forEach((f) => current.push(f));
-    this.validate(current);
 
-    const serialized = await this.serialize(current);
+    const fixed = this.fix(current);
+
+    const serialized = await this.serialize(fixed);
     const r = await this.ghrepo.contentsAsync(this.PATH);
 
     await this.ghrepo.updateContentsAsync(
@@ -95,8 +111,9 @@ abstract class Model<T> {
   }
 
   async update(update: T[]) {
-    this.validate(update);
-    const serialized = await this.serialize(update);
+    const fixed = this.fix(update);
+    this.validate(fixed);
+    const serialized = await this.serialize(fixed);
     const r = await this.ghrepo.contentsAsync(this.PATH);
 
     await this.ghrepo.updateContentsAsync(
