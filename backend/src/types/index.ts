@@ -1,3 +1,13 @@
+export interface IContract {
+  id: string;
+  facilityInternal: string;
+  agencyInternal: string;
+  stateInternal: string;
+  company: "ICS" | "Securus";
+  createdAt: string;
+  canonicalFacility?: string;
+}
+
 export interface IFacility {
   id: string;
   name: string;
@@ -15,7 +25,6 @@ export interface IFacility {
   longitude?: number;
   countyFIPS?: number;
   HIFLID?: number;
-  rawName: string;
 }
 
 export enum Service {
@@ -36,7 +45,7 @@ export interface IRate {
   amountTax?: number;
   phone: string;
   inState: number;
-  facility: string;
+  contract: string;
   updatedAt: string;
   service: Service;
 }

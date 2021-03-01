@@ -61,7 +61,7 @@ router.post("/query", async (req: express.Request, res: express.Response) => {
   try {
     // const r = await db.Facility.query();
     // console.log(r);
-    await db.Facility.insert([]);
+    await db.Contract.insert([]);
     // const cs = await db.Facility.serialize(r);
     // console.log(cs);
     await res.status(200).send({ success: true });
