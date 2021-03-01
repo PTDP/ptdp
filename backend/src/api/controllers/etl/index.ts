@@ -14,7 +14,6 @@ router.post("/", async (req: express.Request, res: express.Response) => {
 
   try {
     const data = await (await axios.get(results_url)).data;
-    console.log(data);
 
     switch (company) {
       case "ics":
@@ -62,28 +61,7 @@ router.post("/query", async (req: express.Request, res: express.Response) => {
   try {
     // const r = await db.Facility.query();
     // console.log(r);
-    await db.Facility.insert([
-      {
-        id: "sdfs",
-        name: "sdf",
-        jurisdiction: "state",
-        agency: "sdf",
-        createdAt: "sdf",
-        source: "sdf",
-        populationFeb20: 23,
-        residentsPopulation: 23,
-        state: "US",
-        address: "23",
-        zipcode: 91103,
-        city: "Test",
-        county: "test",
-        latitude: 123.123,
-        longitude: 323.323,
-        countyFIPS: 343,
-        HIFLID: 2334,
-        rawName: "sdf",
-      },
-    ]);
+    await db.Facility.insert([]);
     // const cs = await db.Facility.serialize(r);
     // console.log(cs);
     await res.status(200).send({ success: true });

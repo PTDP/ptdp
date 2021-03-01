@@ -2,39 +2,107 @@ import {
   ScrapeResult,
   ICSRate,
   SecurusRate,
-  Rate as RateData,
   //   Stusab,
   //   Facility as FacilityData,
 } from "@ptdp/lib";
-import { sha256 } from "./util";
+import { sha1 } from "./util";
+import { IFacility, IRate } from "../../../../types";
+import * as db from "../../../csv_db";
 
-export const removeMetadata = (
-  raw: ICSRate | SecurusRate
-): Omit<ICSRate | SecurusRate, "createdAt"> => {
-  const r: ICSRate | SecurusRate = { ...raw };
-  delete (r as any).createdAt;
-  return r;
-};
+import s_1 from "../../../../constants/scraper_input/8d92f5a0-61fa-44be-a535-efc6af2491e7.json";
+const scrapeInputs = [s_1];
 
 export default abstract class ETL {
   constructor(private result: ScrapeResult<ICSRate | SecurusRate>) {}
 
   async run(): Promise<void> {
     try {
-      const transformed = await this.transform(this.result);
-      await this.load(transformed);
+      const tFacilities = await this.transformFacilities(this.result);
+      await this.loadFacilities(tFacilities);
+
+      const tRates = await this.transformRates(this.result);
+      await this.loadRates(tRates);
     } catch (err) {
       console.error(err.toString());
     }
   }
 
   rawToSha(raw: ICSRate | SecurusRate) {
-    return sha256(JSON.stringify(removeMetadata(raw)));
+    return sha1(JSON.stringify(this.removeRateMetadata(raw)));
   }
 
-  abstract transform(
-    result: ScrapeResult<ICSRate | SecurusRate>
-  ): Promise<RateData>;
+  facilitySha(rawName: string, stusab: string) {
+    return sha1(rawName + stusab);
+  }
 
-  abstract load(transformed: RateData): void;
+  rateSha(rate: ICSRate | SecurusRate) {
+    return sha1(JSON.stringify(this.removeRateMetadata(rate)));
+  }
+
+  async loadFacilities(transformed: IFacility[]): Promise<void> {
+    const existing = await db.Facility.query();
+    const n: IFacility[] = [];
+
+    transformed.forEach((tf) => {
+      if (!existing.find((exst) => exst.id === tf.id)) {
+        n.push(tf);
+      }
+    });
+
+    await db.Facility.insert(n);
+    console.log("Inserted ", n.length, " facilities");
+  }
+
+  abstract transformRates(
+    result: ScrapeResult<ICSRate | SecurusRate>
+  ): Promise<IRate[]>;
+
+  abstract transformFacilities(
+    result: ScrapeResult<ICSRate | SecurusRate>
+  ): IFacility[];
+
+  async loadRates(transformed: IRate[]) {
+    const existingRates = await db.Rate.query();
+    const toPatch: IRate[] = [];
+    const toInsert: IRate[] = [];
+
+    transformed.forEach((r) => {
+      const match = existingRates.find((e) => e.id === r.id);
+      if (match) {
+        const updated = { ...match };
+        updated.updatedAt = JSON.stringify([
+          ...new Set([
+            ...(JSON.parse(match.updatedAt) as string[]),
+            ...(JSON.parse(r.updatedAt) as string[]),
+          ]),
+        ]);
+        toPatch.push(updated);
+      } else {
+        toInsert.push(r);
+      }
+    });
+
+    await db.Rate.update([...toPatch, ...toInsert]);
+
+    console.log("Patched ", toPatch.length, " rates");
+    console.log("Inserted ", toInsert.length, " rates");
+  }
+
+  removeRateMetadata = (
+    raw: ICSRate | SecurusRate
+  ): Omit<ICSRate | SecurusRate, "createdAt"> => {
+    const r: ICSRate | SecurusRate = { ...raw };
+    delete (r as any).updatedAt;
+    return r;
+  };
+
+  strToInt = (str: string): number =>
+    parseInt(str.match(new RegExp(/\d+/))?.[0] || "0");
+
+  isInState = (rate: ICSRate | SecurusRate, stusab: string): boolean => {
+    const scraper = scrapeInputs.find((si) => si.uuid === rate.scraper);
+    if (!scraper)
+      throw new Error(`Scraper not found for ` + JSON.stringify(rate));
+    return (scraper["data"] as any)[stusab].in_state_phone === rate.number;
+  };
 }
