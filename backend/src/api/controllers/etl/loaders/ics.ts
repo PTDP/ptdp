@@ -1,6 +1,6 @@
 import { ScrapeResult, ICSRate } from "@ptdp/lib";
 import ETL from "./abstract";
-import { IContract, IRate, Service } from "../../../../types/index";
+import { ICompanyFacility, IRate, Service } from "../../../../types/index";
 import * as db from "../../../csv_db";
 
 class ICS extends ETL {
@@ -13,8 +13,8 @@ class ICS extends ETL {
     return agency.split("-")[1].trim();
   }
 
-  transformContracts(result: ScrapeResult<ICSRate>): IContract[] {
-    const contracts: Record<string, IContract> = {};
+  transformContracts(result: ScrapeResult<ICSRate>): ICompanyFacility[] {
+    const contracts: Record<string, ICompanyFacility> = {};
 
     Object.entries(result).forEach(([stusab, rates]) => {
       (rates as ICSRate[]).forEach((r: ICSRate): void => {
@@ -66,12 +66,12 @@ class ICS extends ETL {
           amountAdditional: r.overCost
             ? parseFloat(r.overCost.toFixed(2))
             : undefined,
-          amountTax: r.tax
+          pctTax: r.tax
             ? parseFloat(((r.tax / (r.seconds / 60)) as any).toFixed(2))
             : undefined,
           phone: r.number,
           inState: this.isInState(r, stusab) ? 1 : 0,
-          contract: cSha,
+          companyFacility: cSha,
           service: Service.Default,
           updatedAt: JSON.stringify([new Date(r.createdAt).toISOString()]),
         });

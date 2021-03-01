@@ -1,6 +1,6 @@
 import { ScrapeResult, SecurusRate } from "@ptdp/lib";
 import ETL from "./abstract";
-import { IContract, IRate, Service } from "../../../../types/index";
+import { ICompanyFacility, IRate, Service } from "../../../../types/index";
 import * as db from "../../../csv_db";
 
 class Securus extends ETL {
@@ -13,15 +13,14 @@ class Securus extends ETL {
     return agency.split("-")[1].trim();
   }
 
-  transformContracts(result: ScrapeResult<SecurusRate>): IContract[] {
-    const contracts: Record<string, IContract> = {};
+  transformContracts(result: ScrapeResult<SecurusRate>): ICompanyFacility[] {
+    const contracts: Record<string, ICompanyFacility> = {};
 
     Object.entries(result).forEach(([stusab, rates]) => {
       (rates as SecurusRate[]).forEach((r: SecurusRate): void => {
         const sha = this.contractSha(r.facility, "", "Securus", stusab);
 
         if ((contracts as any)[sha]) return;
-
         contracts[sha] = {
           id: sha,
           facilityInternal: r.facility,
@@ -63,10 +62,10 @@ class Securus extends ETL {
                 parseFloat(r.additionalAmount.replace("$", "")).toFixed(2)
               )
             : undefined,
-          amountTax: 0,
+          pctTax: 0,
           phone: r.number!,
           inState: this.isInState(r, stusab) ? 1 : 0,
-          contract: fSha,
+          companyFacility: fSha,
           service: Service[r.service],
           updatedAt: JSON.stringify([new Date(r.createdAt).toISOString()]),
         });

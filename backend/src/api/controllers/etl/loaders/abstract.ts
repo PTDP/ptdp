@@ -1,6 +1,6 @@
 import { ScrapeResult, ICSRate, SecurusRate } from "@ptdp/lib";
 import { sha1 } from "./util";
-import { IContract, IRate } from "../../../../types";
+import { ICompanyFacility, IRate } from "../../../../types";
 import * as db from "../../../csv_db";
 
 import s_1 from "../../../../constants/scraper_input/8d92f5a0-61fa-44be-a535-efc6af2491e7.json";
@@ -42,9 +42,9 @@ export default abstract class ETL {
     return sha1(JSON.stringify(this.removeRateMetadata(rate)));
   }
 
-  async loadContracts(transformed: IContract[]): Promise<void> {
+  async loadContracts(transformed: ICompanyFacility[]): Promise<void> {
     const existing = await db.Contract.query();
-    const n: IContract[] = [];
+    const n: ICompanyFacility[] = [];
 
     transformed.forEach((tf) => {
       if (!existing.find((exst) => exst.id === tf.id)) {
@@ -62,7 +62,7 @@ export default abstract class ETL {
 
   abstract transformContracts(
     result: ScrapeResult<ICSRate | SecurusRate>
-  ): IContract[];
+  ): ICompanyFacility[];
 
   async loadRates(transformed: IRate[]) {
     const existingRates = await db.Rate.query();

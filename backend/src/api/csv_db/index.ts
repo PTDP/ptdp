@@ -4,7 +4,7 @@ import * as csv from "fast-csv";
 import github from "octonode";
 import * as functions from "firebase-functions";
 import crypto from "crypto";
-import { IContract, IRate, IFacility } from "../../types/index";
+import { ICompanyFacility, IRate, IFacility } from "../../types/index";
 
 const duplicatePrimaryKey = (arr: any[]) => {
   const dupes: string[] = [];
@@ -126,8 +126,8 @@ abstract class Model<T> {
   }
 }
 
-export class ContractsModel extends Model<IContract> {
-  PATH = "data/contracts.csv";
+export class ContractsModel extends Model<ICompanyFacility> {
+  PATH = "data/companyFacility.csv";
 }
 
 export class RateModel extends Model<IRate> {

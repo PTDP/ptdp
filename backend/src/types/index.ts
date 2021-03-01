@@ -1,4 +1,4 @@
-export interface IContract {
+export interface ICompanyFacility {
   id: string;
   facilityInternal: string;
   agencyInternal: string;
@@ -6,6 +6,7 @@ export interface IContract {
   company: "ICS" | "Securus";
   createdAt: string;
   canonicalFacility?: string;
+  notes?: string;
 }
 
 export interface IFacility {
@@ -42,10 +43,10 @@ export interface IRate {
   durationAdditional?: number;
   amountInitial?: number;
   amountAdditional?: number;
-  amountTax?: number;
+  pctTax?: number;
   phone: string;
   inState: number;
-  contract: string;
+  companyFacility: string;
   updatedAt: string;
   service: Service;
 }
