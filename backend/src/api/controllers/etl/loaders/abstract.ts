@@ -1,12 +1,6 @@
-import {
-  ScrapeResult,
-  ICSRate,
-  SecurusRate,
-  //   Stusab,
-  //   Facility as FacilityData,
-} from "@ptdp/lib";
+import { ScrapeResult, ICSRate, SecurusRate } from "@ptdp/lib";
 import { sha1 } from "./util";
-import { IFacility, IRate } from "../../../../types";
+import { IContract, IRate } from "../../../../types";
 import * as db from "../../../csv_db";
 
 import s_1 from "../../../../constants/scraper_input/8d92f5a0-61fa-44be-a535-efc6af2491e7.json";
@@ -17,8 +11,8 @@ export default abstract class ETL {
 
   async run(): Promise<void> {
     try {
-      const tFacilities = await this.transformFacilities(this.result);
-      await this.loadFacilities(tFacilities);
+      const tContracts = await this.transformContracts(this.result);
+      await this.loadContracts(tContracts);
 
       const tRates = await this.transformRates(this.result);
       await this.loadRates(tRates);
@@ -31,17 +25,26 @@ export default abstract class ETL {
     return sha1(JSON.stringify(this.removeRateMetadata(raw)));
   }
 
-  facilitySha(rawName: string, stusab: string) {
-    return sha1(rawName + stusab);
+  facilitySha(identifier: string) {
+    return sha1(identifier);
+  }
+
+  contractSha(
+    facilityInternal: string,
+    agencyInternal: string,
+    company: string,
+    stusab: string
+  ) {
+    return sha1(facilityInternal + agencyInternal + company + stusab);
   }
 
   rateSha(rate: ICSRate | SecurusRate) {
     return sha1(JSON.stringify(this.removeRateMetadata(rate)));
   }
 
-  async loadFacilities(transformed: IFacility[]): Promise<void> {
-    const existing = await db.Facility.query();
-    const n: IFacility[] = [];
+  async loadContracts(transformed: IContract[]): Promise<void> {
+    const existing = await db.Contract.query();
+    const n: IContract[] = [];
 
     transformed.forEach((tf) => {
       if (!existing.find((exst) => exst.id === tf.id)) {
@@ -49,7 +52,7 @@ export default abstract class ETL {
       }
     });
 
-    await db.Facility.insert(n);
+    await db.Contract.insert(n);
     console.log("Inserted ", n.length, " facilities");
   }
 
@@ -57,25 +60,32 @@ export default abstract class ETL {
     result: ScrapeResult<ICSRate | SecurusRate>
   ): Promise<IRate[]>;
 
-  abstract transformFacilities(
+  abstract transformContracts(
     result: ScrapeResult<ICSRate | SecurusRate>
-  ): IFacility[];
+  ): IContract[];
 
   async loadRates(transformed: IRate[]) {
     const existingRates = await db.Rate.query();
     const toInsert: IRate[] = [];
 
+    let patched = 0;
+
     transformed.forEach((r) => {
       const match = existingRates.findIndex((e) => e.id === r.id);
       if (match > -1) {
         const updated = { ...existingRates[match] };
-        updated.updatedAt = JSON.stringify([
+        const n = [
           ...new Set([
             ...(JSON.parse(existingRates[match].updatedAt) as string[]),
             ...(JSON.parse(r.updatedAt) as string[]),
           ]),
-        ]);
+        ];
+
+        n.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+        updated.updatedAt = JSON.stringify(n);
+
         existingRates[match] = updated;
+        patched += 1;
       } else {
         toInsert.push(r);
       }
@@ -83,7 +93,7 @@ export default abstract class ETL {
 
     await db.Rate.update([...existingRates, ...toInsert]);
 
-    console.log("Patched ", existingRates.length, " rates");
+    console.log("Patched ", patched, " rates");
     console.log("Inserted ", toInsert.length, " rates");
   }
 
@@ -91,7 +101,7 @@ export default abstract class ETL {
     raw: ICSRate | SecurusRate
   ): Omit<ICSRate | SecurusRate, "createdAt"> => {
     const r: ICSRate | SecurusRate = { ...raw };
-    delete (r as any).updatedAt;
+    delete (r as any).createdAt;
     return r;
   };
 

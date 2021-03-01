@@ -1,6 +1,6 @@
 import { ScrapeResult, ICSRate } from "@ptdp/lib";
 import ETL from "./abstract";
-import { IFacility, IRate, Service } from "../../../../types/index";
+import { IContract, IRate, Service } from "../../../../types/index";
 import * as db from "../../../csv_db";
 
 class ICS extends ETL {
@@ -13,50 +13,42 @@ class ICS extends ETL {
     return agency.split("-")[1].trim();
   }
 
-  transformFacilities(result: ScrapeResult<ICSRate>): IFacility[] {
-    const facilities: Record<string, IFacility> = {};
+  transformContracts(result: ScrapeResult<ICSRate>): IContract[] {
+    const contracts: Record<string, IContract> = {};
 
     Object.entries(result).forEach(([stusab, rates]) => {
       (rates as ICSRate[]).forEach((r: ICSRate): void => {
-        const sha = this.facilitySha(r.facility, stusab);
+        const sha = this.contractSha(r.facility, r.agency, "ICS", stusab);
 
-        if ((facilities as any)[sha]) return;
+        if ((contracts as any)[sha]) return;
 
-        facilities[sha] = {
+        contracts[sha] = {
           id: sha,
-          name: r.facility,
-          jurisdiction: undefined,
-          agency: this.trimAgency(r.agency),
+          facilityInternal: r.facility,
+          agencyInternal: this.trimAgency(r.agency),
+          stateInternal: stusab,
           createdAt: new Date(r.createdAt).toISOString(),
-          populationFeb20: undefined,
-          residentsPopulation: undefined,
-          state: stusab,
-          address: undefined,
-          zipcode: undefined,
-          city: undefined,
-          county: undefined,
-          latitude: undefined,
-          countyFIPS: undefined,
-          HIFLID: undefined,
-          rawName: r.facility,
+          company: "ICS",
+          canonicalFacility: undefined,
         };
       });
     });
 
-    return Object.values(facilities);
+    return Object.values(contracts);
   }
 
   async transformRates(result: ScrapeResult<ICSRate>): Promise<IRate[]> {
     const tf: IRate[] = [];
 
-    const facilities = await db.Facility.query();
+    const contracts = await db.Contract.query();
 
     Object.entries(result).forEach(([stusab, rates]) => {
       (rates as ICSRate[]).forEach((r: ICSRate): void => {
-        const fSha = this.facilitySha(r.facility, stusab);
+        const cSha = this.contractSha(r.facility, r.agency, "ICS", stusab);
+
         const rSha = this.rateSha(r);
 
-        if (!facilities.find((f) => f.id === fSha)) {
+        if (!contracts.find((f) => f.id === cSha)) {
           throw new Error("Could not find facility for " + JSON.stringify(r));
         }
 
@@ -79,7 +71,7 @@ class ICS extends ETL {
             : undefined,
           phone: r.number,
           inState: this.isInState(r, stusab) ? 1 : 0,
-          facility: fSha,
+          contract: cSha,
           service: Service.Default,
           updatedAt: JSON.stringify([new Date(r.createdAt).toISOString()]),
         });
