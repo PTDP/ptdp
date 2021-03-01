@@ -1,10 +1,10 @@
-import { ScrapeResult, ICSRate } from "@ptdp/lib";
+import { ScrapeResult, SecurusRate } from "@ptdp/lib";
 import ETL from "./abstract";
 import { IFacility, IRate, Service } from "../../../../types/index";
 import * as db from "../../../csv_db";
 
-class ICS extends ETL {
-  constructor(result: ScrapeResult<ICSRate>) {
+class Securus extends ETL {
+  constructor(result: ScrapeResult<SecurusRate>) {
     super(result);
   }
 
@@ -13,11 +13,11 @@ class ICS extends ETL {
     return agency.split("-")[1].trim();
   }
 
-  transformFacilities(result: ScrapeResult<ICSRate>): IFacility[] {
+  transformFacilities(result: ScrapeResult<SecurusRate>): IFacility[] {
     const facilities: Record<string, IFacility> = {};
 
     Object.entries(result).forEach(([stusab, rates]) => {
-      (rates as ICSRate[]).forEach((r: ICSRate): void => {
+      (rates as SecurusRate[]).forEach((r: SecurusRate): void => {
         const sha = this.facilitySha(r.facility, stusab);
 
         if ((facilities as any)[sha]) return;
@@ -26,7 +26,7 @@ class ICS extends ETL {
           id: sha,
           name: r.facility,
           jurisdiction: undefined,
-          agency: this.trimAgency(r.agency),
+          agency: undefined,
           createdAt: new Date(r.createdAt).toISOString(),
           populationFeb20: undefined,
           residentsPopulation: undefined,
@@ -46,13 +46,13 @@ class ICS extends ETL {
     return Object.values(facilities);
   }
 
-  async transformRates(result: ScrapeResult<ICSRate>): Promise<IRate[]> {
+  async transformRates(result: ScrapeResult<SecurusRate>): Promise<IRate[]> {
     const tf: IRate[] = [];
 
     const facilities = await db.Facility.query();
 
     Object.entries(result).forEach(([stusab, rates]) => {
-      (rates as ICSRate[]).forEach((r: ICSRate): void => {
+      (rates as SecurusRate[]).forEach((r: SecurusRate): void => {
         const fSha = this.facilitySha(r.facility, stusab);
         const rSha = this.rateSha(r);
 
@@ -62,25 +62,21 @@ class ICS extends ETL {
 
         tf.push({
           id: rSha,
-          durationInitial: r.initialDuration
-            ? this.strToInt(r.initialDuration) * 60
+          durationInitial: r.seconds,
+          durationAdditional: r.seconds,
+          amountInitial: r.initalAmount
+            ? parseFloat(parseFloat(r.initalAmount.replace("$", "")).toFixed(2))
             : undefined,
-          durationAdditional: r.overDuration
-            ? this.strToInt(r.overDuration) * 60
+          amountAdditional: r.additionalAmount
+            ? parseFloat(
+                parseFloat(r.additionalAmount.replace("$", "")).toFixed(2)
+              )
             : undefined,
-          amountInitial: r.initialCost
-            ? parseFloat(r.initialCost.toFixed(2))
-            : undefined,
-          amountAdditional: r.overCost
-            ? parseFloat(r.overCost.toFixed(2))
-            : undefined,
-          amountTax: r.tax
-            ? parseFloat(((r.tax / (r.seconds / 60)) as any).toFixed(2))
-            : undefined,
-          phone: r.number,
+          amountTax: 0,
+          phone: r.number!,
           inState: this.isInState(r, stusab) ? 1 : 0,
           facility: fSha,
-          service: Service.Default,
+          service: Service[r.service],
           updatedAt: JSON.stringify([new Date(r.createdAt).toISOString()]),
         });
       });
@@ -89,4 +85,4 @@ class ICS extends ETL {
   }
 }
 
-export default ICS;
+export default Securus;

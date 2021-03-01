@@ -63,28 +63,27 @@ export default abstract class ETL {
 
   async loadRates(transformed: IRate[]) {
     const existingRates = await db.Rate.query();
-    const toPatch: IRate[] = [];
     const toInsert: IRate[] = [];
 
     transformed.forEach((r) => {
-      const match = existingRates.find((e) => e.id === r.id);
-      if (match) {
-        const updated = { ...match };
+      const match = existingRates.findIndex((e) => e.id === r.id);
+      if (match > -1) {
+        const updated = { ...existingRates[match] };
         updated.updatedAt = JSON.stringify([
           ...new Set([
-            ...(JSON.parse(match.updatedAt) as string[]),
+            ...(JSON.parse(existingRates[match].updatedAt) as string[]),
             ...(JSON.parse(r.updatedAt) as string[]),
           ]),
         ]);
-        toPatch.push(updated);
+        existingRates[match] = updated;
       } else {
         toInsert.push(r);
       }
     });
 
-    await db.Rate.update([...toPatch, ...toInsert]);
+    await db.Rate.update([...existingRates, ...toInsert]);
 
-    console.log("Patched ", toPatch.length, " rates");
+    console.log("Patched ", existingRates.length, " rates");
     console.log("Inserted ", toInsert.length, " rates");
   }
 
