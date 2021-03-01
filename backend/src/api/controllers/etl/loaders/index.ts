@@ -7,6 +7,7 @@ import {
   // Facility as FacilityData,
 } from "@ptdp/lib";
 // import { rawToSha, removeMetadata } from "./util";
+import ICS from "./ics";
 
 // import Rate from "../../../models/rate";
 // import CanonicalRate from "../../../models/canonical_rate";
@@ -58,8 +59,8 @@ import {
 //   return agency;
 // };
 
-export const ICS = require("./ics");
 export const ics = async (data: ScrapeResult<ICSRate>) => {
+  console.log(ICS);
   const icsETL = new ICS(data);
   await icsETL.run();
 };

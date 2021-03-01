@@ -1,49 +1,88 @@
-// import {
-//   ScrapeResult,
-//   ICSRate,
-//   SecurusRate,
-//   Rate as RateData,
-//   Stusab,
-//   Facility as FacilityData,
-// } from "@ptdp/lib";
-// import ETL from "./abstract";
-// import * as db from "../csv_db";
+import { ScrapeResult, ICSRate } from "@ptdp/lib";
+import ETL from "./abstract";
+import { IFacility, IRate } from "../../../../types/index";
+import * as db from "../../../csv_db";
 
-// export class ICS extends ETL {
-//   constructor(result: ScrapeResult<ICSRate>) {
-//     super(result);
-//   }
+class ICS extends ETL {
+  constructor(result: ScrapeResult<ICSRate>) {
+    super(result);
+  }
 
-//   async transformFacilities(result: ScrapeResult<ICSRate>): Promise<RateData> {
-//     // if there is an agency field, trim it
-//     //
-//   }
+  // Arizona - Arizona Department of Corrections => Arizona Department of Corrections
+  trimAgency(agency: string) {
+    return agency.split("-")[1].trim();
+  }
 
-//   async loadFacilities(transformed: RateData): Promise<void> {
-//     // fetch facilities resource, parse it into something useful
-//     // if there is a sha1 in our remote facilities resource corresponding to raw facility name,
-//     // do nothing
-//     // else
-//     // push facility into resource, with uid, everything else we can fetch from rate
-//     // write facilities resource
-//     const existing = await db.Facility.query();
-//   }
+  transformFacilities(result: ScrapeResult<ICSRate>): IFacility[] {
+    const facilities: Record<string, IFacility> = {};
 
-//   async transform(result: ScrapeResult<ICSRate>): Promise<RateData> {
-//     const errors = [];
+    Object.entries(result).forEach(([stusab, rates]) => {
+      (rates as ICSRate[]).forEach((r: ICSRate): void => {
+        const sha = this.facilitySha(r.facility, stusab);
 
-//     let count = 0;
-//     let total = Object.keys(result).reduce((acc, elt) => {
-//       return acc + (result as any)[elt].length || 0;
-//     }, 0);
+        if ((facilities as any)[sha]) return;
 
-//     Object.entries(result).forEach(([state, v], i) => {
-//       // if not facility, create it so that we can reference it
-//       //
-//     });
-//   }
+        facilities[sha] = {
+          id: sha,
+          name: r.facility,
+          jurisdiction: undefined,
+          agency: this.trimAgency(r.agency),
+          createdAt: new Date(r.createdAt).toISOString(),
+          populationFeb20: undefined,
+          residentsPopulation: undefined,
+          state: stusab,
+          address: undefined,
+          zipcode: undefined,
+          city: undefined,
+          county: undefined,
+          latitude: undefined,
+          countyFIPS: undefined,
+          HIFLID: undefined,
+          rawName: r.facility,
+        };
+      });
+    });
 
-//   load(transformed: RateData): void {
-//     //
-//   }
-// }
+    return Object.values(facilities);
+  }
+
+  async transformRates(result: ScrapeResult<ICSRate>): Promise<IRate[]> {
+    const tf: IRate[] = [];
+
+    const facilities = await db.Facility.query();
+
+    Object.entries(result).forEach(([stusab, rates]) => {
+      (rates as ICSRate[]).forEach((r: ICSRate): void => {
+        const fSha = this.facilitySha(r.facility, stusab);
+        const rSha = this.rateSha(r);
+
+        if (!facilities.find((f) => f.id === fSha)) {
+          throw new Error("Could not find facility for " + JSON.stringify(r));
+        }
+
+        tf.push({
+          id: rSha,
+          durationInitial: r.initialDuration
+            ? this.strToInt(r.initialDuration) * 60
+            : undefined,
+          durationAdditional: r.overDuration
+            ? this.strToInt(r.overDuration) * 60
+            : undefined,
+          amountInitial: r.initialCost ? r.initialCost * 100 : undefined,
+          amountAdditional: r.overCost ? r.overCost * 100 : undefined,
+          amountTax: r.tax
+            ? parseFloat(((r.tax / (r.seconds / 60)) as any).toFixed(2))
+            : undefined,
+          phone: r.number,
+          inState: this.isInState(r, stusab),
+          facility: fSha,
+          service: "Default Phone",
+          updatedAt: JSON.stringify([new Date(r.createdAt).toISOString()]),
+        });
+      });
+    });
+    return tf;
+  }
+}
+
+export default ICS;
