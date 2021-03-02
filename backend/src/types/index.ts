@@ -1,21 +1,21 @@
 export interface ICanonicalFacility {
   name: string;
-  jurisdiction?: Jurisdiction;
-  address?: string;
-  googlePlaceName?: string;
-  longitude?: number;
-  latitude?: number;
+  jurisdiction: Jurisdiction | null;
+  address: string | null;
+  googlePlaceName: string | null;
+  longitude: number | null;
+  latitude: number | null;
   state: State;
-  county?: string;
-  countyFIPS?: number;
-  HIFLDID?: number;
-  HIFLD_POPULATION?: number;
-  HIFLD_CAPACITY?: number;
-  HIFLD_SOURCE?: string;
-  UCLACovid19ID?: number;
-  UCLACovid19_POPULATION?: number;
-  UCLACovid19_SOURCE?: string;
-  UCLACovid19_SOURCEDATE?: string;
+  county: string | null;
+  countyFIPS: number | null;
+  HIFLDID: number | null;
+  HIFLD_POPULATION: number | null;
+  HIFLD_CAPACITY: number | null;
+  HIFLD_SOURCE: string | null;
+  UCLACovid19ID: number | null;
+  UCLACovid19_POPULATION: number | null;
+  UCLACovid19_SOURCE: string | null;
+  UCLACovid19_SOURCEDATE: string | null;
 }
 
 export interface ICompanyFacility {
@@ -23,16 +23,16 @@ export interface ICompanyFacility {
   agencyInternal: string;
   stateInternal: State;
   company: Company;
-  canonicalFacility: number;
+  canonicalFacilityId: number | null;
   createdAt: string;
 }
 
 export interface IRate {
-  durationInitial?: number;
-  durationAdditional?: number;
-  amountInitial?: number;
-  amountAdditional?: number;
-  pctTax?: number;
+  durationInitial: number | null;
+  durationAdditional: number | null;
+  amountInitial: number | null;
+  amountAdditional: number | null;
+  pctTax: number | null;
   phone: string;
   inState: boolean;
   service: Service;

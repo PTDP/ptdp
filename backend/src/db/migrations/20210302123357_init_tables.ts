@@ -42,6 +42,7 @@ export async function up(knex: Knex): Promise<void> {
       .references("id")
       .inTable(Tables.canonicalFacilities)
       .onDelete("SET NULL");
+    table.string("createdAt");
 
     table.index(["canonicalFacilityId"], "canonicalFacilityId_f_key");
     table.index(["company"], "companyFacilities_company");

@@ -1,7 +1,14 @@
 import { ScrapeResult, ICSRate } from "@ptdp/lib";
+
 import ETL from "./abstract";
-import { IContract, IRate, Service } from "../../../../types/index";
-import * as db from "../../../csv_db";
+import {
+  ICompanyFacility,
+  IRate,
+  Service,
+  State,
+  Company,
+} from "../../../../types/index";
+import * as db from "../../../../db/models";
 
 class ICS extends ETL {
   constructor(result: ScrapeResult<ICSRate>) {
@@ -13,70 +20,83 @@ class ICS extends ETL {
     return agency.split("-")[1].trim();
   }
 
-  transformContracts(result: ScrapeResult<ICSRate>): IContract[] {
-    const contracts: Record<string, IContract> = {};
+  rateToCF(r: ICSRate, stusab: string) {
+    return {
+      facilityInternal: r.facility,
+      agencyInternal: r.agency,
+      stateInternal: State[stusab as any] as any,
+      company: Company.ICS,
+      createdAt: new Date(r.createdAt).toISOString(),
+      canonicalFacilityId: null,
+    };
+  }
+
+  transformCompanyFacilities(
+    result: ScrapeResult<ICSRate>
+  ): ICompanyFacility[] {
+    const facilities: ICompanyFacility[] = [];
 
     Object.entries(result).forEach(([stusab, rates]) => {
       (rates as ICSRate[]).forEach((r: ICSRate): void => {
-        const sha = this.contractSha(r.facility, r.agency, "ICS", stusab);
-
-        if ((contracts as any)[sha]) return;
-
-        contracts[sha] = {
-          id: sha,
-          facilityInternal: r.facility,
-          agencyInternal: this.trimAgency(r.agency),
-          stateInternal: stusab,
-          createdAt: new Date(r.createdAt).toISOString(),
-          company: "ICS",
-          canonicalFacility: undefined,
-        };
+        facilities.push(this.rateToCF(r, stusab));
       });
     });
 
-    return Object.values(contracts);
+    return facilities;
   }
 
   async transformRates(result: ScrapeResult<ICSRate>): Promise<IRate[]> {
     const tf: IRate[] = [];
+    const entries = Object.entries(result);
 
-    const contracts = await db.Contract.query();
+    const companyFacilities = await db.CompanyFacility.query();
 
-    Object.entries(result).forEach(([stusab, rates]) => {
-      (rates as ICSRate[]).forEach((r: ICSRate): void => {
-        const cSha = this.contractSha(r.facility, r.agency, "ICS", stusab);
+    for (let j = 0; j < entries.length; j++) {
+      let [stusab, rates] = entries[j] as [string, ICSRate[]];
+      for (let i = 0; i < rates.length; i++) {
+        const r = rates[i];
 
-        const rSha = this.rateSha(r);
+        const cf = companyFacilities.find(
+          (cf) =>
+            this.companyFacilityUniqueIdentifier(cf) ===
+            this.companyFacilityUniqueIdentifier(
+              this.rateToCF(rates[i], stusab)
+            )
+        );
 
-        if (!contracts.find((f) => f.id === cSha)) {
+        if (!cf) {
           throw new Error("Could not find facility for " + JSON.stringify(r));
         }
 
-        tf.push({
-          id: rSha,
+        const partial = {
           durationInitial: r.initialDuration
             ? this.strToInt(r.initialDuration) * 60
-            : undefined,
+            : null,
           durationAdditional: r.overDuration
             ? this.strToInt(r.overDuration) * 60
-            : undefined,
+            : null,
           amountInitial: r.initialCost
             ? parseFloat(r.initialCost.toFixed(2))
-            : undefined,
+            : null,
           amountAdditional: r.overCost
             ? parseFloat(r.overCost.toFixed(2))
-            : undefined,
-          amountTax: r.tax
+            : null,
+          pctTax: r.tax
             ? parseFloat(((r.tax / (r.seconds / 60)) as any).toFixed(2))
-            : undefined,
+            : null,
           phone: r.number,
-          inState: this.isInState(r, stusab) ? 1 : 0,
-          contract: cSha,
+          inState: this.isInState(r, stusab),
+          company: Company.ICS,
+          source: "https://icsonline.icsolutions.com/rates",
           service: Service.Default,
-          updatedAt: JSON.stringify([new Date(r.createdAt).toISOString()]),
-        });
-      });
-    });
+          updatedAt: [new Date(r.createdAt).toISOString()],
+          companyFacilityId: cf.id,
+        };
+
+        tf.push(partial);
+      }
+    }
+
     return tf;
   }
 }

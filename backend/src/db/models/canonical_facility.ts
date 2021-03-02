@@ -1,6 +1,6 @@
 import { Model } from "objection";
 import { ICanonicalFacility as CanonicalFacilityData } from "../../types";
-import { Tables } from "../../db/constants";
+import { Tables } from "../constants";
 
 interface CanonicalFacility extends CanonicalFacilityData {}
 
