@@ -41,14 +41,6 @@ export default abstract class ETL {
     }
   }
 
-  rawToSha(raw: ICSRate | SecurusRate) {
-    return sha1(JSON.stringify(this.removeRateMetadata(raw)));
-  }
-
-  facilitySha(identifier: string) {
-    return sha1(identifier);
-  }
-
   rateUniqueIdentitifier(e: IRate) {
     return sha1(
       "" +
@@ -70,17 +62,6 @@ export default abstract class ETL {
     return sha1(
       "" + e.facilityInternal + e.agencyInternal + e.company + e.stateInternal
     );
-  }
-
-  removeDuplicateRates(r: IRate[]) {
-    const seen = new Set();
-    const filteredArr = r.filter((el) => {
-      const duplicate = seen.has(this.rateUniqueIdentitifier(el));
-      seen.add(this.rateUniqueIdentitifier(el));
-      return !duplicate;
-    });
-    console.warn("Removed ", r.length - filteredArr.length, " duplicates");
-    return filteredArr;
   }
 
   validRate(r: IRate) {
@@ -166,25 +147,6 @@ export default abstract class ETL {
     console.log("Patched ", patched, " rates");
     console.log("Inserted ", toInsert.length, " rates");
   }
-
-  removeRateMetadata = (
-    raw: ICSRate | SecurusRate
-  ): Omit<ICSRate | SecurusRate, "createdAt"> => {
-    const r: ICSRate | SecurusRate = { ...raw };
-    delete (r as any).createdAt;
-    return r;
-  };
-
-  removeDbRateMetaData = (
-    raw: IRate
-  ): Omit<IRate, "updated_at" | "created_at" | "updatedAt"> => {
-    const r: IRate = { ...raw };
-    delete (r as any).id;
-    delete (r as any).created_at;
-    delete (r as any).updated_at;
-    delete (r as any).updatedAt;
-    return r;
-  };
 
   strToInt = (str: string): number =>
     parseInt(str.match(new RegExp(/\d+/))?.[0] || "0");
