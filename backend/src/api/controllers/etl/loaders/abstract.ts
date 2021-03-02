@@ -1,19 +1,39 @@
 import { ScrapeResult, ICSRate, SecurusRate } from "@ptdp/lib";
 import { sha1 } from "./util";
-import { IContract, IRate } from "../../../../types";
-import * as db from "../../../csv_db";
+import { ICompanyFacility, IRate } from "../../../../types";
+import * as db from "../../../../db/models";
 
 import s_1 from "../../../../constants/scraper_input/8d92f5a0-61fa-44be-a535-efc6af2491e7.json";
 const scrapeInputs = [s_1];
+
+const removeDuplicates = <T>(
+  r: T[],
+  identifier: (elt: T) => string,
+  itemType: string
+) => {
+  const seen = new Set();
+  const filteredArr = r.filter((el) => {
+    const duplicate = seen.has(identifier(el));
+    seen.add(identifier(el));
+    return !duplicate;
+  });
+  console.warn(
+    "Removed ",
+    r.length - filteredArr.length,
+    " duplicate " + itemType
+  );
+  return filteredArr;
+};
 
 export default abstract class ETL {
   constructor(private result: ScrapeResult<ICSRate | SecurusRate>) {}
 
   async run(): Promise<void> {
     try {
-      const tContracts = await this.transformContracts(this.result);
-      await this.loadContracts(tContracts);
-
+      const tCompanyFacilities = await this.transformCompanyFacilities(
+        this.result
+      );
+      await this.loadCompanyFacilities(tCompanyFacilities);
       const tRates = await this.transformRates(this.result);
       await this.loadRates(tRates);
     } catch (err) {
@@ -29,70 +49,120 @@ export default abstract class ETL {
     return sha1(identifier);
   }
 
-  contractSha(
-    facilityInternal: string,
-    agencyInternal: string,
-    company: string,
-    stusab: string
-  ) {
-    return sha1(facilityInternal + agencyInternal + company + stusab);
+  rateUniqueIdentitifier(e: IRate) {
+    return sha1(
+      "" +
+        e.durationInitial +
+        e.durationAdditional +
+        e.amountInitial +
+        e.amountAdditional +
+        e.pctTax +
+        e.phone +
+        e.inState +
+        e.service +
+        e.source +
+        e.company +
+        e.companyFacilityId
+    );
   }
 
-  rateSha(rate: ICSRate | SecurusRate) {
-    return sha1(JSON.stringify(this.removeRateMetadata(rate)));
+  companyFacilityUniqueIdentifier(e: ICompanyFacility) {
+    return sha1(
+      "" + e.facilityInternal + e.agencyInternal + e.company + e.stateInternal
+    );
   }
 
-  async loadContracts(transformed: IContract[]): Promise<void> {
-    const existing = await db.Contract.query();
-    const n: IContract[] = [];
+  removeDuplicateRates(r: IRate[]) {
+    const seen = new Set();
+    const filteredArr = r.filter((el) => {
+      const duplicate = seen.has(this.rateUniqueIdentitifier(el));
+      seen.add(this.rateUniqueIdentitifier(el));
+      return !duplicate;
+    });
+    console.warn("Removed ", r.length - filteredArr.length, " duplicates");
+    return filteredArr;
+  }
 
-    transformed.forEach((tf) => {
-      if (!existing.find((exst) => exst.id === tf.id)) {
+  validRate(r: IRate) {
+    return r.amountInitial !== null && r.amountAdditional !== null;
+  }
+
+  async loadCompanyFacilities(transformed: ICompanyFacility[]): Promise<void> {
+    const existing = await db.CompanyFacility.query();
+    const n: ICompanyFacility[] = [];
+
+    const deduped = removeDuplicates(
+      transformed,
+      this.companyFacilityUniqueIdentifier,
+      "Company Facilities from input"
+    );
+
+    deduped.forEach((tf) => {
+      if (
+        !existing.find(
+          (exst) =>
+            exst.facilityInternal === tf.facilityInternal &&
+            exst.stateInternal === tf.stateInternal &&
+            exst.agencyInternal === tf.agencyInternal
+        )
+      ) {
         n.push(tf);
       }
     });
 
-    await db.Contract.insert(n);
-    console.log("Inserted ", n.length, " facilities");
+    await db.CompanyFacility.query().insert(n);
+
+    console.log("Inserted ", n.length, " companyFacilities");
   }
 
   abstract transformRates(
     result: ScrapeResult<ICSRate | SecurusRate>
   ): Promise<IRate[]>;
 
-  abstract transformContracts(
+  abstract transformCompanyFacilities(
     result: ScrapeResult<ICSRate | SecurusRate>
-  ): IContract[];
+  ): ICompanyFacility[];
 
   async loadRates(transformed: IRate[]) {
-    const existingRates = await db.Rate.query();
+    const existingRates = await db.Rate.query().select("*");
     const toInsert: IRate[] = [];
 
+    const deduped = removeDuplicates(
+      transformed,
+      this.rateUniqueIdentitifier,
+      "rates from input"
+    );
+
+    const filtered = deduped.filter(this.validRate);
+    console.warn("Removed", deduped.length - filtered.length, " invalid rates");
+
     let patched = 0;
+    for (let i = 0; i < filtered.length; i++) {
+      const r = filtered[i];
+      const match = existingRates.find((e) => {
+        return (
+          this.rateUniqueIdentitifier(e) === this.rateUniqueIdentitifier(r)
+        );
+      });
 
-    transformed.forEach((r) => {
-      const match = existingRates.findIndex((e) => e.id === r.id);
-      if (match > -1) {
-        const updated = { ...existingRates[match] };
-        const n = [
-          ...new Set([
-            ...(JSON.parse(existingRates[match].updatedAt) as string[]),
-            ...(JSON.parse(r.updatedAt) as string[]),
-          ]),
-        ];
-
-        n.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-        updated.updatedAt = JSON.stringify(n);
-
-        existingRates[match] = updated;
+      if (match) {
+        if (!r.updatedAt.find((date) => match.updatedAt.includes(date))) {
+          continue;
+        }
+        const updatedAt = [...new Set([...match.updatedAt, ...r.updatedAt])];
+        updatedAt.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+        await match.$query().patch({
+          updatedAt,
+        });
         patched += 1;
       } else {
         toInsert.push(r);
       }
-    });
+    }
 
-    await db.Rate.update([...existingRates, ...toInsert]);
+    await db.Rate.query().insert(toInsert);
 
+    console.log("Total rates ingested", transformed.length);
     console.log("Patched ", patched, " rates");
     console.log("Inserted ", toInsert.length, " rates");
   }
@@ -102,6 +172,17 @@ export default abstract class ETL {
   ): Omit<ICSRate | SecurusRate, "createdAt"> => {
     const r: ICSRate | SecurusRate = { ...raw };
     delete (r as any).createdAt;
+    return r;
+  };
+
+  removeDbRateMetaData = (
+    raw: IRate
+  ): Omit<IRate, "updated_at" | "created_at" | "updatedAt"> => {
+    const r: IRate = { ...raw };
+    delete (r as any).id;
+    delete (r as any).created_at;
+    delete (r as any).updated_at;
+    delete (r as any).updatedAt;
     return r;
   };
 

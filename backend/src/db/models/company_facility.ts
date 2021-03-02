@@ -1,6 +1,6 @@
 import { Model } from "objection";
 import { ICompanyFacility as CompanyFacilityData } from "../../types";
-import { Tables } from "../../db/constants";
+import { Tables } from "../constants";
 import CanonicalFacility from "./canonical_facility";
 
 interface CompanyFacility extends CompanyFacilityData {}

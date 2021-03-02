@@ -1,6 +1,6 @@
 import { Model } from "objection";
 import { IRate as RateData } from "../../types";
-import { Tables } from "../../db/constants";
+import { Tables } from "../constants";
 import CompanyFacility from "./company_facility";
 
 interface Rate extends RateData {}
@@ -13,16 +13,9 @@ class Rate extends Model {
     return Tables.rates;
   }
 
-  $parseDatabaseJson(json: any) {
-    json = super.$parseDatabaseJson(json);
-    json.seen_at =
-      json.seen_at && json.seen_at.map((d: Date) => d.toISOString());
-    return json;
-  }
-
   static get relationMappings() {
     return {
-      companyFacility: {
+      companyFacilities: {
         relation: Model.BelongsToOneRelation,
         modelClass: CompanyFacility,
         join: {

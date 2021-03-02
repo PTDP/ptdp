@@ -1,5 +1,5 @@
 export const Tables = {
   rates: "rates",
-  companyFacilities: "companyFacilities",
-  canonicalFacilities: "canonicalFacilities",
+  companyFacilities: "company_facilities",
+  canonicalFacilities: "canonical_facilities",
 };
