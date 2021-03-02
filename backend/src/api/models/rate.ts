@@ -1,7 +1,7 @@
 import { Model } from "objection";
-import { Rate as RateData } from "@ptdp/lib/types";
+import { IRate as RateData } from "../../types";
 import { Tables } from "../../db/constants";
-import Scraper from "./scraper";
+import CompanyFacility from "./company_facility";
 
 interface Rate extends RateData {}
 
@@ -22,12 +22,12 @@ class Rate extends Model {
 
   static get relationMappings() {
     return {
-      scrapers: {
+      companyFacility: {
         relation: Model.BelongsToOneRelation,
-        modelClass: Scraper,
+        modelClass: CompanyFacility,
         join: {
-          from: `${Tables.rates}.service_id`,
-          to: `${Tables.scrapers}.id`,
+          from: `${Tables.rates}.companyFacilityId`,
+          to: `${Tables.companyFacilities}.id`,
         },
       },
     };
