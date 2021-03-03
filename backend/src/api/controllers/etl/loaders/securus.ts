@@ -1,79 +1,94 @@
-// import { ScrapeResult, SecurusRate } from "@ptdp/lib";
-// import ETL from "./abstract";
-// import { IContract, IRate, Service } from "../../../../types/index";
-// // import * as db from "../../../csv_db";
+import { ScrapeResult, SecurusRate } from "@ptdp/lib";
+import ETL from "./abstract";
+import {
+  ICompanyFacility,
+  IRate,
+  Service,
+  State,
+  Company,
+} from "../../../../types/index";
+import * as db from "../../../../db/models";
 
-// class Securus extends ETL {
-//   constructor(result: ScrapeResult<SecurusRate>) {
-//     super(result);
-//   }
+class Securus extends ETL {
+  constructor(result: ScrapeResult<SecurusRate>) {
+    super(result);
+  }
 
-//   // Arizona - Arizona Department of Corrections => Arizona Department of Corrections
-//   trimAgency(agency: string) {
-//     return agency.split("-")[1].trim();
-//   }
+  rateToCF(r: SecurusRate, stusab: string) {
+    return {
+      facilityInternal: r.facility,
+      agencyInternal: null,
+      stateInternal: State[stusab as any] as any,
+      company: Company.SECURUS,
+      createdAt: new Date(r.createdAt).toISOString(),
+      canonicalFacilityId: null,
+    };
+  }
 
-//   transformContracts(result: ScrapeResult<SecurusRate>): IContract[] {
-//     const contracts: Record<string, IContract> = {};
+  transformCompanyFacilities(
+    result: ScrapeResult<SecurusRate>
+  ): ICompanyFacility[] {
+    const facilities: ICompanyFacility[] = [];
 
-//     Object.entries(result).forEach(([stusab, rates]) => {
-//       (rates as SecurusRate[]).forEach((r: SecurusRate): void => {
-//         const sha = this.contractSha(r.facility, "", "Securus", stusab);
+    Object.entries(result).forEach(([stusab, rates]) => {
+      (rates as SecurusRate[]).forEach((r: SecurusRate): void => {
+        facilities.push(this.rateToCF(r, stusab));
+      });
+    });
 
-//         if ((contracts as any)[sha]) return;
+    return facilities;
+  }
 
-//         contracts[sha] = {
-//           id: sha,
-//           facilityInternal: r.facility,
-//           agencyInternal: "",
-//           stateInternal: stusab,
-//           createdAt: new Date(r.createdAt).toISOString(),
-//           company: "Securus",
-//           canonicalFacility: undefined,
-//         };
-//       });
-//     });
+  async transformRates(result: ScrapeResult<SecurusRate>): Promise<IRate[]> {
+    const tf: IRate[] = [];
+    const entries = Object.entries(result);
 
-//     return Object.values(contracts);
-//   }
+    const companyFacilities = await db.CompanyFacility.query();
 
-//   async transformRates(result: ScrapeResult<SecurusRate>): Promise<IRate[]> {
-//     const tf: IRate[] = [];
+    for (let j = 0; j < entries.length; j++) {
+      let [stusab, rates] = entries[j] as [string, SecurusRate[]];
+      for (let i = 0; i < rates.length; i++) {
+        const r = rates[i];
 
-//     const facilities = await db.Contract.query();
+        const cf = companyFacilities.find(
+          (cf) =>
+            this.companyFacilityUniqueIdentifier(cf) ===
+            this.companyFacilityUniqueIdentifier(
+              this.rateToCF(rates[i], stusab)
+            )
+        );
 
-//     Object.entries(result).forEach(([stusab, rates]) => {
-//       (rates as SecurusRate[]).forEach((r: SecurusRate): void => {
-//         const fSha = this.contractSha(r.facility, "", "Securus", stusab);
-//         const rSha = this.rateSha(r);
+        if (!cf) {
+          throw new Error("Could not find facility for " + JSON.stringify(r));
+        }
 
-//         if (!facilities.find((f) => f.id === fSha)) {
-//           throw new Error("Could not find facility for " + JSON.stringify(r));
-//         }
+        const partial = {
+          durationInitial: r.seconds,
+          durationAdditional: r.seconds,
+          amountInitial: r.initalAmount
+            ? parseFloat(parseFloat(r.initalAmount.replace("$", "")).toFixed(2))
+            : null,
+          amountAdditional: r.additionalAmount
+            ? parseFloat(
+                parseFloat(r.additionalAmount.replace("$", "")).toFixed(2)
+              )
+            : null,
+          pctTax: 0,
+          phone: r.number!,
+          inState: this.isInState(r, stusab),
+          company: Company.SECURUS,
+          source: "https://securustech.online/#/rate-quote",
+          service: Service[r.service],
+          updatedAt: [new Date(r.createdAt).toISOString()],
+          companyFacilityId: cf.id,
+        };
 
-//         tf.push({
-//           id: rSha,
-//           durationInitial: r.seconds,
-//           durationAdditional: r.seconds,
-//           amountInitial: r.initalAmount
-//             ? parseFloat(parseFloat(r.initalAmount.replace("$", "")).toFixed(2))
-//             : undefined,
-//           amountAdditional: r.additionalAmount
-//             ? parseFloat(
-//                 parseFloat(r.additionalAmount.replace("$", "")).toFixed(2)
-//               )
-//             : undefined,
-//           amountTax: 0,
-//           phone: r.number!,
-//           inState: this.isInState(r, stusab) ? 1 : 0,
-//           contract: fSha,
-//           service: Service[r.service],
-//           updatedAt: JSON.stringify([new Date(r.createdAt).toISOString()]),
-//         });
-//       });
-//     });
-//     return tf;
-//   }
-// }
+        tf.push(partial);
+      }
+    }
 
-// export default Securus;
+    return tf;
+  }
+}
+
+export default Securus;

@@ -135,7 +135,9 @@ export default abstract class ETL {
         await match.$query().patch({
           updatedAt,
         });
+
         patched += 1;
+        console.log("Patching ", patched);
       } else {
         toInsert.push(r);
       }

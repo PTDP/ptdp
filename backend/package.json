@@ -20,6 +20,8 @@
   },
   "main": "lib/index.js",
   "dependencies": {
+    "@google-cloud/storage": "^5.8.0",
+    "@octokit/core": "^3.2.5",
     "@ptdp/lib": "^1.0.34",
     "axios": "^0.21.1",
     "body-parser": "^1.19.0",
@@ -36,6 +38,7 @@
     "pg": "^8.5.1",
     "postgraphile": "^4.10.0",
     "ts-node": "^9.1.1",
+    "uuid": "^8.3.2",
     "xlsx": "^0.16.9"
   },
   "devDependencies": {

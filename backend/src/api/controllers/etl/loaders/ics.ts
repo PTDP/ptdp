@@ -15,11 +15,6 @@ class ICS extends ETL {
     super(result);
   }
 
-  // Arizona - Arizona Department of Corrections => Arizona Department of Corrections
-  trimAgency(agency: string) {
-    return agency.split("-")[1].trim();
-  }
-
   rateToCF(r: ICSRate, stusab: string) {
     return {
       facilityInternal: r.facility,

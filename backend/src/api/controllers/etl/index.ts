@@ -1,13 +1,57 @@
 import * as express from "express";
-// import * as db from "../../csv_db";
-// import * as db from "../../csv_db";
-// import * as geocode from "./transformers/geocode";
 import * as scripts from "../scripts";
 import * as loaders from "./loaders";
-
+import * as storage from "./storage";
+import * as git from "./git";
+import path from "path";
 import axios from "axios";
 
+import { ScrapeResult, ICSRate, SecurusRate } from "@ptdp/lib";
+
 const router = express.Router();
+
+router.post(
+  "/load-all",
+  async (req: express.Request, res: express.Response) => {
+    const files = (await storage.listFilesByPrefix("etl/")).filter(
+      (f) => path.extname(f.name) === ".json"
+    );
+    const errors = [];
+    for (const file of files) {
+      try {
+        const data = await storage.fileToJSON(file);
+        const company = file.name.split("/")[1];
+
+        console.log("Processing ", file.name);
+
+        switch (company) {
+          case "ics":
+            await loaders.ics(data as ScrapeResult<ICSRate>);
+            break;
+          case "securus":
+            await loaders.securus(data as ScrapeResult<SecurusRate>);
+            break;
+          default:
+            throw new Error(`ETL for ${company} not found.`);
+        }
+      } catch (err) {
+        console.error(err);
+        errors.push(err.toString());
+      }
+    }
+    res.status(200).send({ errors });
+  }
+);
+
+router.post(
+  "/sync-git",
+  async (req: express.Request, res: express.Response) => {
+    // await git.CompanyFacility.sync();
+    await git.CanonicalFacility.sync();
+    // await git.Rate.sync();
+    res.send({});
+  }
+);
 
 router.post("/", async (req: express.Request, res: express.Response) => {
   const { company, results_url } = req.body;
