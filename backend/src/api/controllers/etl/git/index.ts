@@ -22,6 +22,7 @@ abstract class Exporter<I, O> {
   client: any;
   dbModel: any;
   abstract PATH: string;
+  abstract CLOUD_STORAGE_PATH: string;
 
   constructor(dbModel: any) {
     this.client = new Octokit({ auth: functions.config().csv_db.token });
@@ -58,43 +59,27 @@ abstract class Exporter<I, O> {
 
       const { sha } = data.tree.find((t: any) => this.PATH.includes(t.path));
 
-      // console.log(sha);
+      const path = await storage.stringToPath(
+        serialized,
+        this.CLOUD_STORAGE_PATH
+      );
+
+      console.log(path);
 
       // https://api.github.com/repos/PTDP/data/git/trees/main:data
 
       // console.log(res);
 
-      // await this.client.request("PUT /repos/{owner}/{repo}/contents/{path}", {
-      //   owner: "PTDP",
-      //   repo: "data",
-      //   content: serialized,
-      //   message: `${Date.now()} update`,
-      //   path: this.PATH,
-      //   sha,
-      // });
-
-      // const res = await this.client.request(
-      //   "POST /repos/{owner}/{repo}/git/blobs",
-      //   {
-      //     owner: "PTDP",
-      //     repo: "data",
-      //     content: serialized,
-      //     message: `${Date.now()} update`,
-      //     path: this.PATH,
-      //     sha,
-      //   }
-      // );
-
-      // console.log(res);
-
-      // const r = await this.client.contentsAsync(this.PATH);
-      // await this.ghrepo.updateContentsAsync(
-      //   this.PATH,
-      //   "Update " + Math.floor(Date.now() / 1000),
-      //   serialized,
-      //   sha,
-      //   "main"
-      // );
+      await this.client.request("PUT /repos/{owner}/{repo}/contents/{path}", {
+        owner: "PTDP",
+        repo: "data",
+        content: Buffer.from(
+          `# Latest CSV\n#### This CSV can be opened with common spreadsheet software like Excel and Google Sheets!\n✅ [${new Date().toLocaleString()}](${path})`
+        ).toString("base64"),
+        message: `${Date.now()} update`,
+        path: this.PATH,
+        sha,
+      });
     } catch (err) {
       console.error(err);
     }
@@ -115,7 +100,8 @@ export class CompanyFacilityModel extends Exporter<
   ICompanyFacility,
   ICompanyFacilityPublic
 > {
-  PATH = "data/company_facilities.csv";
+  PATH = "data/company_facilities.md";
+  CLOUD_STORAGE_PATH = `exports/company_facilities_${Date.now()}.csv`;
 
   transform(fs: ICompanyFacility[]) {
     return fs.map((r) => ({
@@ -127,7 +113,8 @@ export class CompanyFacilityModel extends Exporter<
 }
 
 export class RateModel extends Exporter<IRate, IRatePublic> {
-  PATH = "data/rates.csv";
+  PATH = "data/rates.md";
+  CLOUD_STORAGE_PATH = `exports/rates_${Date.now()}.csv`;
 
   transform(rates: IRate[]) {
     return rates.map((r) => ({
@@ -143,7 +130,8 @@ export class CanonicalFacilityModel extends Exporter<
   ICanonicalFacility,
   ICanonicalFacilityPublic
 > {
-  PATH = "data/canonical_facilities.csv";
+  PATH = "data/canonical_facilities.md";
+  CLOUD_STORAGE_PATH = `exports/canonical_facilities_${Date.now()}.csv`;
 
   transform(fs: ICanonicalFacility[]) {
     return fs.map((r) => ({
