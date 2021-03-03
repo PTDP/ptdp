@@ -118,6 +118,7 @@ export default abstract class ETL {
     console.warn("Removed", deduped.length - filtered.length, " invalid rates");
 
     let patched = 0;
+    let matches = 0;
     for (let i = 0; i < filtered.length; i++) {
       const r = filtered[i];
       const match = existingRates.find((e) => {
@@ -127,7 +128,10 @@ export default abstract class ETL {
       });
 
       if (match) {
-        if (!r.updatedAt.find((date) => match.updatedAt.includes(date))) {
+        matches += 1;
+        if (
+          match.updatedAt.find((date) => date === r.updatedAt.find(Boolean))
+        ) {
           continue;
         }
         const updatedAt = [...new Set([...match.updatedAt, ...r.updatedAt])];
@@ -137,7 +141,6 @@ export default abstract class ETL {
         });
 
         patched += 1;
-        console.log("Patching ", patched);
       } else {
         toInsert.push(r);
       }
@@ -146,6 +149,7 @@ export default abstract class ETL {
     await db.Rate.query().insert(toInsert);
 
     console.log("Total rates ingested", transformed.length);
+    console.log("Matches found", matches);
     console.log("Patched ", patched, " rates");
     console.log("Inserted ", toInsert.length, " rates");
   }
