@@ -18,10 +18,21 @@ export const fileToJSON = async (file: GCloudFile) => {
   return JSON.parse(fs.readFileSync(path, "utf-8"));
 };
 
-// export const stringToPath = async (str: string, path: string) => {
-//   const path = await downloadFile(file);
-//   return JSON.parse(fs.readFileSync(path, "utf-8"));
-// };
+export const stringToPath = async (str: string, destination: string) => {
+  const storage = new Storage();
+  const file = storage
+    .bucket(functions.config().storage.bucket)
+    .file(destination);
+  await file.save(str);
+  await file.makePublic();
+
+  return (
+    "https://storage.googleapis.com/" +
+    functions.config().storage.bucket.replace("gs://", "") +
+    "/" +
+    destination
+  );
+};
 
 export const listFilesByPrefix = async (prefix: string) => {
   /**

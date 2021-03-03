@@ -46,9 +46,9 @@ router.post(
 router.post(
   "/sync-git",
   async (req: express.Request, res: express.Response) => {
-    // await git.CompanyFacility.sync();
+    await git.CompanyFacility.sync();
     await git.CanonicalFacility.sync();
-    // await git.Rate.sync();
+    await git.Rate.sync();
     res.send({});
   }
 );
