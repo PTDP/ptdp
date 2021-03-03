@@ -64,7 +64,7 @@ router.post("/", async (req: express.Request, res: express.Response) => {
         await loaders.ics(data);
         break;
       case "securus":
-        // await loaders.securus(data);
+        await loaders.securus(data);
         break;
       default:
         throw new Error(`ETL for ${company} not found.`);
