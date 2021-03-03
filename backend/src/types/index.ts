@@ -1,6 +1,6 @@
 export interface ICanonicalFacility {
   name: string;
-  jurisdiction: Jurisdiction | null;
+  jurisdiction: Jurisdiction;
   address: string | null;
   googlePlaceName: string | null;
   longitude: number | null;
@@ -18,13 +18,26 @@ export interface ICanonicalFacility {
   UCLACovid19_SOURCEDATE: string | null;
 }
 
+// For export to git
+export interface ICanonicalFacilityPublic
+  extends Omit<ICanonicalFacility, "jurisdiction"> {
+  jurisdiction: string;
+}
+
 export interface ICompanyFacility {
   facilityInternal: string;
-  agencyInternal: string;
+  agencyInternal: string | null;
   stateInternal: State;
   company: Company;
   canonicalFacilityId: number | null;
   createdAt: string;
+}
+
+// For export to git
+export interface ICompanyFacilityPublic
+  extends Omit<ICompanyFacility, "stateInternal" | "company"> {
+  stateInternal: string;
+  company: string;
 }
 
 export interface IRate {
@@ -40,6 +53,14 @@ export interface IRate {
   company: Company;
   companyFacilityId: number;
   updatedAt: string[];
+}
+
+// For export to git
+export interface IRatePublic
+  extends Omit<IRate, "service" | "company" | "updatedAt"> {
+  service: string;
+  company: string;
+  updatedAt: string;
 }
 
 export enum Jurisdiction {
