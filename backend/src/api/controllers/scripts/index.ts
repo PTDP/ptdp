@@ -5,6 +5,8 @@ import Scraper from "../../../api/models/scraper";
 import Faciility from "../../../api/models/facility";
 import State from "../../../api/models/state";
 
+export * from "./geocode_company";
+
 export const canonical_rate_updates_20210215094529 = async () => {
   const canonicalRates = await CanonicalRate.query();
 
