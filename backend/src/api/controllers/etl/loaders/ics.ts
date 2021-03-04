@@ -9,20 +9,54 @@ import {
   Company,
 } from "../../../../types/index";
 import * as db from "../../../../db/models";
+import states from "us-state-codes";
+
+// To be deprecated after scraper rewrite
+import ICS_PRODUCTS_1614890605816 from "../../../../constants/ics_products_1614890605816.json";
 
 class ICS extends ETL {
   constructor(result: ScrapeResult<ICSRate>) {
     super(result);
   }
 
+  // To be deprecated after scraper rewrite
   rateToCF(r: ICSRate, stusab: string) {
+    const product = ICS_PRODUCTS_1614890605816.find(
+      (p) => r.agency === p.full_nm
+    );
+
+    let sureOfState = false;
+    // same product (so same internal agency, but listed stusab)
+    if (product) {
+      // we are sure of state if there are no agencies using
+      // this particular product whose states are different that this state
+
+      sureOfState = !ICS_PRODUCTS_1614890605816.find(
+        (p) => product.agency_id === p.agency_id && p.state_cd !== stusab
+      );
+
+      if (r.facility === "Wisconsin Secure Program Facility - WSPF") {
+        // console.log(sureOfState);
+
+        if (!sureOfState) {
+          console.log(stusab);
+          // console.log(product.agency_id);
+        }
+        // console.log(stusab);
+        // console.log(stusab);
+      }
+    }
+
     return {
       facilityInternal: r.facility,
-      agencyInternal: r.agency,
-      stateInternal: State[stusab as any] as any,
+      productInternal: product ? product.agency_id : "UNKNOWN",
+      // agencyInternal: r.agency,
+      stateInternal: sureOfState ? (State[stusab as any] as any) : null,
       company: Company.ICS,
       createdAt: new Date(r.createdAt).toISOString(),
       canonicalFacilityId: null,
+      internalNotes: `Listed agency: ${r.agency}`,
+      externalNotes: null,
     };
   }
 
@@ -37,7 +71,9 @@ class ICS extends ETL {
       });
     });
 
-    return facilities;
+    const valid = facilities.filter((n) => n.productInternal !== "UNKNOWN");
+
+    return valid;
   }
 
   async transformRates(result: ScrapeResult<ICSRate>): Promise<IRate[]> {
@@ -60,7 +96,13 @@ class ICS extends ETL {
         );
 
         if (!cf) {
-          throw new Error("Could not find facility for " + JSON.stringify(r));
+          // console.warn(
+          //   "No facility has been added to database for " +
+          //     r.facility +
+          //     "this is probably intentional"
+          // );
+          continue;
+          // throw new Error("Could not find facility for " + JSON.stringify(r));
         }
 
         const partial = {
@@ -86,6 +128,8 @@ class ICS extends ETL {
           service: Service.Default,
           updatedAt: [new Date(r.createdAt).toISOString()],
           companyFacilityId: cf.id,
+          internalNotes: `Listed agency: ${r.agency}`,
+          externalNotes: null,
         };
 
         tf.push(partial);
