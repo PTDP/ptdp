@@ -17,11 +17,13 @@ class Securus extends ETL {
   rateToCF(r: SecurusRate, stusab: string) {
     return {
       facilityInternal: r.facility,
-      agencyInternal: null,
+      productInternal: null,
       stateInternal: State[stusab as any] as any,
       company: Company.SECURUS,
       createdAt: new Date(r.createdAt).toISOString(),
       canonicalFacilityId: null,
+      internalNotes: null,
+      externalNotes: null,
     };
   }
 
@@ -81,6 +83,8 @@ class Securus extends ETL {
           service: Service[r.service],
           updatedAt: [new Date(r.createdAt).toISOString()],
           companyFacilityId: cf.id,
+          internalNotes: null,
+          externalNotes: null,
         };
 
         tf.push(partial);

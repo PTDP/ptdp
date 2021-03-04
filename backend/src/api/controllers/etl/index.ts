@@ -14,10 +14,12 @@ router.post(
   "/load-all",
   async (req: express.Request, res: express.Response) => {
     const files = (await storage.listFilesByPrefix("etl/")).filter(
-      (f) => path.extname(f.name) === ".json"
+      (f) => path.extname(f.name) === ".json" && !f.name.includes("deprecated")
     );
     const errors = [];
-    for (const file of files) {
+
+    const x = [files[0]];
+    for (const file of x) {
       try {
         const data = await storage.fileToJSON(file);
         const company = file.name.split("/")[1];

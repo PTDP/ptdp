@@ -16,14 +16,9 @@ export async function up(knex: Knex): Promise<void> {
     table.text("county");
     table.integer("countyFIPS");
     table.integer("HIFLDID");
-    table.integer("HIFLD_POPULATION");
-    table.integer("HIFLD_CAPACITY");
-    table.text("HIFLD_SOURCE");
-    table.text("HIFLD_SOURCEDATE");
     table.integer("UCLACovid19ID");
-    table.integer("UCLACovid19_POPULATION");
-    table.text("UCLACovid19_SOURCE");
-    table.text("UCLACovid19_SOURCEDATE");
+    table.text("externalNotes");
+    table.text("internalNotes");
 
     table.index(["state"], "cf_state_id");
     table.index(["state"], "cf_jurisdiction_id");
@@ -34,7 +29,7 @@ export async function up(knex: Knex): Promise<void> {
     table.timestamps(true, true);
 
     table.text("facilityInternal");
-    table.text("agencyInternal");
+    table.text("productInternal");
     table.integer("stateInternal");
     table.integer("company");
     table
@@ -43,6 +38,8 @@ export async function up(knex: Knex): Promise<void> {
       .inTable(Tables.canonicalFacilities)
       .onDelete("SET NULL");
     table.string("createdAt");
+    table.text("externalNotes");
+    table.text("internalNotes");
 
     table.index(["canonicalFacilityId"], "canonicalFacilityId_f_key");
     table.index(["company"], "companyFacilities_company");
@@ -69,6 +66,8 @@ export async function up(knex: Knex): Promise<void> {
       .inTable(Tables.companyFacilities)
       .onDelete("SET NULL");
     table.specificType("updatedAt", "timestamptz[]");
+    table.text("externalNotes");
+    table.text("internalNotes");
 
     table.index(["companyFacilityId"], "rates_companyFacilityId_f_key");
     table.index(["company"], "rates_company");
