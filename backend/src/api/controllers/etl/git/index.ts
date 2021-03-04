@@ -18,7 +18,7 @@ import { Octokit } from "@octokit/core";
 import * as storage from "../storage";
 // var querystring = require("querystring");
 
-abstract class Exporter<I, O> {
+export abstract class Exporter<I, O> {
   client: any;
   dbModel: any;
   abstract PATH: string;

@@ -72,58 +72,58 @@
 //   });
 // };
 
-// // const reverseGeocodeFacilityCensus = async (facility: Facility) => {
-// //   try {
-// //     if (!facility.formatted_address) {
-// //       console.error(`No formatted address for ${facility.name}`);
-// //       return;
-// //     }
-
-// //     const { result } = (
-// //       await axios.get(
-// //         `https://geocoding.geo.census.gov/geocoder/geographies/onelineaddress?${querystring.stringify(
-// //           { address: facility.formatted_address }
-// //         )}&benchmark=4&vintage=4&format=json`
-// //       )
-// //     ).data;
-// //     if (result.addressMatches[0]) {
-// //       const { GEOID, STUSAB } = result.addressMatches[0].geographies.States[0];
-// //       const { COUNTY, NAME } = result.addressMatches[0].geographies.Counties[0];
-// //       let c = (
-// //         await County.query()
-// //           .where("fips", "=", COUNTY)
-// //           .where("state_fips", "=", GEOID)
-// //       ).find(Boolean);
-
-// //       if (!c) {
-// //         console.log(`Creating new county: ${COUNTY}, ${STUSAB}`);
-// //         c = await County.query().insert({
-// //           state_fips: GEOID,
-// //           fips: COUNTY,
-// //           name: NAME,
-// //         });
-// //       }
-
-// //       await facility.$query().patch({
-// //         county_id: c?.id,
-// //       });
-
-// //       console.log(`Reverse Geocoded ${facility.name}: ${NAME}`);
-// //     }
-// //   } catch (err) {
-// //     console.error(`${facility.name}:`, err);
-// //   }
-// // };
-
-// export const facilities = async (force = false) => {
-//   const fcs = await Facility.query();
-//   // let done = false;
-//   for (const facility of fcs) {
-//     if (!facility.google_place_id || force) {
-//       await geocodeFacility(facility);
+// const reverseGeocodeFacilityCensus = async (facility: Facility) => {
+//   try {
+//     if (!facility.formatted_address) {
+//       console.error(`No formatted address for ${facility.name}`);
+//       return;
 //     }
-//     if (!facility.county_id && facility.latitude && facility.longitude) {
-//       await reverseGeocodeFacilityGoogle(facility);
+
+//     const { result } = (
+//       await axios.get(
+//         `https://geocoding.geo.census.gov/geocoder/geographies/onelineaddress?${querystring.stringify(
+//           { address: facility.formatted_address }
+//         )}&benchmark=4&vintage=4&format=json`
+//       )
+//     ).data;
+//     if (result.addressMatches[0]) {
+//       const { GEOID, STUSAB } = result.addressMatches[0].geographies.States[0];
+//       const { COUNTY, NAME } = result.addressMatches[0].geographies.Counties[0];
+//       let c = (
+//         await County.query()
+//           .where("fips", "=", COUNTY)
+//           .where("state_fips", "=", GEOID)
+//       ).find(Boolean);
+
+//       if (!c) {
+//         console.log(`Creating new county: ${COUNTY}, ${STUSAB}`);
+//         c = await County.query().insert({
+//           state_fips: GEOID,
+//           fips: COUNTY,
+//           name: NAME,
+//         });
+//       }
+
+//       await facility.$query().patch({
+//         county_id: c?.id,
+//       });
+
+//       console.log(`Reverse Geocoded ${facility.name}: ${NAME}`);
 //     }
+//   } catch (err) {
+//     console.error(`${facility.name}:`, err);
 //   }
 // };
+
+// // export const facilities = async (force = false) => {
+// //   const fcs = await Facility.query();
+// //   // let done = false;
+// //   for (const facility of fcs) {
+// //     if (!facility.google_place_id || force) {
+// //       await geocodeFacility(facility);
+// //     }
+// //     if (!facility.county_id && facility.latitude && facility.longitude) {
+// //       await reverseGeocodeFacilityGoogle(facility);
+// //     }
+// //   }
+// // };
