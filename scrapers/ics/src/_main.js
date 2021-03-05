@@ -1,7 +1,7 @@
 const Apify = require("apify");
 const PendingXHR = require("./pendingXHR.js");
 
-const COMPANY = 'ics';
+const COMPANY = "ics";
 
 const rateDetailSel = async (text, page) => {
   const handle = (
@@ -202,7 +202,7 @@ const processFacility = async (facility, agency, state, scraper, page) => {
           facility: facility.label,
           agency,
           seconds: 15 * 60,
-          company: COMPANY
+          company: COMPANY,
         })
       );
     } else if (isFailureResp) {
@@ -222,7 +222,7 @@ const processFacility = async (facility, agency, state, scraper, page) => {
           agency,
           seconds: 15 * 60,
           error: resp.result,
-          company: COMPANY
+          company: COMPANY,
         })
       );
     }
@@ -271,7 +271,7 @@ const processFacility = async (facility, agency, state, scraper, page) => {
 };
 
 Apify.main(async () => {
-  const requestList = await Apify.openRequestList('start-urls', [
+  const requestList = await Apify.openRequestList("start-urls", [
     "https://icsonline.icsolutions.com/rates",
   ]);
 
@@ -280,6 +280,59 @@ Apify.main(async () => {
     errors: [],
   };
 
+  const getHeaders = (page) =>
+    new Promise((res, err) => {
+      new PendingXHR(
+        page,
+        (response) => {
+          res(response._request._headers);
+        },
+        "https://icsonline.icsolutions.com/public-api/products",
+        true
+      );
+    });
+
+  const icsRequest = (page, url, headers) =>
+    page.evaluate(
+      async (headers, url) => {
+        const response = await fetch(url, {
+          headers,
+          referrer: "https://icsonline.icsolutions.com/rates",
+          referrerPolicy: "strict-origin-when-cross-origin",
+          body: null,
+          method: "GET",
+          mode: "cors",
+          credentials: "include",
+        });
+        const json = await response.json();
+        return json;
+      },
+      headers,
+      url
+    );
+
+  class StateHandler {
+    constructor(state, uid, products, page, headers) {
+      this.state = state;
+      this.uid = uid;
+      this.products = products;
+      this.page = page;
+      this.headers = headers;
+    }
+
+    run() {
+
+    }
+
+    multiStateProducts() {
+      return this.products.filter((p) => )
+    }
+
+    stateProducts() {
+      // 
+    }
+  }
+
   const crawler = new Apify.PuppeteerCrawler({
     requestList,
     // proxyConfiguration,
@@ -287,14 +340,27 @@ Apify.main(async () => {
     launchPuppeteerOptions: {
       useChrome: true,
       stealth: true,
-  },
+    },
     handlePageFunction: async ({ page, request, proxyInfo }) => {
-        
       const states = Object.values(input.data);
-      await page.waitForTimeout(selectors.agency_name_input);
+
+      //const listener
+      // wait for request to /products endpoint to resolve
+      const headers = await getHeaders(page);
+      const products = await icsRequest(
+        page,
+        "https://icsonline.icsolutions.com/public-api/products",
+        headers
+      );
+
+      await new Promise((res) => setTimeout(res, 10000));
+
+      // "https://icsonline.icsolutions.com/public-api/products/CULAL/facilities"
+
+      // await page.waitForTimeout(selectors.agency_name_input);
       await new Promise((resolve) => setTimeout(resolve, 1000));
       for (let i = 0; i < states.length; i++) {
-        const results = await processState(states[i], input.uuid, page);
+        const results = await handleState(states[i], input.uuid, page, headers);
         output[states[i].stusab] = [...results];
         await Apify.setValue("OUTPUT", { ...output });
       }
