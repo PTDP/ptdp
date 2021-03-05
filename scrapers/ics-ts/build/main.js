@@ -96,7 +96,7 @@ class StateHandler {
     }
     rawRateToICSRate(rawRate, facility, product, number) {
         const { summary } = rawRate || {};
-        return {
+        return util_1.falseyToNull({
             tariffBand: summary === null || summary === void 0 ? void 0 : summary.tariffBand,
             initialDuration: summary === null || summary === void 0 ? void 0 : summary.initialDuration,
             initialCost: summary === null || summary === void 0 ? void 0 : summary.initialCost,
@@ -111,7 +111,7 @@ class StateHandler {
             agencyFullName: product.agency_nm,
             facility: facility.facility_nm,
             seconds: rawRate.duration,
-        };
+        });
     }
     async run() {
         const rates = [];

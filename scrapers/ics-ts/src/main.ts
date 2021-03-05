@@ -165,7 +165,7 @@ class StateHandler {
         number: string
     ) {
         const { summary } = rawRate || {};
-        return {
+        return falseyToNull({
             tariffBand: summary?.tariffBand,
             initialDuration: summary?.initialDuration,
             initialCost: summary?.initialCost,
@@ -180,7 +180,7 @@ class StateHandler {
             agencyFullName: product.agency_nm,
             facility: facility.facility_nm,
             seconds: rawRate.duration,
-        };
+        });
     }
 
     async run() {
