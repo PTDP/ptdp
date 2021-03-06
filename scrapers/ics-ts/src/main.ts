@@ -1,10 +1,9 @@
-/**
- * This template is a production ready boilerplate for developing with `PuppeteerCrawler`.
- * Use this to bootstrap your projects using the most up-to-date code.
- * If you're looking for examples or want to learn more, see README.
- */
-
 import { ICSRate } from "@ptdp/lib";
+import { Storage } from "@google-cloud/storage";
+import * as states from "us-state-codes";
+import * as fs from "fs";
+import * as path from "path";
+
 import {
     ScraperInput,
     ICSProduct,
@@ -15,8 +14,12 @@ import {
 import PendingXHR from "./pendingXHR";
 import { falseyToNull, sleepInRange } from "./util";
 
-const Apify = require("apify");
+const {
+    GOOGLE_APPLICATION_CREDENTIALS_BASE64,
+    CLOUD_STORAGE_BUCKET,
+} = process.env;
 
+const Apify = require("apify");
 const selectors = {
     agency_name_input: '[ng-model="asyncSelected"]',
     agency_name_dropdown: 'ul[class^="dropdown-menu"] li[id^="typeahead"]',
@@ -100,14 +103,17 @@ const getHeaders = async (page) => {
     });
 };
 
-const multiStateProducts = (products: ICSProduct[]) =>
+const getMultiStateProducts = (products: ICSProduct[]) =>
     products.filter((p) =>
         products.find(
             (pr) => pr.agency_id === p.agency_id && pr.state_cd !== p.state_cd
         )
     );
-// get products associated w/ a particular state
-class StateHandler {
+
+class SingleStateHandler {
+    multiStateProducts: ICSProduct[];
+    singleStateProducts: ICSProduct[];
+
     constructor(
         private state: StateInput,
         private uid,
@@ -115,9 +121,12 @@ class StateHandler {
         private headers,
         private products: ICSProduct[]
     ) {
-        this.products = this.stateProducts(
-            this.singleStateProducts(products),
-            state
+        this.singleStateProducts = this.stateProducts(
+            this.getSingleStateProducts(this.products)
+        );
+
+        this.multiStateProducts = this.stateProducts(
+            getMultiStateProducts(this.products)
         );
     }
 
@@ -185,8 +194,35 @@ class StateHandler {
 
     async run() {
         const rates: ICSRate[] = [];
-        for (const product of this.products) {
+        const rate_calls: {
+            facilities: ICSFacility[];
+            product: ICSProduct;
+        }[] = [];
+
+        for (const product of this.singleStateProducts) {
             const facilities = await this.getFaciliites(product);
+            await sleepInRange(400, 700);
+            rate_calls.push({ facilities, product });
+        }
+
+        for (const product of this.multiStateProducts) {
+            const facilities = [
+                {
+                    site_id: product.site_id,
+
+                    // "Arizona - Central Arizona - Florence Correctional Complex" => "Central Arizona - Florence Correctional Complex""
+                    facility_nm: product.full_nm
+                        .split("-")
+                        .slice(1)
+                        .join("-")
+                        .trim(),
+                },
+            ];
+
+            rate_calls.push({ facilities, product });
+        }
+
+        for (const { facilities, product } of rate_calls) {
             for (const facility of facilities) {
                 await sleepInRange(400, 700);
                 const in_state_rate = await this.getInStateRate(
@@ -219,8 +255,8 @@ class StateHandler {
         return rates;
     }
 
-    singleStateProducts(products: ICSProduct[]) {
-        const multistateP = multiStateProducts(products).map((p) =>
+    getSingleStateProducts(products: ICSProduct[]) {
+        const multistateP = getMultiStateProducts(products).map((p) =>
             JSON.stringify(p)
         );
         return products.filter(
@@ -228,26 +264,44 @@ class StateHandler {
         );
     }
 
-    stateProducts(products: ICSProduct[], state: StateInput) {
-        return products.filter(
-            (p) => p.state_cd.toUpperCase() === state.stusab.toUpperCase()
+    productBelongsToState(product, state) {
+        return (
+            product.state_cd.toUpperCase() === state.stusab.toUpperCase() ||
+            states.getStateCodeByStateName(product.state_nm) ===
+                state.stusab.toUpperCase()
+        );
+    }
+
+    stateProducts(products: ICSProduct[]) {
+        return products.filter((p) =>
+            this.productBelongsToState(p, this.state)
         );
     }
 }
 
-// get multi-state products
-// class MultiStateHandler {
-//     constructor(
-//         private uid,
-//         private page,
-//         private headers,
-//         private products: ICSProduct[]
-//     ) {
-//         this.products = multiStateProducts(products);
-//     }
-// }
+const getProducts = (page, headers) =>
+    icsRequest(
+        page,
+        "https://icsonline.icsolutions.com/public-api/products",
+        headers
+    );
+
+const setCreds = () => {
+    let buff = Buffer.from(GOOGLE_APPLICATION_CREDENTIALS_BASE64, "base64");
+    let text = buff.toString("ascii");
+    const p = path.resolve("./GOOGLE_APPLICATION_CREDENTIALS");
+    fs.writeFileSync(p, text);
+    process.env.GOOGLE_APPLICATION_CREDENTIALS = p;
+};
+
+async function uploadFile(destination, content) {
+    const storage = new Storage();
+    const file = storage.bucket(CLOUD_STORAGE_BUCKET).file(destination);
+    await file.save(content);
+}
 
 Apify.main(async () => {
+    setCreds();
     const requestList = await Apify.openRequestList("start-urls", [
         "https://icsonline.icsolutions.com/rates",
     ]);
@@ -267,17 +321,11 @@ Apify.main(async () => {
         handlePageFunction: async ({ page }) => {
             const headers = await getHeaders(page);
             const states = Object.values(input.data);
+            const products: ICSProduct[] = await getProducts(page, headers);
 
-            const products: ICSProduct[] = await icsRequest(
-                page,
-                "https://icsonline.icsolutions.com/public-api/products",
-                headers
-            );
-
-            // await new Promise((resolve) => setTimeout(resolve, 1000));
             for (let i = 0; i < 1; i++) {
                 try {
-                    const handler = new StateHandler(
+                    const handler = new SingleStateHandler(
                         states[i],
                         input.uuid,
                         page,
@@ -288,11 +336,16 @@ Apify.main(async () => {
                     output[states[i].stusab] = [...results];
                     await Apify.setValue("OUTPUT", { ...output });
                 } catch (err) {
+                    console.error(err);
                     output.errors.push(err.toString());
+                    await Apify.setValue("OUTPUT", { ...output });
                 }
             }
 
-            // Apify.setValue("OUTPUT", multiStateProducts(products));
+            await uploadFile(
+                `etl/ics/${Date.now()}.json`,
+                JSON.stringify(output)
+            );
         },
     });
 
