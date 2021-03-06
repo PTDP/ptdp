@@ -19,6 +19,7 @@ class ICS extends ETL {
     return {
       facilityInternal: r.facility,
       agencyInternal: r.agency,
+      productInternal: r.agency,
       stateInternal: State[stusab as any] as any,
       company: Company.ICS,
       createdAt: new Date(r.createdAt).toISOString(),
