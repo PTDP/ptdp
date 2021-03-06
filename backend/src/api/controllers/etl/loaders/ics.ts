@@ -9,7 +9,6 @@ import {
   Company,
 } from "../../../../types/index";
 import * as db from "../../../../db/models";
-import states from "us-state-codes";
 
 // To be deprecated after scraper rewrite
 import ICS_PRODUCTS_1614890605816 from "../../../../constants/ics_products_1614890605816.json";
