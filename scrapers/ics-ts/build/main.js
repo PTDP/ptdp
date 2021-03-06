@@ -2,8 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const storage_1 = require("@google-cloud/storage");
 const states = require("us-state-codes");
-const fs = require("fs");
-const path = require("path");
 const pendingXHR_1 = require("./pendingXHR");
 const util_1 = require("./util");
 const { GOOGLE_APPLICATION_CREDENTIALS_BASE64, CLOUD_STORAGE_BUCKET, } = process.env;
@@ -164,20 +162,15 @@ class SingleStateHandler {
     }
 }
 const getProducts = (page, headers) => icsRequest(page, BASE_URL + "/public-api/products", headers);
-const setCreds = () => {
-    let buff = Buffer.from(GOOGLE_APPLICATION_CREDENTIALS_BASE64, "base64");
-    let text = buff.toString("ascii");
-    const p = path.resolve("./GOOGLE_APPLICATION_CREDENTIALS");
-    fs.writeFileSync(p, text);
-    process.env.GOOGLE_APPLICATION_CREDENTIALS = p;
-};
 async function uploadFile(destination, content) {
-    const storage = new storage_1.Storage();
+    let credentials = JSON.parse(Buffer.from(GOOGLE_APPLICATION_CREDENTIALS_BASE64, "base64").toString("ascii"));
+    const storage = new storage_1.Storage({
+        credentials,
+    });
     const file = storage.bucket(CLOUD_STORAGE_BUCKET).file(destination);
     await file.save(content);
 }
 Apify.main(async () => {
-    setCreds();
     const requestList = await Apify.openRequestList("start-urls", [
         "https://icsonline.icsolutions.com/rates",
     ]);
@@ -196,7 +189,7 @@ Apify.main(async () => {
             const headers = await getHeaders(page);
             const states = Object.values(input.data);
             const products = await getProducts(page, headers);
-            for (let i = 0; i < states.length; i++) {
+            for (let i = 0; i < 1; i++) {
                 try {
                     const handler = new SingleStateHandler(states[i], input.uuid, page, headers, products);
                     const results = await handler.run();
