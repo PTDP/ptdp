@@ -17,9 +17,9 @@ class Securus extends ETL {
   rateToCF(r: SecurusRate, stusab: string) {
     return {
       facilityInternal: r.facility,
-      productInternal: null,
       stateInternal: State[stusab as any] as any,
       company: Company.SECURUS,
+      productInternal: null,
       createdAt: new Date(r.createdAt).toISOString(),
       canonicalFacilityId: null,
       internalNotes: null,
