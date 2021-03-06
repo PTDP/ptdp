@@ -10,47 +10,16 @@ import {
 } from "../../../../types/index";
 import * as db from "../../../../db/models";
 
-// To be deprecated after scraper rewrite
-import ICS_PRODUCTS_1614890605816 from "../../../../constants/ics_products_1614890605816.json";
-
 class ICS extends ETL {
   constructor(result: ScrapeResult<ICSRate>) {
     super(result);
   }
 
-  // To be deprecated after scraper rewrite
   rateToCF(r: ICSRate, stusab: string) {
-    const product = ICS_PRODUCTS_1614890605816.find(
-      (p) => r.agency === p.full_nm
-    );
-
-    let sureOfState = false;
-    // same product (so same internal agency, but listed stusab)
-    if (product) {
-      // we are sure of state if there are no agencies using
-      // this particular product whose states are different that this state
-
-      sureOfState = !ICS_PRODUCTS_1614890605816.find(
-        (p) => product.agency_id === p.agency_id && p.state_cd !== stusab
-      );
-
-      if (r.facility === "Wisconsin Secure Program Facility - WSPF") {
-        // console.log(sureOfState);
-
-        if (!sureOfState) {
-          console.log(stusab);
-          // console.log(product.agency_id);
-        }
-        // console.log(stusab);
-        // console.log(stusab);
-      }
-    }
-
     return {
       facilityInternal: r.facility,
-      productInternal: product ? product.agency_id : "UNKNOWN",
-      // agencyInternal: r.agency,
-      stateInternal: sureOfState ? (State[stusab as any] as any) : null,
+      agencyInternal: r.agency,
+      stateInternal: State[stusab as any] as any,
       company: Company.ICS,
       createdAt: new Date(r.createdAt).toISOString(),
       canonicalFacilityId: null,

@@ -85,6 +85,10 @@ export type ICSProduct = {
     register_link: string; //null
 };
 
+export type ICSProductAppended = ICSProduct & {
+    publicAgencies: string;
+};
+
 export type ICSFacility = {
     facility_nm: string; // "Morgan County Jail"
     site_id: number; // 5261

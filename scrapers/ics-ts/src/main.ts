@@ -5,6 +5,7 @@ import * as states from "us-state-codes";
 import {
     ScraperInput,
     ICSProduct,
+    ICSProductAppended,
     StateInput,
     ICSFacility,
     ICSRawRate,
@@ -111,8 +112,8 @@ const getMultiStateProducts = (products: ICSProduct[]) =>
     );
 
 class SingleStateHandler {
-    multiStateProducts: ICSProduct[];
-    singleStateProducts: ICSProduct[];
+    multiStateProducts: ICSProductAppended[];
+    singleStateProducts: ICSProductAppended[];
 
     constructor(
         private state: StateInput,
@@ -121,13 +122,27 @@ class SingleStateHandler {
         private headers,
         private products: ICSProduct[]
     ) {
-        this.singleStateProducts = this.stateProducts(
-            this.getSingleStateProducts(this.products)
+        this.singleStateProducts = this.addPublicAgencies(
+            this.stateProducts(this.getSingleStateProducts(this.products))
+        ).filter(
+            (v, i, a) => a.findIndex((t) => t.agency_id === v.agency_id) === i
         );
 
-        this.multiStateProducts = this.stateProducts(
-            getMultiStateProducts(this.products)
+        this.multiStateProducts = this.addPublicAgencies(
+            this.stateProducts(getMultiStateProducts(this.products))
         );
+    }
+
+    addPublicAgencies(products: ICSProduct[]): ICSProductAppended[] {
+        return products.map((p, _, a) => {
+            return {
+                ...p,
+                publicAgencies: a
+                    .filter((el) => el.agency_id === p.agency_id)
+                    .map((prod) => prod.full_nm)
+                    .join(","),
+            };
+        });
     }
 
     async getFaciliites(product: ICSProduct) {
@@ -172,7 +187,7 @@ class SingleStateHandler {
     rawRateToICSRate(
         rawRate: ICSRawRate,
         facility: ICSFacility,
-        product: ICSProduct,
+        product: ICSProductAppended,
         number: string
     ) {
         const { summary } = rawRate || {};
@@ -187,8 +202,9 @@ class SingleStateHandler {
             number: number,
             createdAt: Date.now(),
             scraper: this.uid,
-            agency: product.agency_id,
-            agencyFullName: product.agency_nm,
+            internalAgency: product.agency_id,
+            internalAgencyFullName: product.agency_nm,
+            publicAgencies: product.publicAgencies,
             facility: facility.facility_nm,
             seconds: rawRate.duration,
         });
@@ -198,7 +214,7 @@ class SingleStateHandler {
         const rates: ICSRate[] = [];
         const rate_calls: {
             facilities: ICSFacility[];
-            product: ICSProduct;
+            product: ICSProductAppended;
         }[] = [];
 
         for (const product of this.singleStateProducts) {
@@ -319,7 +335,7 @@ Apify.main(async () => {
             const states = Object.values(input.data);
             const products: ICSProduct[] = await getProducts(page, headers);
 
-            for (let i = 0; i < states.length; i++) {
+            for (let i = 2; i < 3; i++) {
                 try {
                     const handler = new SingleStateHandler(
                         states[i],

@@ -78,8 +78,19 @@ class SingleStateHandler {
         this.page = page;
         this.headers = headers;
         this.products = products;
-        this.singleStateProducts = this.stateProducts(this.getSingleStateProducts(this.products));
-        this.multiStateProducts = this.stateProducts(getMultiStateProducts(this.products));
+        this.singleStateProducts = this.addPublicAgencies(this.stateProducts(this.getSingleStateProducts(this.products))).filter((v, i, a) => a.findIndex((t) => t.agency_id === v.agency_id) === i);
+        this.multiStateProducts = this.addPublicAgencies(this.stateProducts(getMultiStateProducts(this.products)));
+    }
+    addPublicAgencies(products) {
+        return products.map((p, _, a) => {
+            return {
+                ...p,
+                publicAgencies: a
+                    .filter((el) => el.agency_id === p.agency_id)
+                    .map((prod) => prod.full_nm)
+                    .join(","),
+            };
+        });
     }
     async getFaciliites(product) {
         const facilities = await icsRequest(this.page, BASE_URL + `/public-api/products/${product.agency_id}/facilities`, this.headers);
@@ -108,8 +119,9 @@ class SingleStateHandler {
             number: number,
             createdAt: Date.now(),
             scraper: this.uid,
-            agency: product.agency_id,
-            agencyFullName: product.agency_nm,
+            internalAgency: product.agency_id,
+            internalAgencyFullName: product.agency_nm,
+            publicAgencies: product.publicAgencies,
             facility: facility.facility_nm,
             seconds: rawRate.duration,
         });
@@ -189,7 +201,7 @@ Apify.main(async () => {
             const headers = await getHeaders(page);
             const states = Object.values(input.data);
             const products = await getProducts(page, headers);
-            for (let i = 0; i < states.length; i++) {
+            for (let i = 2; i < 3; i++) {
                 try {
                     const handler = new SingleStateHandler(states[i], input.uuid, page, headers, products);
                     const results = await handler.run();
