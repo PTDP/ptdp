@@ -57,8 +57,8 @@ router.post("/all", async (req: express.Request, res: express.Response) => {
   const chunks = createRequestChunks(scraper_input, 5);
 
   let count = 0;
-  for (const chunk of chunks) {
-    for (const scraper_endpoint of functions.config().scraper_endpoints) {
+  for (const scraper_endpoint of functions.config().scraper_endpoints) {
+    for (const chunk of chunks) {
       try {
         await axios.post(scraper_endpoint, chunk);
         count += 1;

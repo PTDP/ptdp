@@ -189,7 +189,7 @@ Apify.main(async () => {
             const headers = await getHeaders(page);
             const states = Object.values(input.data);
             const products = await getProducts(page, headers);
-            for (let i = 0; i < 1; i++) {
+            for (let i = 0; i < states.length; i++) {
                 try {
                     const handler = new SingleStateHandler(states[i], input.uuid, page, headers, products);
                     const results = await handler.run();
