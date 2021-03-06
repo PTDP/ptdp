@@ -47,7 +47,7 @@ const selectAgency = async (page) => {
     });
 };
 const { utils: { log }, } = Apify;
-const icsRequest = (page, url, headers) => page.evaluate(async (headers, url) => {
+const icsRequest = (page, url, headers) => page.evaluate(async (headers, url, BASE_URL) => {
     const response = await fetch(url, {
         headers,
         referrer: BASE_URL + "/rates",
@@ -59,7 +59,7 @@ const icsRequest = (page, url, headers) => page.evaluate(async (headers, url) =>
     });
     const json = await response.json();
     return json;
-}, headers, url);
+}, headers, url, BASE_URL);
 const getHeaders = async (page) => {
     await page.waitForTimeout(selectors.agency_name_input);
     await new Promise((resolve) => setTimeout(resolve, 1000));

@@ -18,7 +18,6 @@ const {
     GOOGLE_APPLICATION_CREDENTIALS_BASE64,
     CLOUD_STORAGE_BUCKET,
 } = process.env;
-
 const BASE_URL = "https://icsonline.icsolutions.com";
 
 const Apify = require("apify");
@@ -69,7 +68,7 @@ const {
 
 const icsRequest = (page, url, headers) =>
     page.evaluate(
-        async (headers, url) => {
+        async (headers, url, BASE_URL) => {
             const response = await fetch(url, {
                 headers,
                 referrer: BASE_URL + "/rates",
@@ -83,7 +82,8 @@ const icsRequest = (page, url, headers) =>
             return json;
         },
         headers,
-        url
+        url,
+        BASE_URL
     );
 
 const getHeaders = async (page) => {
