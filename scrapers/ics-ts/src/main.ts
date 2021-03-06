@@ -1,8 +1,6 @@
 import { ICSRate } from "@ptdp/lib";
 import { Storage } from "@google-cloud/storage";
 import * as states from "us-state-codes";
-import * as fs from "fs";
-import * as path from "path";
 
 import {
     ScraperInput,
@@ -286,22 +284,20 @@ class SingleStateHandler {
 const getProducts = (page, headers) =>
     icsRequest(page, BASE_URL + "/public-api/products", headers);
 
-const setCreds = () => {
-    let buff = Buffer.from(GOOGLE_APPLICATION_CREDENTIALS_BASE64, "base64");
-    let text = buff.toString("ascii");
-    const p = path.resolve("./GOOGLE_APPLICATION_CREDENTIALS");
-    fs.writeFileSync(p, text);
-    process.env.GOOGLE_APPLICATION_CREDENTIALS = p;
-};
-
 async function uploadFile(destination, content) {
-    const storage = new Storage();
+    let credentials = JSON.parse(
+        Buffer.from(GOOGLE_APPLICATION_CREDENTIALS_BASE64, "base64").toString(
+            "ascii"
+        )
+    );
+    const storage = new Storage({
+        credentials,
+    });
     const file = storage.bucket(CLOUD_STORAGE_BUCKET).file(destination);
     await file.save(content);
 }
 
 Apify.main(async () => {
-    setCreds();
     const requestList = await Apify.openRequestList("start-urls", [
         "https://icsonline.icsolutions.com/rates",
     ]);
@@ -323,7 +319,7 @@ Apify.main(async () => {
             const states = Object.values(input.data);
             const products: ICSProduct[] = await getProducts(page, headers);
 
-            for (let i = 0; i < states.length; i++) {
+            for (let i = 0; i < 1; i++) {
                 try {
                     const handler = new SingleStateHandler(
                         states[i],
