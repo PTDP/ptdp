@@ -19,10 +19,13 @@ class ICS extends ETL {
     return {
       facilityInternal: r.facility,
       agencyInternal: r.agency,
+      productInternal: r.agency,
       stateInternal: State[stusab as any] as any,
       company: Company.ICS,
       createdAt: new Date(r.createdAt).toISOString(),
       canonicalFacilityId: null,
+      internalNotes: `Listed agency: ${r.agency}`,
+      externalNotes: null,
     };
   }
 
@@ -37,7 +40,9 @@ class ICS extends ETL {
       });
     });
 
-    return facilities;
+    const valid = facilities.filter((n) => n.productInternal !== "UNKNOWN");
+
+    return valid;
   }
 
   async transformRates(result: ScrapeResult<ICSRate>): Promise<IRate[]> {
@@ -60,7 +65,13 @@ class ICS extends ETL {
         );
 
         if (!cf) {
-          throw new Error("Could not find facility for " + JSON.stringify(r));
+          // console.warn(
+          //   "No facility has been added to database for " +
+          //     r.facility +
+          //     "this is probably intentional"
+          // );
+          continue;
+          // throw new Error("Could not find facility for " + JSON.stringify(r));
         }
 
         const partial = {
@@ -86,6 +97,8 @@ class ICS extends ETL {
           service: Service.Default,
           updatedAt: [new Date(r.createdAt).toISOString()],
           companyFacilityId: cf.id,
+          internalNotes: `Listed agency: ${r.agency}`,
+          externalNotes: null,
         };
 
         tf.push(partial);

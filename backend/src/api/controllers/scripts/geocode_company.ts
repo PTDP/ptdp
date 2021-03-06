@@ -21,7 +21,7 @@ export class GeocodedCompanyFExporter extends Exporter<
   transform(fs: GeocodedCompanyF[]) {
     return fs.map((r) => ({
       ...r,
-      state: State[r.stateInternal],
+      state: r.stateInternal ? State[r.stateInternal] : null,
     }));
   }
 }
@@ -101,6 +101,7 @@ export const geocode_company = async () => {
       let name = "";
 
       try {
+        // if company is ICS, we cannot trust the reported state for each facility
         ({ formatted_address, lat, lng, name, place_id } =
           (await geocodeFacility(cs[i])) || {});
       } catch (err) {
@@ -116,7 +117,7 @@ export const geocode_company = async () => {
 
       fs.appendFileSync(
         "./intermediate_company_facilities.csv",
-        `${(e as any).id},"${e.facilityInternal}","${e.agencyInternal}","${
+        `${(e as any).id},"${e.facilityInternal}","${e.productInternal}","${
           e.stateInternal
         }","${e.company}","${
           e.createdAt
@@ -169,6 +170,8 @@ const geocodeFacility = async (facility: ICompanyFacility) => {
       `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${query}&key=${PLACES_KEY}`
     )
   ).data;
+
+  console.log(results);
   if (results.length) {
     const {
       formatted_address,

@@ -106,7 +106,7 @@ export class CompanyFacilityModel extends Exporter<
   transform(fs: ICompanyFacility[]) {
     return fs.map((r) => ({
       ...r,
-      stateInternal: State[r.stateInternal],
+      stateInternal: r.stateInternal ? State[r.stateInternal] : null,
       company: Company[r.company],
     }));
   }
