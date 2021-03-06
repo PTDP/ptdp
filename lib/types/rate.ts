@@ -12,8 +12,9 @@ export type ICSRate = {
   number: string;
   createdAt: number;
   scraper: string;
-  agency: string;
-  agencyFullName: string;
+  internalAgency: string;
+  internalAgencyFullName: string;
+  publicAgencies: string; //
   facility: string;
   seconds: number;
 };
