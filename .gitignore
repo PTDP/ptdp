@@ -13,4 +13,3 @@ package-lock.json
 types/dist/**
 .runtimeconfig.json
 GOOGLE_APPLICATION_CREDENTIALS
-**/build/**

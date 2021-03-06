@@ -19,6 +19,8 @@ const {
     CLOUD_STORAGE_BUCKET,
 } = process.env;
 
+const BASE_URL = "https://icsonline.icsolutions.com";
+
 const Apify = require("apify");
 const selectors = {
     agency_name_input: '[ng-model="asyncSelected"]',
@@ -70,7 +72,7 @@ const icsRequest = (page, url, headers) =>
         async (headers, url) => {
             const response = await fetch(url, {
                 headers,
-                referrer: "https://icsonline.icsolutions.com/rates",
+                referrer: BASE_URL + "/rates",
                 referrerPolicy: "strict-origin-when-cross-origin",
                 body: null,
                 method: "GET",
@@ -97,7 +99,7 @@ const getHeaders = async (page) => {
             (response) => {
                 res(response._request._headers);
             },
-            "https://icsonline.icsolutions.com/public-api/facilities",
+            BASE_URL + "/public-api/facilities",
             true
         );
     });
@@ -133,7 +135,7 @@ class SingleStateHandler {
     async getFaciliites(product: ICSProduct) {
         const facilities: ICSFacility[] = await icsRequest(
             this.page,
-            `https://icsonline.icsolutions.com/public-api/products/${product.agency_id}/facilities`,
+            BASE_URL + `/public-api/products/${product.agency_id}/facilities`,
             this.headers
         );
         return facilities;
@@ -142,11 +144,12 @@ class SingleStateHandler {
     async getInStateRate(product, facility) {
         const in_state_rate: ICSRawRate = await icsRequest(
             this.page,
-            `https://icsonline.icsolutions.com/public-api/products/${
-                product.agency_id
-            }/rates/${this.state.in_state_phone.slice(
-                1
-            )}?duration=900&site_id=${facility.site_id}`,
+            BASE_URL +
+                `/public-api/products/${
+                    product.agency_id
+                }/rates/${this.state.in_state_phone.slice(
+                    1
+                )}?duration=900&site_id=${facility.site_id}`,
             this.headers
         );
 
@@ -156,11 +159,12 @@ class SingleStateHandler {
     async getOutStateRate(product, facility) {
         const out_state_rate: ICSRawRate = await icsRequest(
             this.page,
-            `https://icsonline.icsolutions.com/public-api/products/${
-                product.agency_id
-            }/rates/${this.state.out_state_phone.slice(
-                1
-            )}?duration=900&site_id=${facility.site_id}`,
+            BASE_URL +
+                `/public-api/products/${
+                    product.agency_id
+                }/rates/${this.state.out_state_phone.slice(
+                    1
+                )}?duration=900&site_id=${facility.site_id}`,
             this.headers
         );
 
@@ -280,11 +284,7 @@ class SingleStateHandler {
 }
 
 const getProducts = (page, headers) =>
-    icsRequest(
-        page,
-        "https://icsonline.icsolutions.com/public-api/products",
-        headers
-    );
+    icsRequest(page, BASE_URL + "/public-api/products", headers);
 
 const setCreds = () => {
     let buff = Buffer.from(GOOGLE_APPLICATION_CREDENTIALS_BASE64, "base64");
