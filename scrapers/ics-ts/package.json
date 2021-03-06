@@ -3,10 +3,12 @@
 	"version": "0.0.1",
 	"description": "This is a boilerplate of an Apify actor.",
 	"dependencies": {
+		"@google-cloud/storage": "^5.8.1",
 		"@ptdp/lib": "^1.0.36",
 		"@types/puppeteer": "^5.4.3",
 		"apify": "^1.0.1",
-		"puppeteer": "*"
+		"puppeteer": "*",
+		"us-state-codes": "^1.1.2"
 	},
 	"devDependencies": {
 		"@apify/eslint-config": "^0.1.3",
