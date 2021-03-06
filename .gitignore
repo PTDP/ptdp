@@ -12,3 +12,4 @@ package-lock.json
 **/apify_storage/key_value_stores/default/**
 types/dist/**
 .runtimeconfig.json
+GOOGLE_APPLICATION_CREDENTIALS

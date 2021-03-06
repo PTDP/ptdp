@@ -60,7 +60,7 @@ export default abstract class ETL {
 
   companyFacilityUniqueIdentifier(e: ICompanyFacility) {
     return sha1(
-      "" + e.facilityInternal + e.agencyInternal + e.company + e.stateInternal
+      "" + e.facilityInternal + e.productInternal + e.company + e.stateInternal
     );
   }
 
@@ -84,16 +84,16 @@ export default abstract class ETL {
           (exst) =>
             exst.facilityInternal === tf.facilityInternal &&
             exst.stateInternal === tf.stateInternal &&
-            exst.agencyInternal === tf.agencyInternal
+            exst.productInternal === tf.productInternal
         )
       ) {
         n.push(tf);
       }
     });
 
-    await db.CompanyFacility.query().insert(n);
+    await db.CompanyFacility.query().insert(deduped);
 
-    console.log("Inserted ", n.length, " companyFacilities");
+    console.log("Inserted ", deduped.length, " companyFacilities");
   }
 
   abstract transformRates(

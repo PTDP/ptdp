@@ -9,13 +9,9 @@ export interface ICanonicalFacility {
   county: string | null;
   countyFIPS: number | null;
   HIFLDID: number | null;
-  HIFLD_POPULATION: number | null;
-  HIFLD_CAPACITY: number | null;
-  HIFLD_SOURCE: string | null;
   UCLACovid19ID: number | null;
-  UCLACovid19_POPULATION: number | null;
-  UCLACovid19_SOURCE: string | null;
-  UCLACovid19_SOURCEDATE: string | null;
+  internalNotes: string | null;
+  externalNotes: string | null;
 }
 
 // For export to git
@@ -26,17 +22,20 @@ export interface ICanonicalFacilityPublic
 
 export interface ICompanyFacility {
   facilityInternal: string;
-  agencyInternal: string | null;
-  stateInternal: State;
+  // agencyInternal: string | null;
+  productInternal: string | null;
+  stateInternal: State | null;
   company: Company;
   canonicalFacilityId: number | null;
   createdAt: string;
+  internalNotes: string | null;
+  externalNotes: string | null;
 }
 
 // For export to git
 export interface ICompanyFacilityPublic
   extends Omit<ICompanyFacility, "stateInternal" | "company"> {
-  stateInternal: string;
+  stateInternal: string | null;
   company: string;
 }
 
@@ -53,6 +52,8 @@ export interface IRate {
   company: Company;
   companyFacilityId: number;
   updatedAt: string[];
+  internalNotes: string | null;
+  externalNotes: string | null;
 }
 
 // For export to git
