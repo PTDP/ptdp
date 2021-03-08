@@ -108,6 +108,7 @@ export class CompanyFacilityModel extends Exporter<
       ...r,
       stateInternal: r.stateInternal ? State[r.stateInternal] : null,
       company: Company[r.company],
+      notes: null, // hide CF Notes
     }));
   }
 }
@@ -122,6 +123,7 @@ export class RateModel extends Exporter<IRate, IRatePublic> {
       service: Service[r.service],
       company: Company[r.company],
       updatedAt: JSON.stringify(r.updatedAt),
+      notes: r.notes.length ? JSON.stringify(r.notes) : null,
     }));
   }
 }
@@ -137,6 +139,7 @@ export class CanonicalFacilityModel extends Exporter<
     return fs.map((r) => ({
       ...r,
       jurisdiction: Jurisdiction[r.jurisdiction],
+      notes: r.notes.length ? JSON.stringify(r.notes) : null,
     }));
   }
 }

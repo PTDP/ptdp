@@ -18,8 +18,7 @@ router.post(
     );
     const errors = [];
 
-    const x = [files[0]];
-    for (const file of x) {
+    for (const file of files) {
       try {
         const data = await storage.fileToJSON(file);
         const company = file.name.split("/")[1];
@@ -105,13 +104,13 @@ router.post(
 
 router.post("/query", async (req: express.Request, res: express.Response) => {
   try {
-    await scripts.geocode_company();
+    await scripts.merge_geocodings();
     // const r = await db.Facility.query();
     // console.log(r);
     // await db.Contract.insert([]);
     // const cs = await db.Facility.serialize(r);
     // console.log(cs);
-    await res.status(200).send({ success: true });
+    res.status(200).send({ success: true });
   } catch (err) {
     console.error(err);
     res.status(400).send({ error: err.toString(), success: false });
