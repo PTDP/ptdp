@@ -17,9 +17,22 @@ export async function up(knex: Knex): Promise<void> {
     table.integer("countyFIPS");
     table.integer("HIFLDID");
     table.integer("UCLACovid19ID");
-    table.text("externalNotes");
-    table.text("internalNotes");
+    table.boolean("hidden");
 
+    // override fields
+    table.text("name_override");
+    table.integer("jurisdiction_override");
+    table.text("address_override");
+    table.float("longitude_override");
+    table.float("latitude_override");
+    table.integer("state_override");
+    table.text("county_override");
+    table.integer("countyFIPS_override");
+    table.integer("HIFLDID_override");
+    table.integer("UCLACovid19ID_override");
+    table.boolean("hidden_override");
+
+    table.specificType("notes", "text[]");
     table.index(["state"], "cf_state_id");
     table.index(["state"], "cf_jurisdiction_id");
   });
@@ -29,7 +42,8 @@ export async function up(knex: Knex): Promise<void> {
     table.timestamps(true, true);
 
     table.text("facilityInternal");
-    table.text("productInternal");
+    table.text("agencyInternal");
+    table.text("agencyFullNameInternal");
     table.integer("stateInternal");
     table.integer("company");
     table
@@ -38,8 +52,9 @@ export async function up(knex: Knex): Promise<void> {
       .inTable(Tables.canonicalFacilities)
       .onDelete("SET NULL");
     table.string("createdAt");
-    table.text("externalNotes");
-    table.text("internalNotes");
+    table.boolean("hidden_override");
+
+    table.specificType("notes", "text[]");
 
     table.index(["canonicalFacilityId"], "canonicalFacilityId_f_key");
     table.index(["company"], "companyFacilities_company");
@@ -66,8 +81,8 @@ export async function up(knex: Knex): Promise<void> {
       .inTable(Tables.companyFacilities)
       .onDelete("SET NULL");
     table.specificType("updatedAt", "timestamptz[]");
-    table.text("externalNotes");
-    table.text("internalNotes");
+    table.specificType("notes", "text[]");
+    table.boolean("hidden_override");
 
     table.index(["companyFacilityId"], "rates_companyFacilityId_f_key");
     table.index(["company"], "rates_company");
