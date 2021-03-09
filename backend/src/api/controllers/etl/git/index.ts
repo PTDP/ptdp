@@ -10,7 +10,6 @@ import {
   ICompanyFacilityPublic,
   State,
   Company,
-  Jurisdiction,
   Service,
 } from "../../../../types/index";
 import * as db from "../../../../db/models";
@@ -87,6 +86,7 @@ export abstract class Exporter<I, O> {
 
   deleteDBMeta(data: any[]): any[] {
     return data.map((d) => {
+      delete d.id;
       delete d.created_at;
       delete d.updated_at;
       return d;
@@ -104,12 +104,14 @@ export class CompanyFacilityModel extends Exporter<
   CLOUD_STORAGE_PATH = `exports/company_facilities_${Date.now()}.csv`;
 
   transform(fs: ICompanyFacility[]) {
-    return fs.map((r) => ({
-      ...r,
-      stateInternal: r.stateInternal ? State[r.stateInternal] : null,
-      company: Company[r.company],
-      notes: null, // hide CF Notes
-    }));
+    return fs.map((r: ICompanyFacility) => {
+      return {
+        ...r,
+        stateInternal: r.stateInternal ? State[r.stateInternal] : null,
+        company: Company[r.company],
+        notes: null, // hide CF Notes
+      };
+    });
   }
 }
 
@@ -118,13 +120,15 @@ export class RateModel extends Exporter<IRate, IRatePublic> {
   CLOUD_STORAGE_PATH = `exports/rates_${Date.now()}.csv`;
 
   transform(rates: IRate[]) {
-    return rates.map((r) => ({
-      ...r,
-      service: Service[r.service],
-      company: Company[r.company],
-      updatedAt: JSON.stringify(r.updatedAt),
-      notes: r.notes.length ? JSON.stringify(r.notes) : null,
-    }));
+    return rates.map((r) => {
+      return {
+        ...r,
+        service: Service[r.service],
+        company: Company[r.company],
+        updatedAt: JSON.stringify(r.updatedAt),
+        notes: r.notes.length ? JSON.stringify(r.notes) : null,
+      };
+    });
   }
 }
 
@@ -136,11 +140,12 @@ export class CanonicalFacilityModel extends Exporter<
   CLOUD_STORAGE_PATH = `exports/canonical_facilities_${Date.now()}.csv`;
 
   transform(fs: ICanonicalFacility[]) {
-    return fs.map((r) => ({
-      ...r,
-      jurisdiction: Jurisdiction[r.jurisdiction],
-      notes: r.notes.length ? JSON.stringify(r.notes) : null,
-    }));
+    return fs.map((r) => {
+      return {
+        ...r,
+        notes: r.notes.length ? JSON.stringify(r.notes) : null,
+      };
+    });
   }
 }
 

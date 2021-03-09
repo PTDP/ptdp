@@ -27,7 +27,7 @@ export class GeocodedCompanyFExporter extends Exporter<
 }
 
 const CSV =
-  "https://storage.googleapis.com/ptdp-staging.appspot.com/exports/company_facilities_1614735201106.csv";
+  "https://storage.googleapis.com/ptdp-staging.appspot.com/exports/company_facilities_1615248404962.csv";
 
 interface GeocodedCompanyF extends ICompanyFacility {
   normalized_name: null;
@@ -89,11 +89,11 @@ const serialize = (data: any, path: string) => {
 // One off script (3/7/2021) to merge geocoded elts (already paid for) w/ newly scraped elements
 export const merge_geocodings = async () => {
   const latest_company_facilities = await readCSV(
-    "https://storage.googleapis.com/ptdp-staging.appspot.com/exports/company_facilities_1615165263019.csv"
+    "https://storage.googleapis.com/ptdp-staging.appspot.com/exports/company_facilities_1615248404962.csv"
   );
 
   const previously_geocoded = await readCSV(
-    "https://raw.githubusercontent.com/PTDP/data/main/intermediate_data/intermediate_company_facilities.csv"
+    "https://raw.githubusercontent.com/PTDP/data/main/intermediate_data/geocoded_company_facilities.csv"
   );
 
   let missing: any[] = [];
