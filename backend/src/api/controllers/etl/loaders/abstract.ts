@@ -33,6 +33,7 @@ export default abstract class ETL {
       const tCompanyFacilities = await this.transformCompanyFacilities(
         this.result
       );
+
       await this.loadCompanyFacilities(tCompanyFacilities);
       const tRates = await this.transformRates(this.result);
       await this.loadRates(tRates);
@@ -60,7 +61,11 @@ export default abstract class ETL {
 
   companyFacilityUniqueIdentifier(e: ICompanyFacility) {
     return sha1(
-      "" + e.facilityInternal + e.agencyInternal + e.company + e.stateInternal
+      "" +
+        e.facilityInternal +
+        (e.agencyInternal || "") +
+        e.company +
+        e.stateInternal
     );
   }
 
@@ -70,30 +75,33 @@ export default abstract class ETL {
 
   async loadCompanyFacilities(transformed: ICompanyFacility[]): Promise<void> {
     const existing = await db.CompanyFacility.query();
-    const n: ICompanyFacility[] = [];
+    const deDupedWDB: ICompanyFacility[] = [];
 
-    const deduped = removeDuplicates(
+    const dedupedWSelf = removeDuplicates(
       transformed,
       this.companyFacilityUniqueIdentifier,
       "Company Facilities from input"
     );
 
-    deduped.forEach((tf) => {
+    dedupedWSelf.forEach((tf) => {
       if (
-        !existing.find(
-          (exst) =>
-            exst.facilityInternal === tf.facilityInternal &&
-            exst.stateInternal === tf.stateInternal &&
-            exst.agencyInternal === tf.agencyInternal
-        )
+        !existing.find((exst) => {
+          return (
+            this.companyFacilityUniqueIdentifier(exst) ===
+            this.companyFacilityUniqueIdentifier(tf)
+          );
+        })
       ) {
-        n.push(tf);
+        deDupedWDB.push({
+          uid: this.companyFacilityUniqueIdentifier(tf),
+          ...tf,
+        });
       }
     });
 
-    await db.CompanyFacility.query().insert(deduped);
+    await db.CompanyFacility.query().insert(deDupedWDB);
 
-    console.log("Inserted ", deduped.length, " companyFacilities");
+    console.log("Inserted ", deDupedWDB.length, " companyFacilities");
   }
 
   abstract transformRates(
@@ -144,7 +152,7 @@ export default abstract class ETL {
 
         patched += 1;
       } else {
-        toInsert.push(r);
+        toInsert.push({ uid: this.rateUniqueIdentitifier(r), ...r });
       }
     }
 

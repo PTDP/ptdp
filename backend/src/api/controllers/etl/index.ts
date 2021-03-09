@@ -77,6 +77,10 @@ router.post("/", async (req: express.Request, res: express.Response) => {
   }
 });
 
+router.post("/load/canonical-facilities", async () => {
+  await loaders.canonical();
+});
+
 router.post("/scripts", async () => {
   await scripts.canonical_rate_updates_20210215094529();
 });

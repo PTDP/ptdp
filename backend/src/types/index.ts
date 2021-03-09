@@ -1,13 +1,9 @@
 export interface ICanonicalFacility {
-  name: string;
-  jurisdiction: Jurisdiction;
-  address: string | null;
-  googlePlaceName: string | null;
-  longitude: number | null;
-  latitude: number | null;
-  state: State;
-  county: string | null;
-  countyFIPS: number | null;
+  uid?: string;
+
+  // determine whether to hide based on thresholds like how confident we are that
+  // name matches
+  hidden: boolean;
   HIFLDID: number | null;
   UCLACovid19ID: number | null;
 
@@ -22,23 +18,19 @@ export interface ICanonicalFacility {
   countyFIPS_override: number | null;
   HIFLDID_override: number | null;
   UCLACovid19ID_override: number | null;
-  hidden_override: boolean;
-
-  // determine whether to hide based on thresholds like how confident we are that
-  // name matches
-  hidden: boolean;
+  hidden_override: boolean | null;
 
   notes: string[];
 }
 
 // For export to git
 export interface ICanonicalFacilityPublic
-  extends Omit<ICanonicalFacility, "jurisdiction" | "notes"> {
-  jurisdiction: string;
+  extends Omit<ICanonicalFacility, "notes"> {
   notes: string | null;
 }
 
 export interface ICompanyFacility {
+  uid?: string;
   facilityInternal: string;
   agencyInternal: string | null;
   agencyFullNameInternal: string | null;
@@ -49,7 +41,7 @@ export interface ICompanyFacility {
   notes: string[]; // store internalAgencyID, and publicAgencies for ICS here
 
   // allow manual hiding
-  hidden_override: boolean;
+  hidden_override: boolean | null;
 }
 
 // For export to git
@@ -61,6 +53,7 @@ export interface ICompanyFacilityPublic
 }
 
 export interface IRate {
+  uid?: string;
   durationInitial: number | null;
   durationAdditional: number | null;
   amountInitial: number | null;
@@ -76,12 +69,13 @@ export interface IRate {
   notes: string[];
 
   // allow manual hiding
-  hidden_override: boolean;
+  hidden_override: boolean | null;
 }
 
 // For export to git
 export interface IRatePublic
   extends Omit<IRate, "service" | "company" | "updatedAt" | "notes"> {
+  // id: string;
   service: string;
   company: string;
   updatedAt: string;
@@ -161,3 +155,7 @@ export enum State {
   "WI" = 49,
   "WY" = 50,
 }
+
+export interface JoinedCompanyFacility
+  extends ICanonicalFacility,
+    ICompanyFacility {}

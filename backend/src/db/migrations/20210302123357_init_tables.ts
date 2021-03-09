@@ -5,16 +5,9 @@ export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable(Tables.canonicalFacilities, (table) => {
     table.increments();
     table.timestamps(true, true);
+    table.string("uid");
+    table.unique(["uid"]);
 
-    table.text("name");
-    table.integer("jurisdiction");
-    table.text("address");
-    table.text("googlePlaceName");
-    table.float("longitude");
-    table.float("latitude");
-    table.integer("state");
-    table.text("county");
-    table.integer("countyFIPS");
     table.integer("HIFLDID");
     table.integer("UCLACovid19ID");
     table.boolean("hidden");
@@ -40,6 +33,8 @@ export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable(Tables.companyFacilities, (table) => {
     table.increments();
     table.timestamps(true, true);
+    table.string("uid");
+    table.unique(["uid"]);
 
     table.text("facilityInternal");
     table.text("agencyInternal");
@@ -64,6 +59,8 @@ export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable(Tables.rates, (table) => {
     table.increments();
     table.timestamps(true, true);
+    table.string("uid");
+    table.unique(["uid"]);
 
     table.integer("durationInitial");
     table.integer("durationAdditional");
