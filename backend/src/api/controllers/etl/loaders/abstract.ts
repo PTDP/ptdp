@@ -60,7 +60,7 @@ export default abstract class ETL {
 
   companyFacilityUniqueIdentifier(e: ICompanyFacility) {
     return sha1(
-      "" + e.facilityInternal + e.productInternal + e.company + e.stateInternal
+      "" + e.facilityInternal + e.agencyInternal + e.company + e.stateInternal
     );
   }
 
@@ -84,7 +84,7 @@ export default abstract class ETL {
           (exst) =>
             exst.facilityInternal === tf.facilityInternal &&
             exst.stateInternal === tf.stateInternal &&
-            exst.productInternal === tf.productInternal
+            exst.agencyInternal === tf.agencyInternal
         )
       ) {
         n.push(tf);
@@ -135,9 +135,11 @@ export default abstract class ETL {
           continue;
         }
         const updatedAt = [...new Set([...match.updatedAt, ...r.updatedAt])];
+        const notes = [...new Set([...match.notes, ...r.notes])];
         updatedAt.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
         await match.$query().patch({
           updatedAt,
+          notes,
         });
 
         patched += 1;
