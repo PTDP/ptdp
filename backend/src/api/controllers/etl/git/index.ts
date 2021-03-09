@@ -125,7 +125,7 @@ export class RateModel extends Exporter<IRate, IRatePublic> {
         ...r,
         service: Service[r.service],
         company: Company[r.company],
-        updatedAt: JSON.stringify(r.updatedAt),
+        updated: JSON.stringify(r.updated),
         notes: r.notes.length ? JSON.stringify(r.notes) : null,
       };
     });
