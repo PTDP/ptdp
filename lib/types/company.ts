@@ -1,6 +1,4 @@
-export type Company = {
-    created_at?: string,
-    updated_at?: string,
-    
-    name: "Securus" | "ICS"
+export enum Company {
+  "ICS" = 1,
+  "SECURUS" = 2,
 }
