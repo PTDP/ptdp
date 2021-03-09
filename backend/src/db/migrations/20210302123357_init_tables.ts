@@ -2,32 +2,69 @@ import * as Knex from "knex";
 import { Tables } from "../constants";
 
 export async function up(knex: Knex): Promise<void> {
+  await knex.schema.createTable(Tables.hifld, (table) => {
+    table.increments();
+    table.integer("FID");
+    table.integer("FACILITYID").unique().notNullable();
+    table.text("NAME");
+    table.text("ADDRESS");
+    table.text("CITY");
+    table.text("STATE");
+    table.integer("ZIP");
+    table.integer("ZIP4");
+    table.text("TELEPHONE");
+    table.text("TYPE");
+    table.text("STATUS");
+    table.integer("POPULATION");
+    table.text("COUNTY");
+    table.integer("COUNTYFIPS");
+    table.text("COUNTRY");
+    table.integer("NAICS_CODE");
+    table.text("NAICS_DESC");
+    table.text("SOURCE");
+    table.text("SOURCEDATE");
+    table.text("VAL_METHOD");
+    table.text("VAL_DATE");
+    table.text("WEBSITE");
+    table.text("SECURELVL");
+    table.integer("CAPACITY");
+    table.float("SHAPE_Leng");
+    table.float("SHAPE_Length");
+    table.float("SHAPE_Area");
+
+    table.index(["FACILITYID"], "hifld_FACILITYID");
+  });
+
   await knex.schema.createTable(Tables.canonicalFacilities, (table) => {
     table.increments();
     table.timestamps(true, true);
     table.string("uid");
     table.unique(["uid"]);
 
-    table.integer("HIFLDID");
+    table
+      .integer("HIFLDID")
+      .references("FACILITYID")
+      .inTable(Tables.hifld)
+      .onDelete("SET NULL");
     table.integer("UCLACovid19ID");
     table.boolean("hidden");
 
     // override fields
-    table.text("name_override");
-    table.integer("jurisdiction_override");
-    table.text("address_override");
-    table.float("longitude_override");
-    table.float("latitude_override");
-    table.integer("state_override");
-    table.text("county_override");
-    table.integer("countyFIPS_override");
-    table.integer("HIFLDID_override");
-    table.integer("UCLACovid19ID_override");
-    table.boolean("hidden_override");
+    table.float("longitude");
+    table.float("latitude");
+    table.text("name");
+    table.integer("jurisdiction");
+    table.text("address");
+    table.text("city");
+    table.integer("zip");
+    table.text("state");
+    table.text("county");
+    table.integer("countyFIPS");
+    table.integer("population");
+    table.integer("capacity");
 
     table.specificType("notes", "text[]");
-    table.index(["state"], "cf_state_id");
-    table.index(["state"], "cf_jurisdiction_id");
+    table.index(["uid"], "canf_uid");
   });
 
   await knex.schema.createTable(Tables.companyFacilities, (table) => {
@@ -46,7 +83,7 @@ export async function up(knex: Knex): Promise<void> {
       .references("id")
       .inTable(Tables.canonicalFacilities)
       .onDelete("SET NULL");
-    table.string("createdAt");
+    table.string("created");
     table.boolean("hidden_override");
 
     table.specificType("notes", "text[]");
@@ -54,6 +91,7 @@ export async function up(knex: Knex): Promise<void> {
     table.index(["canonicalFacilityId"], "canonicalFacilityId_f_key");
     table.index(["company"], "companyFacilities_company");
     table.index(["stateInternal"], "companyFacilities_stateInternal");
+    table.index(["uid"], "compf_uid");
   });
 
   await knex.schema.createTable(Tables.rates, (table) => {
@@ -77,7 +115,7 @@ export async function up(knex: Knex): Promise<void> {
       .references("id")
       .inTable(Tables.companyFacilities)
       .onDelete("SET NULL");
-    table.specificType("updatedAt", "timestamptz[]");
+    table.specificType("updated", "timestamptz[]");
     table.specificType("notes", "text[]");
     table.boolean("hidden_override");
 

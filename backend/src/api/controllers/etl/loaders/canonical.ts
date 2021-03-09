@@ -1,11 +1,15 @@
-import { JoinedCompanyFacility, ICanonicalFacility } from "../../../../types";
 import * as csv from "fast-csv";
 import axios from "axios";
+
 import CanonicalFacility from "../../../../db/models/canonical_facility";
-// import { CompanyFacility } from "../../../../db/models";
+import HIFLD from "../../../../db/models/hifld";
 import { Tables } from "../../../../db/constants";
-// import CompanyFacility from "../../../../db/models/company_facility";
 import connection from "../../../../db";
+import {
+  JoinedCompanyFacility,
+  ICanonicalFacility,
+  HIFLD as HIFLDData,
+} from "../../../../types";
 
 export default class CanonicalLoader {
   URL =
@@ -16,9 +20,9 @@ export default class CanonicalLoader {
 
   constructor() {}
 
-  parse(data: string): Promise<JoinedCompanyFacility[]> {
+  parse(data: string): Promise<any[]> {
     return new Promise((res, rej) => {
-      const out: JoinedCompanyFacility[] = [];
+      const out: any[] = [];
       const stream = csv
         .parse({ headers: true })
         .on("error", (error) => rej(error))
@@ -43,20 +47,24 @@ export default class CanonicalLoader {
     for (const c of parsed) {
       insertables.push({
         uid: c.uid,
+        longitude: c.longitude_override || c.longitude || null,
+        latitude: c.latitude_override || c.latitude || null,
         hidden: (c as any).hidden === "True" ? true : false,
-        HIFLDID: c.HIFLDID ? parseInt((c as any).HIFLDID) : null,
-        UCLACovid19ID: c.UCLACovid19ID || null,
-        name_override: c.name_override || null,
-        jurisdiction_override: c.jurisdiction_override || null,
-        address_override: c.address_override || null,
-        longitude_override: c.longitude_override || null,
-        latitude_override: c.latitude_override || null,
-        state_override: c.state_override || null,
-        county_override: c.county_override || null,
-        countyFIPS_override: c.countyFIPS_override || null,
-        HIFLDID_override: c.HIFLDID_override || null,
-        UCLACovid19ID_override: c.UCLACovid19ID_override || null,
-        hidden_override: c.hidden_override || null,
+        HIFLDID: c.HIFLDID
+          ? parseInt((c as any).HIFLDID_override || c.HIFLDID)
+          : null,
+        UCLACovid19ID: c.UCLACovid19ID_override || c.UCLACovid19ID || null,
+
+        name: c.name || null,
+        jurisdiction: c.jurisdiction_override || null,
+        address: c.address_override || null,
+        city: c.city_override || null,
+        zip: c.zip_override || null,
+        state: (c as any).state_override || null,
+        county: c.county_override || null,
+        countyFIPS: c.countyFIPS_override || null,
+        population: c.population_override || null,
+        capacity: c.capacity_override || null,
         notes: [],
       });
     }
@@ -83,14 +91,44 @@ export default class CanonicalLoader {
     });
   }
 
+  async clearOldHIFLD() {
+    await HIFLD.query().del();
+  }
+
+  async insertNewHIFLD() {
+    const csv = (await axios.get(this.HIFLD_URL)).data;
+    const parsed: HIFLDData[] = (await this.parse(csv)).map((elt) => ({
+      ...elt,
+      FID: parseInt(elt.FID) || null,
+      FACILITYID: parseInt(elt.FACILITYID) || null,
+      ZIP: parseInt(elt.ZIP) || null,
+      ZIP4: parseInt(elt.ZIP4) || null,
+      POPULATION: parseInt(elt.POPULATION) || null,
+      COUNTYFIPS: parseInt(elt.COUNTYFIPS) || null,
+      NAICS_CODE: parseInt(elt.NAICS_CODE) || null,
+      CAPACITY: parseInt(elt.CAPACITY) || null,
+      SHAPE_Leng: parseFloat(elt.SHAPE_Leng) || null,
+      SHAPE_Length: parseFloat(elt.SHAPE_Length) || null,
+      SHAPE_Area: parseFloat(elt.SHAPE_Area) || null,
+    }));
+
+    await connection.batchInsert(Tables.hifld, parsed, 1000);
+  }
+
   async run() {
-    console.log("Clearing");
+    console.log("Clearing HIFLD");
+    await this.clearOldHIFLD();
+
+    console.log("Inserting HIFLD");
+    await this.insertNewHIFLD();
+
+    console.log("Clearing Canonical");
     await this.clearOldCanonical();
 
-    console.log("Inserting");
+    console.log("Inserting Canonical");
     await this.insertNewCanonical();
 
-    console.log("Linking");
+    console.log("Linking Canonical");
     await this.linkNewCanonicalToCompany();
 
     console.log("Finished");

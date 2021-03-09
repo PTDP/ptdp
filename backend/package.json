@@ -35,6 +35,7 @@
     "knex": "^0.21.15",
     "objection": "^2.2.6",
     "octonode": "^0.10.0",
+    "parse-address": "^1.1.2",
     "pg": "^8.5.1",
     "postgraphile": "^4.10.0",
     "ts-node": "^9.1.1",

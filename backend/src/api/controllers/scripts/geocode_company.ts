@@ -215,7 +215,7 @@ export const geocode_company = async () => {
         `${(e as any).id},"${e.facilityInternal}","${e.agencyInternal}","${
           e.stateInternal
         }","${e.company}","${
-          e.createdAt
+          e.created
         }","${name}","${formatted_address}","${lng}","${lat}","${county}","${place_id}","${
           e.stateInternal
         }"\n`

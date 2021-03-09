@@ -6,19 +6,20 @@ export interface ICanonicalFacility {
   hidden: boolean;
   HIFLDID: number | null;
   UCLACovid19ID: number | null;
+  longitude: number | null;
+  latitude: number | null;
 
   // allow for manual error correction in case of improper auto-coding
-  name_override: string | null;
-  jurisdiction_override: string | null;
-  address_override: string | null;
-  longitude_override: number | null;
-  latitude_override: number | null;
-  state_override: State;
-  county_override: string | null;
-  countyFIPS_override: number | null;
-  HIFLDID_override: number | null;
-  UCLACovid19ID_override: number | null;
-  hidden_override: boolean | null;
+  name: string | null;
+  jurisdiction: string | null;
+  address: string | null;
+  city: string | null;
+  zip: number | null;
+  state: State;
+  county: string | null;
+  countyFIPS: number | null;
+  population: number | null;
+  capacity: number | null;
 
   notes: string[];
 }
@@ -37,7 +38,7 @@ export interface ICompanyFacility {
   stateInternal: State | null;
   company: Company;
   canonicalFacilityId: number | null;
-  createdAt: string;
+  created: string;
   notes: string[]; // store internalAgencyID, and publicAgencies for ICS here
 
   // allow manual hiding
@@ -65,7 +66,7 @@ export interface IRate {
   source: string;
   company: Company;
   companyFacilityId: number;
-  updatedAt: string[];
+  updated: string[];
   notes: string[];
 
   // allow manual hiding
@@ -74,11 +75,11 @@ export interface IRate {
 
 // For export to git
 export interface IRatePublic
-  extends Omit<IRate, "service" | "company" | "updatedAt" | "notes"> {
+  extends Omit<IRate, "service" | "company" | "updated" | "notes"> {
   // id: string;
   service: string;
   company: string;
-  updatedAt: string;
+  updated: string;
   notes: string | null;
 }
 
@@ -158,4 +159,50 @@ export enum State {
 
 export interface JoinedCompanyFacility
   extends ICanonicalFacility,
-    ICompanyFacility {}
+    ICompanyFacility {
+  longitude_override: number | null;
+  latitude_override: number | null;
+  HIFLDID_override: number | null;
+  UCLACovid19ID_override: number | null;
+
+  name_override: string | null;
+  jurisdiction_override: string | null;
+  address_override: string | null;
+  city_override: string | null;
+  zip_override: number | null;
+  state_override: string | null;
+  county_override: string | null;
+  countyFIPS_override: number | null;
+  population_override: number | null;
+  capacity_override: number | null;
+}
+
+export interface HIFLD {
+  FID: number;
+  FACILITYID: number;
+  NAME: string;
+  ADDRESS: string;
+  CITY: string;
+  STATE: string;
+  ZIP: number;
+  ZIP4: number;
+  TELEPHONE: string;
+  TYPE: string;
+  STATUS: string;
+  POPULATION: string;
+  COUNTY: string;
+  COUNTYFIPS: number;
+  COUNTRY: string;
+  NAICS_CODE: number;
+  NAICS_DESC: string;
+  SOURCE: string;
+  SOURCEDATE: string;
+  VAL_METHOD: string;
+  VAL_DATE: string;
+  WEBSITE: string;
+  SECURELVL: string;
+  CAPACITY: number;
+  SHAPE_Leng: number;
+  SHAPE_Length: number;
+  SHAPE_Area: number;
+}

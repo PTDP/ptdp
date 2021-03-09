@@ -137,16 +137,14 @@ export default abstract class ETL {
 
       if (match) {
         matches += 1;
-        if (
-          match.updatedAt.find((date) => date === r.updatedAt.find(Boolean))
-        ) {
+        if (match.updated.find((date) => date === r.updated.find(Boolean))) {
           continue;
         }
-        const updatedAt = [...new Set([...match.updatedAt, ...r.updatedAt])];
+        const updated = [...new Set([...match.updated, ...r.updated])];
         const notes = [...new Set([...match.notes, ...r.notes])];
-        updatedAt.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+        updated.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
         await match.$query().patch({
-          updatedAt,
+          updated,
           notes,
         });
 
