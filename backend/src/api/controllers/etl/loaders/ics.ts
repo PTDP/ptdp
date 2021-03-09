@@ -18,14 +18,14 @@ class ICS extends ETL {
   rateToCF(r: ICSRate, stusab: string) {
     return {
       facilityInternal: r.facility,
-      agencyInternal: r.agency,
-      productInternal: r.agency,
+      agencyInternal: r.internalAgency,
+      agencyFullNameInternal: r.internalAgencyFullName,
       stateInternal: State[stusab as any] as any,
       company: Company.ICS,
       createdAt: new Date(r.createdAt).toISOString(),
       canonicalFacilityId: null,
-      internalNotes: `Listed agency: ${r.agency}`,
-      externalNotes: null,
+      notes: [`Public Agencies: ${r.publicAgencies};`],
+      hidden_override: false,
     };
   }
 
@@ -40,9 +40,7 @@ class ICS extends ETL {
       });
     });
 
-    const valid = facilities.filter((n) => n.productInternal !== "UNKNOWN");
-
-    return valid;
+    return facilities;
   }
 
   async transformRates(result: ScrapeResult<ICSRate>): Promise<IRate[]> {
@@ -97,8 +95,8 @@ class ICS extends ETL {
           service: Service.Default,
           updatedAt: [new Date(r.createdAt).toISOString()],
           companyFacilityId: cf.id,
-          internalNotes: `Listed agency: ${r.agency}`,
-          externalNotes: null,
+          notes: [],
+          hidden_override: false,
         };
 
         tf.push(partial);

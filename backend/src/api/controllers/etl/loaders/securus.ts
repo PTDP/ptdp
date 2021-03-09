@@ -19,11 +19,12 @@ class Securus extends ETL {
       facilityInternal: r.facility,
       stateInternal: State[stusab as any] as any,
       company: Company.SECURUS,
-      productInternal: null,
+      agencyInternal: null,
+      agencyFullNameInternal: null,
       createdAt: new Date(r.createdAt).toISOString(),
       canonicalFacilityId: null,
-      internalNotes: null,
-      externalNotes: null,
+      notes: [],
+      hidden_override: false,
     };
   }
 
@@ -83,8 +84,8 @@ class Securus extends ETL {
           service: Service[r.service],
           updatedAt: [new Date(r.createdAt).toISOString()],
           companyFacilityId: cf.id,
-          internalNotes: null,
-          externalNotes: null,
+          notes: [],
+          hidden_override: false,
         };
 
         tf.push(partial);

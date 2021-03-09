@@ -10,33 +10,54 @@ export interface ICanonicalFacility {
   countyFIPS: number | null;
   HIFLDID: number | null;
   UCLACovid19ID: number | null;
-  internalNotes: string | null;
-  externalNotes: string | null;
+
+  // allow for manual error correction in case of improper auto-coding
+  name_override: string | null;
+  jurisdiction_override: string | null;
+  address_override: string | null;
+  longitude_override: number | null;
+  latitude_override: number | null;
+  state_override: State;
+  county_override: string | null;
+  countyFIPS_override: number | null;
+  HIFLDID_override: number | null;
+  UCLACovid19ID_override: number | null;
+  hidden_override: boolean;
+
+  // determine whether to hide based on thresholds like how confident we are that
+  // name matches
+  hidden: boolean;
+
+  notes: string[];
 }
 
 // For export to git
 export interface ICanonicalFacilityPublic
-  extends Omit<ICanonicalFacility, "jurisdiction"> {
+  extends Omit<ICanonicalFacility, "jurisdiction" | "notes"> {
   jurisdiction: string;
+  notes: string | null;
 }
 
 export interface ICompanyFacility {
   facilityInternal: string;
-  // agencyInternal: string | null;
-  productInternal: string | null;
+  agencyInternal: string | null;
+  agencyFullNameInternal: string | null;
   stateInternal: State | null;
   company: Company;
   canonicalFacilityId: number | null;
   createdAt: string;
-  internalNotes: string | null;
-  externalNotes: string | null;
+  notes: string[]; // store internalAgencyID, and publicAgencies for ICS here
+
+  // allow manual hiding
+  hidden_override: boolean;
 }
 
 // For export to git
 export interface ICompanyFacilityPublic
-  extends Omit<ICompanyFacility, "stateInternal" | "company"> {
+  extends Omit<ICompanyFacility, "stateInternal" | "company" | "notes"> {
   stateInternal: string | null;
   company: string;
+  notes: string | null;
 }
 
 export interface IRate {
@@ -52,16 +73,19 @@ export interface IRate {
   company: Company;
   companyFacilityId: number;
   updatedAt: string[];
-  internalNotes: string | null;
-  externalNotes: string | null;
+  notes: string[];
+
+  // allow manual hiding
+  hidden_override: boolean;
 }
 
 // For export to git
 export interface IRatePublic
-  extends Omit<IRate, "service" | "company" | "updatedAt"> {
+  extends Omit<IRate, "service" | "company" | "updatedAt" | "notes"> {
   service: string;
   company: string;
   updatedAt: string;
+  notes: string | null;
 }
 
 export enum Jurisdiction {

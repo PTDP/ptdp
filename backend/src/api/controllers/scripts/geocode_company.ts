@@ -5,7 +5,7 @@ import * as functions from "firebase-functions";
 import axios from "axios";
 import * as csv from "fast-csv";
 // import querystring from "querystring";
-import fs from "fs";
+import * as fs from "fs";
 
 // import fs from "fs";
 
@@ -69,17 +69,112 @@ const readCSV = (url: string): Promise<ICompanyFacility[]> => {
   });
 };
 
-// const serialize = (data: any, path: string) => {
-//   return new Promise((res, rej) => {
-//     const csvStream = csv.format({ headers: true });
-//     csvStream.on("end", () => res("cs"));
-//     csvStream.on("error", (err) => rej(err));
-//     csvStream.on("data", (d) => {
-//       fs.writeFileSync("./intermediate_company_facilities.csv", d);
-//     });
-//     csvStream.end();
-//   });
-// };
+const serialize = (data: any, path: string) => {
+  return new Promise((res, rej) => {
+    let cs = "";
+    const csvStream = csv.format({ headers: true });
+    csvStream.on("end", () => {
+      fs.writeFileSync(path, cs);
+      res(true);
+    });
+    csvStream.on("error", (err) => rej(err));
+    csvStream.on("data", (d) => {
+      cs += d;
+    });
+    data.forEach((elt: any) => csvStream.write(elt));
+    csvStream.end();
+  });
+};
+
+// One off script (3/7/2021) to merge geocoded elts (already paid for) w/ newly scraped elements
+export const merge_geocodings = async () => {
+  const latest_company_facilities = await readCSV(
+    "https://storage.googleapis.com/ptdp-staging.appspot.com/exports/company_facilities_1615165263019.csv"
+  );
+
+  const previously_geocoded = await readCSV(
+    "https://raw.githubusercontent.com/PTDP/data/main/intermediate_data/intermediate_company_facilities.csv"
+  );
+
+  let missing: any[] = [];
+  const geocoded = latest_company_facilities.map((e) => {
+    const prev: any = previously_geocoded.find((elt) => {
+      return (
+        elt.company === e.company &&
+        elt.facilityInternal === e.facilityInternal &&
+        // elt.agencyInternal === e.agencyInternal &&
+        elt.stateInternal === e.stateInternal
+      );
+    });
+
+    if (!prev) {
+      missing.push(e);
+      return;
+    }
+
+    return {
+      ...e,
+      googlePlaceName: prev.googlePlaceName,
+      address: prev.address,
+      longitude: prev.longitude,
+      latitude: prev.latitude,
+      county: prev.county,
+      googlePlaceId: prev.googlePlaceId,
+      state: prev.state,
+    };
+  });
+
+  const fixed = missing.map((elt) => {
+    let updated = { ...elt };
+    if (elt.facilityInternal === "Benton County Jail") {
+      updated = {
+        ...updated,
+        googlePlaceName: "Benton County Jail",
+        address: "190 NW 4th St. Corvallis, OR 97330",
+        longitude: -123.2645137,
+        latitude: 44.5656091,
+        county: "Benton County",
+        googlePlaceId: null,
+        state: "OR",
+      };
+    } else if (elt.facilityInternal === "Sumter County Detention Center") {
+      updated = {
+        ...updated,
+        googlePlaceName: "Sumter-Lee Regional Detention Center",
+        address: "1250 Winkles Rd, Sumter, SC 29153, United States",
+        longitude: -80.3261587,
+        latitude: 33.9589824,
+        county: "Sumter County",
+        googlePlaceId: "ChIJvx7PsXll_4gRP_eD9aq3HC4",
+        state: "SC",
+      };
+    } else if (
+      elt.facilityInternal ===
+      'OK DOC - CHARLES E "BILL" JOHNSON CORRECTIONAL CENTER'
+    ) {
+      const et: any = previously_geocoded.find((geo_elt: any) => {
+        return geo_elt.googlePlaceId === "ChIJYeQI-QVwr4cRuRsTLE4xCS4";
+      });
+
+      updated = {
+        ...updated,
+        googlePlaceName: et!.googlePlaceName,
+        address: et!.address,
+        longitude: et!.longitude,
+        latitude: et!.latitude,
+        county: et!.county,
+        googlePlaceId: et!.googlePlaceId,
+        state: et!.state,
+      };
+    }
+    return updated;
+  });
+
+  geocoded.push(...fixed);
+  geocoded.sort((a: any, b: any) => a.id - b.id);
+
+  await serialize(geocoded, "./geocoded.csv");
+};
 
 export const geocode_company = async () => {
   const cs = await readCSV(CSV);
@@ -117,7 +212,7 @@ export const geocode_company = async () => {
 
       fs.appendFileSync(
         "./intermediate_company_facilities.csv",
-        `${(e as any).id},"${e.facilityInternal}","${e.productInternal}","${
+        `${(e as any).id},"${e.facilityInternal}","${e.agencyInternal}","${
           e.stateInternal
         }","${e.company}","${
           e.createdAt
