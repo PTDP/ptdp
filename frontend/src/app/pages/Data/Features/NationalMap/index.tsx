@@ -23,7 +23,9 @@ import Charts from './charts';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNationalMapSlice } from './slice';
 import { selectFacilities, selectLoading, selectError, selectFilters } from './slice/selectors';
-import { Filters, FilterCompanies } from './slice/types';
+import { Filters, FilterCompanies, Geography, CallType, FacilityType } from './slice/types';
+import { Facility } from 'types/Facility'
+import { createImmutableStateInvariantMiddleware } from '@reduxjs/toolkit';
 
 const INITIAL_VIEW_STATE = {
   longitude: -98.5795,
@@ -101,17 +103,39 @@ export const NationalMap = props => {
   }, [filters])
 
   useEffect(() => {
-    filtered = facilities
+    filtered = JSON.parse(JSON.stringify(facilities))
     forceUpdate();
   }, [facilities])
 
   function setFilters(filters: Filters) {
-    filtered = facilities.filter(d => {
-      if (filters.company !== FilterCompanies.ALL) {
-        return d.companyFacilitiesByCanonicalFacilityId.nodes.find(n => n.company === filters.company)
+
+    const filter = (d: Facility) => {
+      // Canonical Facility Filters
+      try {
+        if (filters.facility_type !== FacilityType.ALL && d.hifldByHifldid.type !== filters.facility_type) return false;
+      } catch (err) {
       }
-      return true
-    });
+
+      // Company Facility Filters
+      try {
+        d.companyFacilitiesByCanonicalFacilityId.nodes = d.companyFacilitiesByCanonicalFacilityId.nodes.filter((c) => {
+          if (c.company !== filters.company) return false;
+
+          // Rate filters
+          c.ratesByCompanyFacilityId.nodes = c.ratesByCompanyFacilityId.nodes.filter((f) => {
+            return filters.call_type == CallType.IN_STATE ? f.inState : !f.inState;
+          })
+
+          return true;
+        })
+      } catch (err) {
+      }
+
+      return true;
+    }
+
+
+    filtered = JSON.parse(JSON.stringify(facilities)).filter(filter);
     forceUpdate();
   }
 

@@ -3,7 +3,7 @@ import { NationalMap } from "./Features/NationalMap/index";
 import { useSelector, useDispatch } from 'react-redux';
 import { useNationalMapSlice } from './Features/NationalMap/slice';
 import { selectFilters } from './Features/NationalMap/slice/selectors';
-import { FilterCompanies } from './Features/NationalMap/slice/types';
+import { FilterCompanies, Geography, CallType, FacilityType } from './Features/NationalMap/slice/types';
 
 const Radio = ({ name, options }) => {
     const filters = useSelector(selectFilters);
@@ -13,7 +13,7 @@ const Radio = ({ name, options }) => {
     const handleClick = (e) => {
         let { id, name } = e.target;
         console.log(filters)
-        if (typeof parseInt(id) === 'number') id = parseInt(id);
+        if (!Number.isNaN(parseInt(id))) id = parseInt(id);
         dispatch(actions.updateFilters({ ...filters, [name]: id }));
     }
 
@@ -53,29 +53,29 @@ const SideBar = () => {
                     <div className="flex-col">
                         <Radio name="Data" options={[
                             {
-                                id: 'in_state',
+                                id: CallType.IN_STATE,
                                 name: 'call_type',
                                 label: "In-State Calls"
                             },
                             {
-                                id: 'out_state',
+                                id: CallType.OUT_STATE,
                                 name: 'call_type',
                                 label: "Out-State Calls"
                             }
                         ]} />
                         <Radio name="Geography" options={[
                             {
-                                id: 'facility',
+                                id: Geography.FACILITY,
                                 name: 'geography',
                                 label: "Facility"
                             },
                             {
-                                id: 'county',
+                                id: Geography.COUNTY,
                                 name: 'geography',
                                 label: "County"
                             },
                             {
-                                id: 'state',
+                                id: Geography.STATE,
                                 name: 'geography',
                                 label: "State"
                             }
@@ -99,32 +99,32 @@ const SideBar = () => {
                         ]} />
                         <Radio name="Facility Type" options={[
                             {
-                                id: 'local',
+                                id: FacilityType.LOCAL,
                                 name: 'facility_type',
                                 label: "Local"
                             },
                             {
-                                id: 'county',
+                                id: FacilityType.COUNTY,
                                 name: 'facility_type',
                                 label: "County"
                             },
                             {
-                                id: 'state',
+                                id: FacilityType.STATE,
                                 name: 'facility_type',
                                 label: "State"
                             },
                             {
-                                id: 'federal',
+                                id: FacilityType.FEDERAL,
                                 name: 'facility_type',
                                 label: "Federal"
                             },
                             {
-                                id: 'multi',
+                                id: FacilityType.MULTI,
                                 name: 'facility_type',
                                 label: "Multi"
                             },
                             {
-                                id: 'all',
+                                id: FacilityType.ALL,
                                 name: 'facility_type',
                                 label: "All"
                             },

@@ -6,36 +6,39 @@ import { Facility } from 'types/Facility';
 import { Rate } from 'types/Rate';
 import client from '../../../../../../api';
 import { FACILITIES_QUERY } from '../../../../../../api/queries';
+import data from './facilities_data.json';
 /**
  * Github repos request/response handler
  */
 export function* loadFacilities() {
   try {
-    const [f_response]: [
-      {
-        data: {
-          allCanonicalFacilities: {
-            nodes: Facility[];
-          };
-        };
-      },
-      {
-        data: {
-          allRates: {
-            nodes: Rate[];
-          };
-        };
-      },
-    ] = yield all([
-      call(() =>
-        client.query({
-          query: FACILITIES_QUERY,
-        }),
-      ),
-    ]);
+    // const [f_response]: [
+    // {
+    //   data: {
+    //     allCanonicalFacilities: {
+    //       nodes: Facility[];
+    //     };
+    //   };
+    // },
+    //   {
+    //     data: {
+    //       allRates: {
+    //         nodes: Rate[];
+    //       };
+    //     };
+    //   },
+    // ] = yield all([
+    //   call(() =>
+    //     client.query({
+    //       query: FACILITIES_QUERY,
+    //     }),
+    //   ),
+    // ]);
+
+    const f_response: any = data;
 
     // match all
-    console.log(f_response[0]);
+    // console.log(f_response[0]);
 
     const facilities = f_response?.data?.allCanonicalFacilities?.nodes;
 

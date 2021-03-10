@@ -23,9 +23,10 @@ export function configureAppStore() {
     }),
   ];
 
+  // ...getDefaultMiddleware(),
   const store = configureStore({
     reducer: createReducer(),
-    middleware: [...getDefaultMiddleware(), ...middlewares],
+    middleware: [...middlewares],
     devTools: process.env.NODE_ENV !== 'production',
     enhancers,
   });
