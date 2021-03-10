@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import autobind from 'autobind-decorator';
 
 import {
   XYPlot,
@@ -395,12 +394,12 @@ export function GeospatialAppBasicLineChart() {
 }
 
 export class GeospatialAppHoverInteraction extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = { highlightedHour: null };
   }
   render() {
-    const { highlightedHour } = this.state;
+    const { highlightedHour }: any = this.state;
     const data = pickups.map(d => ({
       ...d,
       color: d.hour === highlightedHour ? '#17B8BE' : '#125C77',

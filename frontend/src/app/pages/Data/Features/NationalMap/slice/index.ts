@@ -3,10 +3,21 @@ import { Facility } from 'types/Facility';
 import { createSlice } from 'utils/@reduxjs/toolkit';
 import { useInjectReducer, useInjectSaga } from 'utils/redux-injectors';
 import { nationalMapSaga } from './saga';
-import { NationalMapState, RepoErrorType } from './types';
+import {
+  NationalMapState,
+  RepoErrorType,
+  Filters,
+  FilterCompanies,
+} from './types';
 
 export const initialState: NationalMapState = {
-  points: [],
+  facilities: [],
+  filters: {
+    call_type: 'in_state',
+    geography: 'facility',
+    company: FilterCompanies.ALL,
+    facility_type: 'all',
+  },
   loading: false,
   error: null,
 };
@@ -21,16 +32,19 @@ const slice = createSlice({
     loadFacilities(state) {
       state.loading = true;
       state.error = null;
-      state.points = [];
+      state.facilities = [];
     },
     facilitiesLoaded(state, action: PayloadAction<Facility[]>) {
-      const points = action.payload;
-      state.points = points;
+      const facilities = action.payload;
+      state.facilities = facilities;
       state.loading = false;
     },
     facilitiesError(state, action: PayloadAction<RepoErrorType>) {
       state.error = action.payload;
       state.loading = false;
+    },
+    updateFilters(state, action: PayloadAction<Filters>) {
+      state.filters = action.payload;
     },
   },
 });

@@ -7,6 +7,10 @@ header {
     z-index: 50;
 }
 
+.fieldset {
+    border: 0;
+}
+
 nav {
     @apply 
     bg-white 

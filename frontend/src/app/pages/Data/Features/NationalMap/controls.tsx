@@ -111,7 +111,7 @@ const MAPBOX_DEFAULT_MAPSTYLES = [
   },
 ];
 
-export function MapStylePicker({ currentStyle, onStyleChange }) {
+export function MapStylePicker({ currentStyle, onStyleChange }: any) {
   return (
     <select
       className="map-style-picker"
@@ -129,12 +129,13 @@ export function MapStylePicker({ currentStyle, onStyleChange }) {
 }
 
 export class LayerControls extends Component {
+  props: any
   _onValueChange(settingName, newValue) {
-    const { settings } = this.props;
+    const { settings }: any = this.props;
     // Only update if we have a confirmed change
     if (settings[settingName] !== newValue) {
       // Create a new object so that shallow-equal detects a change
-      const newSettings = {
+      const newSettings: any = {
         ...this.props.settings,
         [settingName]: newValue,
       };
@@ -144,7 +145,7 @@ export class LayerControls extends Component {
   }
 
   render() {
-    const { title, settings, propTypes = {} } = this.props;
+    const { title, settings, propTypes = {} }: any = this.props;
 
     return (
       <div className="layer-controls" style={layerControl}>
@@ -153,7 +154,7 @@ export class LayerControls extends Component {
           <div key={key}>
             <label>{propTypes[key].displayName}</label>
             <div style={{ display: 'inline-block', float: 'right' }}>
-              {console.log('<><><><>', settings[key])}
+
               {settings[key]}
             </div>
             <Setting
@@ -169,7 +170,7 @@ export class LayerControls extends Component {
   }
 }
 
-export class DataFilterControls extends Component {
+export const DataFilterControls = (props) => {
   // _onValueChange(settingName, newValue) {
   //   const { settings } = this.props;
   //   // Only update if we have a confirmed change
@@ -184,29 +185,27 @@ export class DataFilterControls extends Component {
   //   }
   // }
 
-  render() {
-    const { title, settings, propTypes = {} } = this.props;
+  const { title, settings, propTypes = {} }: any = props;
 
-    return (
-      <div className="layer-controls" style={layerControl}>
-        {title && <h4>{title}</h4>}
-        {Object.keys(settings).map(key => (
-          <div key={key}>
-            <label>{propTypes[key].displayName}</label>
-            <div style={{ display: 'inline-block', float: 'right' }}>
-              {/* {settings[key]} */}
-            </div>
-            {/* <Setting
+  return (
+    <div className="layer-controls" style={layerControl}>
+      {title && <h4>{title}</h4>}
+      {Object.keys(settings).map(key => (
+        <div key={key}>
+          <label>{propTypes[key].displayName}</label>
+          <div style={{ display: 'inline-block', float: 'right' }}>
+            {/* {settings[key]} */}
+          </div>
+          {/* <Setting
               settingName={key}
               value={settings[key]}
               propType={propTypes[key]}
               onChange={this._onValueChange.bind(this)}
             /> */}
-          </div>
-        ))}
-      </div>
-    );
-  }
+        </div>
+      ))}
+    </div>
+  );
 }
 
 const Setting = props => {
@@ -222,6 +221,7 @@ const Setting = props => {
         return <input {...props} />;
     }
   }
+  return null;
 };
 
 const Checkbox = ({ settingName, value, onChange }) => {

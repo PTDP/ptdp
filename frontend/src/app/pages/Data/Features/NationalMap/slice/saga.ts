@@ -1,37 +1,45 @@
-import { call, put, select, takeLatest, delay } from 'redux-saga/effects';
+import { call, all, put, select, takeLatest, delay } from 'redux-saga/effects';
 import { request } from 'utils/request';
-// import { selectUsername } from './selectors';
 import { nationalMapActions as actions } from '.';
-import { Facility } from 'types/Facility';
 import { RepoErrorType } from './types';
+import { Facility } from 'types/Facility';
+import { Rate } from 'types/Rate';
 import client from '../../../../../../api';
 import { FACILITIES_QUERY } from '../../../../../../api/queries';
-
-// const processFacilities = facilities =>
-//   facilities.map(f => {
-//     const position = [f.longitude, f.latitude];
-//     delete f.longitid
-//   });
 /**
  * Github repos request/response handler
  */
 export function* loadFacilities() {
   try {
-    const result: {
-      data: {
-        allFacilities: {
-          nodes: Facility[];
+    const [f_response]: [
+      {
+        data: {
+          allCanonicalFacilities: {
+            nodes: Facility[];
+          };
         };
-      };
-    } = yield call(() =>
-      client.query({
-        query: FACILITIES_QUERY,
-      }),
-    );
+      },
+      {
+        data: {
+          allRates: {
+            nodes: Rate[];
+          };
+        };
+      },
+    ] = yield all([
+      call(() =>
+        client.query({
+          query: FACILITIES_QUERY,
+        }),
+      ),
+    ]);
 
-    const facilities = result?.data?.allFacilities?.nodes;
+    // match all
+    console.log(f_response[0]);
+
+    const facilities = f_response?.data?.allCanonicalFacilities?.nodes;
+
     if (facilities?.length > 0) {
-      console.log(facilities);
       yield put(actions.facilitiesLoaded(facilities));
     } else {
       yield put(actions.facilitiesError(RepoErrorType.USER_HAS_NO_REPO));

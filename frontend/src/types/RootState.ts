@@ -1,5 +1,5 @@
 import { GithubRepoFormState } from 'app/pages/HomePage/Features/GithubRepoForm/slice/types';
-import { NationalMapState } from 'app/pages/HomePage/Features/NationalMap/slice/types';
+import { NationalMapState } from 'app/pages/Data/Features/NationalMap/slice/types';
 import { ThemeState } from 'styles/theme/slice/types';
 // [IMPORT NEW CONTAINERSTATE ABOVE] < Needed for generating containers seamlessly
 

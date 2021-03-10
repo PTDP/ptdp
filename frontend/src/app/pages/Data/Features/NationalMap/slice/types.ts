@@ -1,15 +1,23 @@
 import { Repo } from 'types/Repo';
+import { Facility } from 'types/Facility';
+
+export interface Filters {
+  call_type: string;
+  geography: string;
+  company: FilterCompanies;
+  facility_type: string;
+}
+
+export enum FilterCompanies {
+  ICS = 1,
+  SECURUS = 2,
+  ALL = 3,
+}
 
 /* --- STATE --- */
 export interface NationalMapState {
-  points: {
-    name: string;
-    latitude: number;
-    longitude: number;
-    agencyByAgencyId: {
-      name: string;
-    };
-  }[];
+  facilities: Facility[];
+  filters: Filters;
   loading: boolean;
   error?: RepoErrorType | null;
 }

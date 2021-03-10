@@ -25,7 +25,7 @@ export function App() {
         defaultTitle="React Boilerplate"
         htmlAttributes={{ lang: i18n.language }}
       >
-        <meta name="description" content="Prison Phone Data Project" />
+        <meta name="description" content="Prison Telecom Data Project" />
       </Helmet>
 
       <Switch>
