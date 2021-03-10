@@ -8,15 +8,18 @@ import {
   RepoErrorType,
   Filters,
   FilterCompanies,
+  CallType,
+  Geography,
+  FacilityType,
 } from './types';
 
 export const initialState: NationalMapState = {
   facilities: [],
   filters: {
-    call_type: 'in_state',
-    geography: 'facility',
+    call_type: CallType.IN_STATE,
+    geography: Geography.FACILITY,
     company: FilterCompanies.ALL,
-    facility_type: 'all',
+    facility_type: FacilityType.ALL,
   },
   loading: false,
   error: null,

@@ -2,16 +2,36 @@ import { Repo } from 'types/Repo';
 import { Facility } from 'types/Facility';
 
 export interface Filters {
-  call_type: string;
-  geography: string;
+  call_type: CallType;
+  geography: Geography;
   company: FilterCompanies;
-  facility_type: string;
+  facility_type: FacilityType;
+}
+
+export enum Geography {
+  FACILITY = 1,
+  COUNTY = 2,
+  STATE = 3,
 }
 
 export enum FilterCompanies {
   ICS = 1,
   SECURUS = 2,
   ALL = 3,
+}
+
+export enum CallType {
+  IN_STATE = 1,
+  OUT_STATE = 2,
+}
+
+export enum FacilityType {
+  LOCAL = 'LOCAL',
+  COUNTY = 'COUNTY',
+  STATE = 'STATE',
+  FEDERAL = 'FEDERAL',
+  MULTI = 'MULTI',
+  ALL = 'ALL',
 }
 
 /* --- STATE --- */
