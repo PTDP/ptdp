@@ -6,9 +6,14 @@ import { initialState } from '.';
 // First select the relevant part from the state
 const selectDomain = (state: RootState) => state.nationalMap || initialState;
 
-export const selectPoints = createSelector(
+export const selectFacilities = createSelector(
   [selectDomain],
-  nationalMapState => nationalMapState.points,
+  nationalMapState => nationalMapState.facilities,
+);
+
+export const selectFilters = createSelector(
+  [selectDomain],
+  nationalMapState => nationalMapState.filters,
 );
 
 export const selectLoading = createSelector(

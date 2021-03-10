@@ -66,7 +66,7 @@ export default () => (
                             <span className="block xl:inline">on the prison phone industry.</span>
                         </h1>
                         <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
-                            The Prison Phone Data Project collects and publishes rate data from the largest prison telecom providers: Securus and ICS.
+                            The Prison Telecom Data Project collects and publishes rate data from the largest prison telecom providers: Securus and ICS.
           </p>
                         <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
                             <div className="rounded-md shadow">

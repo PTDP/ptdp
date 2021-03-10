@@ -2,9 +2,7 @@ import * as React from 'react';
 import styled from 'styled-components/macro';
 import tw from 'twin.macro'
 import { Phone, Avatar } from '../Icons';
-import { fullConfig } from '../../constants';
-import { ReactComponent as DocumentationIcon } from './assets/documentation-icon.svg';
-import { ReactComponent as GithubIcon } from './assets/github-icon.svg';
+import { useHistory } from 'react-router-dom';
 
 const Logo = () => (
   <Avatar size={12} bg={'green-500'}>
@@ -16,11 +14,24 @@ const LogoFull = () => (
   <div className="flex">
     <Logo />
     <span className="ml-4 flex items-center font-bold">
-      Prison Phone Data Project
+      Prison Telecom Data Project
     </span>
   </div>
 )
 export function Nav() {
+  const history = useHistory();
+
+  const handleClick = (e) => {
+    e.preventDefault();
+    history.push(new URL(e.target.href).pathname)
+  }
+
+  const getNavClass = (activePath) => {
+    console.log('activePath', history.location.pathname)
+    return history.location.pathname === activePath ? "nav-link-active" : "nav-link-inactive"
+  }
+
+
   return (
     <Wrapper>
       <nav>
@@ -67,20 +78,16 @@ export function Nav() {
                 </div>
                 <div className="flex justify-end w-full">
                   <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                    {/* <!-- Current: "border-indigo-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" --> */}
-                    <a href="#" className="nav-link-active">
+                    <a href="/" onClick={handleClick} className={getNavClass("/")}>
                       About
                   </a>
-                    <a href="#" className="nav-link-inactive">
-                      Media & Publications
+                    <a href="/data" onClick={handleClick} className={getNavClass("/data")}>
+                      Data
                   </a>
-                    <a href="#" className="nav-link-inactive">
-                      Resources
-                  </a>
-                    <a href="#" className="nav-link-inactive">
+                    <a href="/methods" onClick={handleClick} className={getNavClass("/methods")}>
                       Methods & FAQ
                   </a>
-                    <a href="#" className="nav-link-inactive">
+                    <a href="/contact" onClick={handleClick} className={getNavClass("/contact")}>
                       Contact
                   </a>
                   </div>

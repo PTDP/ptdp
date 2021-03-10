@@ -2,27 +2,49 @@ import { useQuery, gql } from '@apollo/client';
 
 export const FACILITIES_QUERY = gql`
   {
-    allFacilities {
+    allCanonicalFacilities {
       nodes {
-        name
-        latitude
+        createdAt
+        hidden
+        hifldid
+        id
+        hidden
         longitude
-        agencyByAgencyId {
+        latitude
+        hifldByHifldid {
+          capacity
+          city
+          country
+          county
+          countyfips
+          zip
+          status
+          telephone
+          state
+          population
           name
+          sourcedate
+          source
         }
-        canonicalRatesByFacilityId {
+        companyFacilitiesByCanonicalFacilityId {
           nodes {
-            inState
-            phoneNumber
-            companyByCompanyId {
-              name
-            }
-            ratesByCanonicalRateId(orderBy: UPDATED_AT_DESC) {
+            id
+            facilityInternal
+            company
+            ratesByCompanyFacilityId {
               nodes {
-                initialAmount
-                additionalAmount
-                updatedAt
-                seenAt
+                amountAdditional
+                amountInitial
+                company
+                durationAdditional
+                durationInitial
+                inState
+                notes
+                pctTax
+                phone
+                service
+                uid
+                updated
               }
             }
           }

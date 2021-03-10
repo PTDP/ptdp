@@ -1,3 +1,4 @@
+import { CSSProperties } from 'react';
 export const tooltipStyle = {
   position: 'absolute',
   padding: '4px',
@@ -7,7 +8,7 @@ export const tooltipStyle = {
   fontSize: '10px',
   zIndex: 9,
   pointerEvents: 'none',
-};
+} as CSSProperties;
 
 export const mapStylePicker = {
   background: '#fff',
@@ -15,7 +16,7 @@ export const mapStylePicker = {
   top: '20px',
   left: '20px',
   zIndex: 45,
-};
+} as CSSProperties;
 
 export const layerControl = {
   borderRadius: 3,
@@ -31,7 +32,7 @@ export const layerControl = {
   padding: '20px',
   zIndex: 45,
   background: 'white',
-};
+} as CSSProperties;
 
 export const charts = {
   background: 'white',
@@ -48,7 +49,7 @@ export const charts = {
   bottom: 20,
   width: 500,
   zIndex: 45,
-};
+} as CSSProperties;
 
 export const spinner = {
   animation: 'linear 2s infinite',
@@ -62,4 +63,4 @@ export const spinner = {
   left: 60,
   transformOrigin: '20px 20px',
   zIndex: 110,
-};
+} as CSSProperties;
