@@ -17,7 +17,7 @@ export const initialState: NationalMapState = {
   facilities: [],
   filters: {
     call_type: CallType.IN_STATE,
-    geography: Geography.FACILITY,
+    geography: [Geography.FACILITY, Geography.COUNTY],
     company: FilterCompanies.ALL,
     facility_type: FacilityType.ALL,
   },
