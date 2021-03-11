@@ -25,3 +25,8 @@ export const selectError = createSelector(
   [selectDomain],
   nationalMapState => nationalMapState.error,
 );
+
+export const selectCounties = createSelector(
+  [selectDomain],
+  nationalMapState => nationalMapState.counties,
+);

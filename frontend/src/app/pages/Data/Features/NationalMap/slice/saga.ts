@@ -6,7 +6,11 @@ import { Facility } from 'types/Facility';
 import { Rate } from 'types/Rate';
 import client from '../../../../../../api';
 import { FACILITIES_QUERY } from '../../../../../../api/queries';
-import data from './facilities_data.json';
+// import data from './facilities_data.json';
+import data from './facilities_data_min.json';
+import * as topojson from 'topojson-client';
+import counties from 'us-atlas/counties-10m.json';
+
 /**
  * Github repos request/response handler
  */
@@ -44,6 +48,8 @@ export function* loadFacilities() {
 
     if (facilities?.length > 0) {
       yield put(actions.facilitiesLoaded(facilities));
+      const geojson = topojson.feature(counties, counties.objects.counties);
+      yield put(actions.countiesLoaded(geojson));
     } else {
       yield put(actions.facilitiesError(RepoErrorType.USER_HAS_NO_REPO));
     }
