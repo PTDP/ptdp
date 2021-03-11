@@ -28,6 +28,7 @@ import { Facility } from 'types/Facility'
 import { createImmutableStateInvariantMiddleware } from '@reduxjs/toolkit';
 import counties from 'us-atlas/counties-10m.json';
 import * as topojson from 'topojson-client';
+import yj from 'yieldable-json';
 
 const INITIAL_VIEW_STATE = {
   longitude: -98.5795,
@@ -60,8 +61,39 @@ const INITIAL_VIEW_STATE = {
 //     </div>
 //   );
 // };
-let filtered: any[] = [];
-let gj: any[] = [];
+const Loader = () => (
+  <div id="hello" className="flex items-center justify-center w-full h-full" style={{ zIndex: 1000, position: 'absolute' }}>
+    <div className="ease-linear rounded-full border-4 border-t-4 border-white h-6 w-6 loader-blue" style={{
+      borderTopColor: '#2f80ed'
+    }} />
+
+  </div >
+)
+
+const parseAsync = (json: string): Promise<any> => {
+  return new Promise((res, rej) => {
+    return yj.parseAsync(json, (err, data) => {
+      if (err) return rej(err);
+      res(data);
+    })
+  })
+}
+
+const stringifyAsync = (json: any): Promise<any> => {
+  return new Promise((res, rej) => {
+    return yj.stringifyAsync(json, (err, data) => {
+      if (err) return rej(err);
+      res(data);
+    })
+  })
+}
+
+const layers = {
+  points: [],
+  gj: [],
+  settings: {}
+} as any;
+
 export const NationalMap = props => {
   const [state, setState] = useReducer(
     function reducer(state, action) {
@@ -88,7 +120,8 @@ export const NationalMap = props => {
 
   const [, updateState] = React.useState();
   const u: any = {};
-  const [ignored, forceUpdate] = useReducer(x => x + 1, 0);
+  const [forceUpdateNum, forceUpdate] = useReducer(x => x + 1, 0);
+  const [loading, setLoading] = useState(false);
 
   const dispatch = useDispatch();
   const { actions } = useNationalMapSlice();
@@ -98,24 +131,18 @@ export const NationalMap = props => {
   const filters = useSelector(selectFilters);
 
   useEffect(() => {
-    // const feature = topojson.feature(counties, "foo");
     dispatch(actions.loadFacilities());
   }, []);
 
   useEffect(() => {
-    setFilters(filters)
-    sortByCounty();
-  }, [filters])
-
-  useEffect(() => {
-    filtered = JSON.parse(JSON.stringify(facilities))
-    forceUpdate();
-  }, [facilities])
+    if (!filters || !facilities) return;
+    onFilterUpdate();
+  }, [filters, facilities])
 
   const sortByCounty = () => {
     const facilitiesByFips = {};
 
-    filtered.forEach((f) => {
+    layers.points.forEach((f) => {
       if (facilitiesByFips[f.hifldByHifldid.countyfips]) {
         facilitiesByFips[f.hifldByHifldid.countyfips].push(f)
       } else {
@@ -140,12 +167,22 @@ export const NationalMap = props => {
       g.properties.fifteenMinute = max;
     })
 
-    gj = geojson;
+    layers.gj = geojson;
   }
 
-  function setFilters(filters: Filters) {
+  async function onFilterUpdate() {
+    setLoading(true);
+    await setFilters(filters)
+    await sortByCounty();
+    setLoading(false);
+    forceUpdate();
+  }
 
+  async function setFilters(filters: Filters) {
+    layers.settings = filters;
     const filter = (d: Facility) => {
+
+      if (d.hidden) return false;
       // Canonical Facility Filters
       try {
         if (filters.facility_type !== FacilityType.ALL && d.hifldByHifldid.type !== filters.facility_type) return false;
@@ -155,7 +192,7 @@ export const NationalMap = props => {
       // Company Facility Filters
       try {
         d.companyFacilitiesByCanonicalFacilityId.nodes = d.companyFacilitiesByCanonicalFacilityId.nodes.filter((c) => {
-          if (c.company !== filters.company) return false;
+          if (filters.company !== FilterCompanies.ALL && c.company !== filters.company) return false;
 
           // Rate filters
           c.ratesByCompanyFacilityId.nodes = c.ratesByCompanyFacilityId.nodes.filter((f) => {
@@ -169,12 +206,10 @@ export const NationalMap = props => {
 
       return true;
     }
-
-
-    filtered = JSON.parse(JSON.stringify(facilities)).filter(filter);
-    forceUpdate();
+    const str = await stringifyAsync(facilities);
+    const j = await parseAsync(str);
+    layers.points = j.filter(filter);
   }
-
 
   // const _onHover = props => {
   //   const { x, y, object } = props;
@@ -246,7 +281,7 @@ export const NationalMap = props => {
 
   const { viewState, controller = true } = props;
 
-  if (!filtered.length) {
+  if (!layers.points.length) {
     return null;
   }
   const { hover } = state;
@@ -263,8 +298,6 @@ export const NationalMap = props => {
         height: '100vh',
       }}
     >
-      {/* <Fetcher /> */}
-      {/* <div className="text-5xl font-extrabold mb-8">National Map</div> */}
       <div id="national-map" className="relative w-full h-full">
         {hover && hover.hoveredObject && (
           <div
@@ -273,53 +306,28 @@ export const NationalMap = props => {
             <div dangerouslySetInnerHTML={{ __html: hover.label }}></div>
           </div>
         )}
-        {/* <MapStylePicker
-          onStyleChange={onStyleChange}
-          currentStyle={state.style}
-        /> */}
-        {/* <DataFilterControls
-          title={'Filter Data'}
-          settings={{
-            showInState: {
-              displayName: 'Show In State',
-              type: 'boolean',
-              value: true,
-            },
-          }}
-          propTypes={{
-            showInState: {
-              displayName: 'Show In State',
-              type: 'boolean',
-              value: true,
-            },
-          }}
-        /> */}
-        {/* <LayerControls
-          settings={state.settings}
-          propTypes={HEXAGON_CONTROLS}
-          onChange={settings => _updateLayerSettings(settings)}
-        /> */}
-        <DeckGL
-          {...state.settings}
-          onWebGLInitialized={_onWebGLInitialize}
-          layers={renderLayers({
-            points: filtered,
-            geojson: gj,
-            // onHover: hover => _onHover(hover),
-            settings: filters,
-          })}
-          initialViewState={INITIAL_VIEW_STATE}
-          viewState={viewState}
-          controller={controller}
-        >
-
-          <StaticMap
-            mapStyle={state.style}
-            mapboxApiAccessToken={
-              'pk.eyJ1Ijoic2VjdXJ1cy12aXN1YWxpemVyIiwiYSI6ImNrZzJlMGpuMDA3Nncyd213OThpczd6ejYifQ.02um_OvAOYmVzyHUxCUFuQ'
-            }
-          />
-        </DeckGL>
+        <div className={`${loading && 'opacity-50'}`}>
+          <DeckGL
+            {...state.settings}
+            onWebGLInitialized={_onWebGLInitialize}
+            layers={renderLayers({
+              points: layers.points,
+              geojson: layers.gj,
+              settings: layers.settings
+            }, forceUpdateNum)}
+            initialViewState={INITIAL_VIEW_STATE}
+            viewState={viewState}
+            controller={controller}
+          >
+            <StaticMap
+              mapStyle={state.style}
+              mapboxApiAccessToken={
+                'pk.eyJ1Ijoic2VjdXJ1cy12aXN1YWxpemVyIiwiYSI6ImNrZzJlMGpuMDA3Nncyd213OThpczd6ejYifQ.02um_OvAOYmVzyHUxCUFuQ'
+              }
+            />
+          </DeckGL>
+        </div>
+        {loading && <Loader />}
         {/* <Charts
               {...state}
               highlight={hour => _onHighlight(hour)}

@@ -87,26 +87,17 @@ const LIGHT_SETTINGS = {
 
 const elevationRange = [0, 100];
 
-/*
-      getPosition: d => {
-        const {
-          latitude,
-          longitude,
-        } = d.canonicalFacilityByCanonicalFacilityId;
-        console.log(d);
-        return [longitude, latitude];
-      },
-      getColor: d => (d.company === Company.ICS ? ICS_COLOR : SECURUS_COLOR),
-*/
-
-export function renderLayers(props: {
-  geojson: any;
-  points: any;
-  // onHover: hover => _onHover(hover),
-  settings: Filters;
-}) {
-  // console.log('RERENDERING LAYERS');
+export function renderLayers(
+  props: {
+    geojson: any;
+    points: any;
+    settings: Filters;
+  },
+  forceUpdateNum,
+) {
   const { geojson, points, settings } = props;
+
+  (window as any).lastForceUpdateNum = forceUpdateNum;
 
   const fifteenMinute = d => {
     let max = 0;
@@ -122,39 +113,31 @@ export function renderLayers(props: {
     return max;
   };
 
-  return [
-    settings.geography === Geography.COUNTY &&
-      new GeoJsonLayer({
-        id: 'geojson-layer',
-        data: geojson,
-        pickable: true,
-        stroked: true,
-        filled: true,
-        extruded: true,
+  if (!settings) return;
+  console.log('TRYING TO RENDER', props);
 
-        lineWidthScale: 20,
-        lineWidthMinPixels: 2,
-        getFillColor: d => COLOR_SCALE(d.properties.fifteenMinute),
-        // getElevation: d => d.properties.fifteenMinute,
-        getLineColor: [255, 255, 255],
-        getRadius: 100,
-        // elevationScale: 5000,
-        getLineWidth: 200,
-      }),
-    // settings.showScatterplot &&
-    //   new ScatterplotLayer({
-    //     id: 'scatterplot',
-    //     getPosition: d => [d.longitude, d.latitude],
-    //     getColor: d => (d.pickup ? PICKUP_COLOR : DROPOFF_COLOR),
-    //     getRadius: d => 5,
-    //     opacity: 0.5,
-    //     pickable: true,
-    //     radiusMinPixels: 0.25,
-    //     radiusMaxPixels: 30,
-    //     data,
-    //     onHover,
-    //     ...settings,
-    //   }),
+  const geo =
+    settings.geography.includes(Geography.COUNTY) &&
+    new GeoJsonLayer({
+      id: 'geojson-layer',
+      data: geojson,
+      pickable: true,
+      stroked: true,
+      filled: true,
+      extruded: true,
+
+      lineWidthScale: 20,
+      lineWidthMinPixels: 2,
+      getFillColor: d => COLOR_SCALE(d.properties.fifteenMinute),
+      // getElevation: d => d.properties.fifteenMinute,
+      getLineColor: [255, 255, 255],
+      getRadius: 100,
+      // elevationScale: 5000,
+      getLineWidth: 200,
+    });
+
+  const hexagon =
+    settings.geography.includes(Geography.FACILITY) &&
     new HexagonLayer({
       data: points,
       pickable: true,
@@ -169,32 +152,7 @@ export function renderLayers(props: {
           return [longitude, latitude];
         } catch (err) {}
       },
-    }),
-    // new ScatterplotLayer({
-    //   id: 'scatterplot-layer',
-    //   data: props.data,
-    //   pickable: true,
-    //   opacity: 0.8,
-    //   stroked: true,
-    //   filled: true,
-    //   radiusScale: 6,
-    //   radiusMinPixels: 1,
-    //   radiusMaxPixels: 100,
-    //   lineWidthMinPixels: 1,
-    //   getPosition: d => {
-    //     try {
-    //       const {
-    //         latitude,
-    //         longitude,
-    //       } = d.canonicalFacilityByCanonicalFacilityId;
-    //       console.log(d);
-    //       return [longitude, latitude];
-    //     } catch (err) {}
-    //   },
-    //   getRadius: d => 2000,
-    //   getFillColor: d =>
-    //     d.company === Company.ICS ? ICS_COLOR : SECURUS_COLOR,
-    //   getLineColor: d => [0, 0, 0],
-    // }),
-  ];
+    });
+
+  return [geo, hexagon];
 }

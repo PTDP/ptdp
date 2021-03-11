@@ -10,11 +10,13 @@ import 'react-app-polyfill/stable';
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { setAutoFreeze } from "immer";
 import { Provider } from 'react-redux';
 import FontFaceObserver from 'fontfaceobserver';
 
 // Use consistent styling
 import 'sanitize.css/sanitize.css';
+
 
 import { App } from 'app';
 
@@ -29,6 +31,8 @@ import reportWebVitals from 'reportWebVitals';
 // Initialize languages
 import './locales/i18n';
 
+// https://github.com/reduxjs/redux-toolkit/issues/90#issuecomment-547154051
+setAutoFreeze(false);
 // Observe loading of Inter (to remove 'Inter', remove the <link> tag in
 // the index.html file and this observer)
 const openSansObserver = new FontFaceObserver('Inter', {});

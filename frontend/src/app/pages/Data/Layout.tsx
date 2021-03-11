@@ -39,6 +39,53 @@ const Radio = ({ name, options }) => {
     )
 }
 
+const Toggle = ({ name, options }) => {
+    const filters = useSelector(selectFilters);
+    const dispatch = useDispatch();
+    const { actions } = useNationalMapSlice();
+
+    const handleClick = (e) => {
+        let { id, name, checked } = e.target;
+
+        let n: number[] = [];
+        filters[name].forEach(nme => n.push(nme));
+
+        if (checked) {
+            n.push(parseInt(id));
+            n = Array.from(new Set(n));
+        } else {
+            n = n.filter(e => e !== parseInt(id));
+        }
+
+        if (!Number.isNaN(parseInt(id))) id = parseInt(id);
+
+        dispatch(actions.updateFilters({ ...filters, [name]: n }));
+    }
+
+    return (
+        <div id="fieldset" className="p-2">
+            <div>
+                <legend className="text-base font-medium text-gray-900">{name}</legend>
+                {/* <p className="text-sm text-gray-500">These are delivered via SMS to your mobile phone.</p> */}
+            </div>
+            <div className="mt-4 space-y-4 pl-2 flex-col">
+                {options.map((o) => {
+                    return (
+                        <div className="relative flex items-start">
+                            <div className="flex items-center h-5">
+                                <input onClick={handleClick} id={o.id} name={o.name} checked={filters && filters[name.toLowerCase()].includes(parseInt(o.id))} type="checkbox" className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded" />
+                            </div>
+                            <div className="ml-3 text-sm">
+                                <label htmlFor={o.id} className="font-medium text-gray-700">{o.label}</label>
+                            </div>
+                        </div>
+                    )
+                })}
+            </div>
+        </div>
+    )
+}
+
 const SideBar = () => {
     return (
         <div className="flex flex-col h-0 flex-1 border-r border-gray-200 bg-white">
@@ -63,7 +110,8 @@ const SideBar = () => {
                                 label: "Out-State Calls"
                             }
                         ]} />
-                        <Radio name="Geography" options={[
+
+                        <Toggle name="Geography" options={[
                             {
                                 id: Geography.FACILITY,
                                 name: 'geography',
@@ -73,13 +121,8 @@ const SideBar = () => {
                                 id: Geography.COUNTY,
                                 name: 'geography',
                                 label: "County"
-                            },
-                            // {
-                            //     id: Geography.STATE,
-                            //     name: 'geography',
-                            //     label: "State"
-                            // }
-                        ]} />
+                            }]}
+                        />
                         <Radio name="Company" options={[
                             {
                                 id: FilterCompanies.ICS,

@@ -585,6 +585,10 @@ header {
   z-index: 50;
 }
 
+.fieldset {
+  border: 0;
+}
+
 nav {
   --tw-bg-opacity: 1;
   background-color: rgba(255, 255, 255, var(--tw-bg-opacity));
@@ -699,6 +703,22 @@ main {
 .nav-link-inactive:hover {
   --tw-text-opacity: 1;
   color: rgba(55, 65, 81, var(--tw-text-opacity));
+}
+
+.loader,
+.loader-blue {
+  border-top-color: #2f80ed;
+  animation: spinner 1.2s linear infinite;
+}
+
+@keyframes spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .space-y-0 > :not([hidden]) ~ :not([hidden]) {
