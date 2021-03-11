@@ -97,6 +97,8 @@ export function renderLayers(
 ) {
   const { geojson, points, settings } = props;
 
+  console.log('TRYING TO RENDER', props);
+
   (window as any).lastForceUpdateNum = forceUpdateNum;
 
   const fifteenMinute = d => {
@@ -144,6 +146,7 @@ export function renderLayers(
       extruded: true,
       radius: 5000,
       elevationScale: 200,
+      elevationDomain: [0, 25],
       getElevationValue: fifteenMinute,
       getFillColor: d => COLOR_SCALE(fifteenMinute(d)),
       getPosition: d => {

@@ -3,7 +3,7 @@ import { NationalMap } from "./Features/NationalMap/index";
 import { useSelector, useDispatch } from 'react-redux';
 import { useNationalMapSlice } from './Features/NationalMap/slice';
 import { selectFilters } from './Features/NationalMap/slice/selectors';
-import { FilterCompanies, Geography, CallType, FacilityType } from './Features/NationalMap/slice/types';
+import { FilterCompanies, Geography, CallType, FacilityType, SecureLVL } from './Features/NationalMap/slice/types';
 
 const Radio = ({ name, options }) => {
     const filters = useSelector(selectFilters);
@@ -47,21 +47,20 @@ const Toggle = ({ name, options }) => {
     const handleClick = (e) => {
         let { id, name, checked } = e.target;
 
+        if (!Number.isNaN(parseInt(id))) id = parseInt(id);
+
         let n: number[] = [];
         filters[name].forEach(nme => n.push(nme));
 
         if (checked) {
-            n.push(parseInt(id));
+            n.push(id);
             n = Array.from(new Set(n));
         } else {
-            n = n.filter(e => e !== parseInt(id));
+            n = n.filter(e => e !== id);
         }
-
-        if (!Number.isNaN(parseInt(id))) id = parseInt(id);
 
         dispatch(actions.updateFilters({ ...filters, [name]: n }));
     }
-
     return (
         <div id="fieldset" className="p-2">
             <div>
@@ -73,7 +72,7 @@ const Toggle = ({ name, options }) => {
                     return (
                         <div className="relative flex items-start">
                             <div className="flex items-center h-5">
-                                <input onClick={handleClick} id={o.id} name={o.name} checked={filters && filters[name.toLowerCase()].includes(parseInt(o.id))} type="checkbox" className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded" />
+                                <input onClick={handleClick} id={o.id} name={o.name} checked={filters && filters[`${o.name}`].includes(o.id)} type="checkbox" className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded" />
                             </div>
                             <div className="ml-3 text-sm">
                                 <label htmlFor={o.id} className="font-medium text-gray-700">{o.label}</label>
@@ -123,7 +122,7 @@ const SideBar = () => {
                                 label: "County"
                             }]}
                         />
-                        <Radio name="Company" options={[
+                        <Toggle name="Company" options={[
                             {
                                 id: FilterCompanies.ICS,
                                 name: 'company',
@@ -133,14 +132,9 @@ const SideBar = () => {
                                 id: FilterCompanies.SECURUS,
                                 name: 'company',
                                 label: "Securus"
-                            },
-                            {
-                                id: FilterCompanies.ALL,
-                                name: 'company',
-                                label: "All"
                             }
                         ]} />
-                        <Radio name="Facility Type" options={[
+                        <Toggle name="Facility Type" options={[
                             {
                                 id: FacilityType.LOCAL,
                                 name: 'facility_type',
@@ -166,11 +160,40 @@ const SideBar = () => {
                                 name: 'facility_type',
                                 label: "Multi"
                             },
+
+                        ]} />
+                        <Toggle name="Secure Level" options={[
                             {
-                                id: FacilityType.ALL,
-                                name: 'facility_type',
-                                label: "All"
+                                id: SecureLVL.CLOSE,
+                                name: 'secure_level',
+                                label: "Close"
                             },
+                            {
+                                id: SecureLVL.JUVENILE,
+                                name: 'secure_level',
+                                label: "Juvenile"
+                            },
+                            {
+                                id: SecureLVL.MINIMUM,
+                                name: 'secure_level',
+                                label: "Minimum"
+                            },
+                            {
+                                id: SecureLVL.MEDIUM,
+                                name: 'secure_level',
+                                label: "Medium"
+                            },
+                            {
+                                id: SecureLVL.MAXIMUM,
+                                name: 'secure_level',
+                                label: "Maximum"
+                            },
+                            {
+                                id: SecureLVL.NOT_AVAILABLE,
+                                name: 'secure_level',
+                                label: "Not Available"
+                            },
+
                         ]} />
                     </div>
                     <a href="#" className="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md">

@@ -4,8 +4,9 @@ import { Facility } from 'types/Facility';
 export interface Filters {
   call_type: CallType;
   geography: Geography[];
-  company: FilterCompanies;
-  facility_type: FacilityType;
+  company: FilterCompanies[];
+  facility_type: FacilityType[];
+  secure_level: SecureLVL[];
 }
 
 export enum Geography {
@@ -31,6 +32,16 @@ export enum FacilityType {
   STATE = 'STATE',
   FEDERAL = 'FEDERAL',
   MULTI = 'MULTI',
+  ALL = 'ALL',
+}
+
+export enum SecureLVL {
+  CLOSE = 'CLOSE',
+  JUVENILE = 'JUVENILE',
+  MAXIMUM = 'MAXIMUM',
+  MEDIUM = 'MEDIUM',
+  MINIMUM = 'MINIMUM',
+  NOT_AVAILABLE = 'NOT AVAILABLE',
   ALL = 'ALL',
 }
 

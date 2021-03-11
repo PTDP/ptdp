@@ -23,7 +23,7 @@ import Charts from './charts';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNationalMapSlice } from './slice';
 import { selectFacilities, selectLoading, selectError, selectFilters } from './slice/selectors';
-import { Filters, FilterCompanies, Geography, CallType, FacilityType } from './slice/types';
+import { Filters, FilterCompanies, Geography, CallType, FacilityType, SecureLVL } from './slice/types';
 import { Facility } from 'types/Facility'
 import { createImmutableStateInvariantMiddleware } from '@reduxjs/toolkit';
 import counties from 'us-atlas/counties-10m.json';
@@ -174,8 +174,8 @@ export const NationalMap = props => {
     setLoading(true);
     await setFilters(filters)
     await sortByCounty();
-    setLoading(false);
     forceUpdate();
+    setLoading(false);
   }
 
   async function setFilters(filters: Filters) {
@@ -185,14 +185,15 @@ export const NationalMap = props => {
       if (d.hidden) return false;
       // Canonical Facility Filters
       try {
-        if (filters.facility_type !== FacilityType.ALL && d.hifldByHifldid.type !== filters.facility_type) return false;
+        if (!filters.facility_type.includes(d.hifldByHifldid.type)) return false;
+        if (!filters.secure_level.includes(d.hifldByHifldid.securelvl)) return false;
       } catch (err) {
       }
 
       // Company Facility Filters
       try {
         d.companyFacilitiesByCanonicalFacilityId.nodes = d.companyFacilitiesByCanonicalFacilityId.nodes.filter((c) => {
-          if (filters.company !== FilterCompanies.ALL && c.company !== filters.company) return false;
+          if (!filters.company.includes(c.company)) return false;
 
           // Rate filters
           c.ratesByCompanyFacilityId.nodes = c.ratesByCompanyFacilityId.nodes.filter((f) => {
@@ -202,13 +203,16 @@ export const NationalMap = props => {
           return true;
         })
       } catch (err) {
+
       }
 
       return true;
     }
     const str = await stringifyAsync(facilities);
     const j = await parseAsync(str);
+
     layers.points = j.filter(filter);
+    console.log(layers.points)
   }
 
   // const _onHover = props => {
