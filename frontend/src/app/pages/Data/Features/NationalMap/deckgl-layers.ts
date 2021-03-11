@@ -92,13 +92,11 @@ export function renderLayers(
     geojson: any;
     points: any;
     settings: Filters;
+    onHover: any;
   },
   forceUpdateNum,
 ) {
-  const { geojson, points, settings } = props;
-
-  console.log('TRYING TO RENDER', props);
-
+  const { geojson, points, settings, onHover } = props;
   (window as any).lastForceUpdateNum = forceUpdateNum;
 
   const fifteenMinute = d => {
@@ -116,7 +114,6 @@ export function renderLayers(
   };
 
   if (!settings) return;
-  console.log('TRYING TO RENDER', props);
 
   const geo =
     settings.geography.includes(Geography.COUNTY) &&
@@ -136,6 +133,7 @@ export function renderLayers(
       getRadius: 100,
       // elevationScale: 5000,
       getLineWidth: 200,
+      onHover,
     });
 
   const hexagon =
@@ -155,6 +153,7 @@ export function renderLayers(
           return [longitude, latitude];
         } catch (err) {}
       },
+      onHover,
     });
 
   return [geo, hexagon];

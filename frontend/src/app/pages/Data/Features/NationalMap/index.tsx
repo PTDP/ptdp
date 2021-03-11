@@ -22,7 +22,7 @@ import Charts from './charts';
 /* Data Fetching */
 import { useSelector, useDispatch } from 'react-redux';
 import { useNationalMapSlice } from './slice';
-import { selectFacilities, selectLoading, selectError, selectFilters } from './slice/selectors';
+import { selectFacilities, selectLoading, selectError, selectFilters, selectCounties } from './slice/selectors';
 import { Filters, FilterCompanies, Geography, CallType, FacilityType, SecureLVL } from './slice/types';
 import { Facility } from 'types/Facility'
 import { createImmutableStateInvariantMiddleware } from '@reduxjs/toolkit';
@@ -129,13 +129,14 @@ export const NationalMap = props => {
   const isLoading = useSelector(selectLoading);
   const facilities = useSelector(selectFacilities);
   const filters = useSelector(selectFilters);
+  const counties = useSelector(selectCounties);
 
   useEffect(() => {
     dispatch(actions.loadFacilities());
   }, []);
 
   useEffect(() => {
-    if (!filters || !facilities) return;
+    if (!filters || !facilities || !counties?.features?.length) return;
     onFilterUpdate();
   }, [filters, facilities])
 
@@ -149,9 +150,10 @@ export const NationalMap = props => {
         facilitiesByFips[f.hifldByHifldid.countyfips] = [f];
       }
     })
-    const geojson = topojson.feature(counties, counties.objects.counties);
 
-    geojson.features.forEach((g) => {
+    let filteredGeoJSON = { ...counties };
+
+    filteredGeoJSON.features.forEach((g) => {
       let max = 0;
       if (facilitiesByFips[g.id]) {
         try {
@@ -164,10 +166,11 @@ export const NationalMap = props => {
           })
         } catch (err) { }
       }
+
       g.properties.fifteenMinute = max;
     })
 
-    layers.gj = geojson;
+    layers.gj = filteredGeoJSON;
   }
 
   async function onFilterUpdate() {
@@ -212,53 +215,61 @@ export const NationalMap = props => {
     const j = await parseAsync(str);
 
     layers.points = j.filter(filter);
-    console.log(layers.points)
   }
 
-  // const _onHover = props => {
-  //   const { x, y, object } = props;
-  //   const d = object?.points?.[0]?.source;
+  const _onHover = props => {
+    const { x, y, object, hoveredObject, layer } = props;
+    if (layer.id === 'geojson-layer' && (!object || object?.properties?.fifteenMinute === 0)) {
+      return setState({
+        hover: {
+          x: 0,
+          y: 0,
+          hoveredObject: null,
+          label: ''
+        }
+      });
+    };
+    // const d = object?.points?.[0]?.source;
 
-  //   const canonical =
-  //     props.layer.id === 'in-state'
-  //       ? latestInStateCanonical([d])
-  //       : latestOutStateCanonical([d]);
-  //   const rate = latestRateFromCanonical(canonical);
-  //   const seen = rate?.seenAt;
+    // const canonical =
+    //   props.layer.id === 'in-state'
+    //     ? latestInStateCanonical([d])
+    //     : latestOutStateCanonical([d]);
+    // const rate = latestRateFromCanonical(canonical);
+    // const seen = rate?.seenAt;
 
-  //   let str = '';
-  //   if (seen) {
-  //     const latest = seen?.[seen.length - 1];
-  //     str = new Date(latest).toLocaleString('en-US', { timeZone: 'UTC' });
-  //   }
+    // let str = '';
+    // if (seen) {
+    //   const latest = seen?.[seen.length - 1];
+    //   str = new Date(latest).toLocaleString('en-US', { timeZone: 'UTC' });
+    // }
 
-  //   const label = object
-  //     ? object.points
-  //       ? `
-  //         <div>
-  //         Facility: ${d?.name}
-  //         </div>
-  //         <div>
-  //          Agency: ${d?.agencyByAgencyId?.name || 'Unknown'}
-  //          </div>
-  //          <div>
-  //          15 Minute Rate: $${(fifteenMinute(rate) / 100).toFixed(2)}
-  //          </div>
-  //          <div>
-  //          Company: ${canonical?.companyByCompanyId?.['name']}
-  //          </div>
-  //          <div>
-  //          Number used: ${canonical?.phoneNumber}
-  //          </div>
-  //          <div>
-  //          Rate Collected At: ${str}
-  //          </div>
-  //          `
-  //       : null
-  //     : null;
-
-  //   setState({ hover: { x, y, hoveredObject: object, label } });
-  // };
+    // const label = object
+    //   ? object.points
+    //     ? `
+    //       <div>
+    //       Facility: ${d?.name}
+    //       </div>
+    //       <div>
+    //        Agency: ${d?.agencyByAgencyId?.name || 'Unknown'}
+    //        </div>
+    //        <div>
+    //        15 Minute Rate: $${(fifteenMinute(rate) / 100).toFixed(2)}
+    //        </div>
+    //        <div>
+    //        Company: ${canonical?.companyByCompanyId?.['name']}
+    //        </div>
+    //        <div>
+    //        Number used: ${canonical?.phoneNumber}
+    //        </div>
+    //        <div>
+    //        Rate Collected At: ${str}
+    //        </div>
+    //        `
+    //     : null
+    //   : null;
+    setState({ hover: { x, y, hoveredObject: object, label: `Hello ${layer.id}` } });
+  };
 
   const _onHighlight = highlightedHour => {
     setState({ highlightedHour });
@@ -317,7 +328,8 @@ export const NationalMap = props => {
             layers={renderLayers({
               points: layers.points,
               geojson: layers.gj,
-              settings: layers.settings
+              settings: layers.settings,
+              onHover: hover => _onHover(hover)
             }, forceUpdateNum)}
             initialViewState={INITIAL_VIEW_STATE}
             viewState={viewState}

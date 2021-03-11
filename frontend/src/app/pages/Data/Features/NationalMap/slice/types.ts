@@ -48,6 +48,7 @@ export enum SecureLVL {
 /* --- STATE --- */
 export interface NationalMapState {
   facilities: Facility[];
+  counties: { features: any[] };
   filters: Filters;
   loading: boolean;
   error?: RepoErrorType | null;
