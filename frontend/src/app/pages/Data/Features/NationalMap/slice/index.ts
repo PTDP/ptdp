@@ -11,6 +11,7 @@ import {
   CallType,
   Geography,
   FacilityType,
+  SecureLVL,
 } from './types';
 
 export const initialState: NationalMapState = {
@@ -18,8 +19,22 @@ export const initialState: NationalMapState = {
   filters: {
     call_type: CallType.IN_STATE,
     geography: [Geography.FACILITY, Geography.COUNTY],
-    company: FilterCompanies.ALL,
-    facility_type: FacilityType.ALL,
+    company: [FilterCompanies.SECURUS, FilterCompanies.ICS],
+    facility_type: [
+      FacilityType.LOCAL,
+      FacilityType.COUNTY,
+      FacilityType.STATE,
+      FacilityType.FEDERAL,
+      FacilityType.MULTI,
+    ],
+    secure_level: [
+      SecureLVL.CLOSE,
+      SecureLVL.JUVENILE,
+      SecureLVL.MAXIMUM,
+      SecureLVL.MEDIUM,
+      SecureLVL.MINIMUM,
+      SecureLVL.NOT_AVAILABLE,
+    ],
   },
   loading: false,
   error: null,

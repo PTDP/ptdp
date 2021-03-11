@@ -1,3 +1,8 @@
+import {
+  SecureLVL,
+  FacilityType,
+} from 'app/pages/Data/Features/NationalMap/slice/types';
+
 export interface Facility {
   createdAt: string;
   hidden: boolean;
@@ -17,9 +22,10 @@ export interface Facility {
     state: string;
     population: number;
     name: string;
-    type: string;
+    type: FacilityType;
     sourcedate: string;
     source: string;
+    securelvl: SecureLVL;
   };
   companyFacilitiesByCanonicalFacilityId: {
     nodes: CF[];
