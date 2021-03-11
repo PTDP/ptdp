@@ -1,7 +1,28 @@
-import { ScatterplotLayer, HexagonLayer } from 'deck.gl';
+import { ScatterplotLayer, HexagonLayer, GeoJsonLayer } from 'deck.gl';
 import { Service } from 'types/Service';
 import { Facility } from 'types/Facility';
 import { GeospatialAppBarChartXDomain } from './examples';
+import { Filters, Geography } from './slice/types';
+import { scaleThreshold } from 'd3-scale';
+
+export const COLOR_SCALE = scaleThreshold()
+  .domain(new Array(13).fill(0).map((_, i) => (25 / 13) * i + 0))
+  .range([
+    [0, 0, 0, 0],
+    [127, 205, 187, 0],
+    [199, 233, 180],
+    [237, 248, 177],
+    // zero
+    [255, 255, 204],
+    [255, 237, 160],
+    [254, 217, 118],
+    [254, 178, 76],
+    [253, 141, 60],
+    [252, 78, 42],
+    [227, 26, 28],
+    [189, 0, 38],
+    [128, 0, 38],
+  ]);
 
 // TODO Make imports work so this can be removed!
 export enum Company {
@@ -79,15 +100,47 @@ const elevationRange = [0, 100];
 */
 
 export function renderLayers(props: {
-  data: Facility[];
+  geojson: any;
+  points: any;
   // onHover: hover => _onHover(hover),
-  settings: any;
+  settings: Filters;
 }) {
   // console.log('RERENDERING LAYERS');
-  console.log('props.data.length', props.data.length);
-  let i = 0;
-  // const { data, onHover, settings } = props;
+  const { geojson, points, settings } = props;
+
+  const fifteenMinute = d => {
+    let max = 0;
+    try {
+      d[0].companyFacilitiesByCanonicalFacilityId.nodes.forEach(el => {
+        el.ratesByCompanyFacilityId.nodes.forEach((r, i) => {
+          max = Math.max(max, r.amountInitial + r.amountAdditional * 14);
+        });
+      });
+    } catch (err) {
+      console.error(err);
+    }
+    return max;
+  };
+
   return [
+    settings.geography === Geography.COUNTY &&
+      new GeoJsonLayer({
+        id: 'geojson-layer',
+        data: geojson,
+        pickable: true,
+        stroked: true,
+        filled: true,
+        extruded: true,
+
+        lineWidthScale: 20,
+        lineWidthMinPixels: 2,
+        getFillColor: d => COLOR_SCALE(d.properties.fifteenMinute),
+        // getElevation: d => d.properties.fifteenMinute,
+        getLineColor: [255, 255, 255],
+        getRadius: 100,
+        // elevationScale: 5000,
+        getLineWidth: 200,
+      }),
     // settings.showScatterplot &&
     //   new ScatterplotLayer({
     //     id: 'scatterplot',
@@ -102,26 +155,14 @@ export function renderLayers(props: {
     //     onHover,
     //     ...settings,
     //   }),
-
     new HexagonLayer({
-      data: props.data,
+      data: points,
       pickable: true,
       extruded: true,
       radius: 5000,
       elevationScale: 200,
-      getElevationValue: (d: Facility) => {
-        let max = 0;
-        try {
-          d[0].companyFacilitiesByCanonicalFacilityId.nodes.forEach(el => {
-            el.ratesByCompanyFacilityId.nodes.forEach((r, i) => {
-              max = Math.max(max, r.amountInitial + r.amountAdditional * 14);
-            });
-          });
-        } catch (err) {
-          console.error(err);
-        }
-        return max;
-      },
+      getElevationValue: fifteenMinute,
+      getFillColor: d => COLOR_SCALE(fifteenMinute(d)),
       getPosition: d => {
         try {
           const { latitude, longitude } = d;

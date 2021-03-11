@@ -26,6 +26,8 @@ import { selectFacilities, selectLoading, selectError, selectFilters } from './s
 import { Filters, FilterCompanies, Geography, CallType, FacilityType } from './slice/types';
 import { Facility } from 'types/Facility'
 import { createImmutableStateInvariantMiddleware } from '@reduxjs/toolkit';
+import counties from 'us-atlas/counties-10m.json';
+import * as topojson from 'topojson-client';
 
 const INITIAL_VIEW_STATE = {
   longitude: -98.5795,
@@ -59,6 +61,7 @@ const INITIAL_VIEW_STATE = {
 //   );
 // };
 let filtered: any[] = [];
+let gj: any[] = [];
 export const NationalMap = props => {
   const [state, setState] = useReducer(
     function reducer(state, action) {
@@ -95,17 +98,50 @@ export const NationalMap = props => {
   const filters = useSelector(selectFilters);
 
   useEffect(() => {
+    // const feature = topojson.feature(counties, "foo");
     dispatch(actions.loadFacilities());
   }, []);
 
   useEffect(() => {
     setFilters(filters)
+    sortByCounty();
   }, [filters])
 
   useEffect(() => {
     filtered = JSON.parse(JSON.stringify(facilities))
     forceUpdate();
   }, [facilities])
+
+  const sortByCounty = () => {
+    const facilitiesByFips = {};
+
+    filtered.forEach((f) => {
+      if (facilitiesByFips[f.hifldByHifldid.countyfips]) {
+        facilitiesByFips[f.hifldByHifldid.countyfips].push(f)
+      } else {
+        facilitiesByFips[f.hifldByHifldid.countyfips] = [f];
+      }
+    })
+    const geojson = topojson.feature(counties, counties.objects.counties);
+
+    geojson.features.forEach((g) => {
+      let max = 0;
+      if (facilitiesByFips[g.id]) {
+        try {
+          facilitiesByFips[g.id].forEach((f) => {
+            f.companyFacilitiesByCanonicalFacilityId.nodes.forEach(el => {
+              el.ratesByCompanyFacilityId.nodes.forEach((r, i) => {
+                max = Math.max(max, r.amountInitial + r.amountAdditional * 14);
+              });
+            });
+          })
+        } catch (err) { }
+      }
+      g.properties.fifteenMinute = max;
+    })
+
+    gj = geojson;
+  }
 
   function setFilters(filters: Filters) {
 
@@ -241,7 +277,7 @@ export const NationalMap = props => {
           onStyleChange={onStyleChange}
           currentStyle={state.style}
         /> */}
-        <DataFilterControls
+        {/* <DataFilterControls
           title={'Filter Data'}
           settings={{
             showInState: {
@@ -257,19 +293,20 @@ export const NationalMap = props => {
               value: true,
             },
           }}
-        />
-        <LayerControls
+        /> */}
+        {/* <LayerControls
           settings={state.settings}
           propTypes={HEXAGON_CONTROLS}
           onChange={settings => _updateLayerSettings(settings)}
-        />
+        /> */}
         <DeckGL
           {...state.settings}
           onWebGLInitialized={_onWebGLInitialize}
           layers={renderLayers({
-            data: filtered,
+            points: filtered,
+            geojson: gj,
             // onHover: hover => _onHover(hover),
-            settings: state.settings,
+            settings: filters,
           })}
           initialViewState={INITIAL_VIEW_STATE}
           viewState={viewState}

@@ -74,11 +74,11 @@ const SideBar = () => {
                                 name: 'geography',
                                 label: "County"
                             },
-                            {
-                                id: Geography.STATE,
-                                name: 'geography',
-                                label: "State"
-                            }
+                            // {
+                            //     id: Geography.STATE,
+                            //     name: 'geography',
+                            //     label: "State"
+                            // }
                         ]} />
                         <Radio name="Company" options={[
                             {
