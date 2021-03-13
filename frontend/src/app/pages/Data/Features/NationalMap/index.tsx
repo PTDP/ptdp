@@ -104,8 +104,8 @@ export const NationalMap = props => {
         x: 0,
         y: 0,
         hoveredObject: null,
+        hoveredlayer: ''
       },
-      filtered: [],
       settings: Object.keys(HEXAGON_CONTROLS).reduce(
         (accu, key) => ({
           ...accu,
@@ -113,9 +113,10 @@ export const NationalMap = props => {
         }),
         {},
       ),
-      filterSettings: {},
+      selectedFacility: {},
       style: 'mapbox://styles/mapbox/light-v9',
     },
+
   );
 
   const [, updateState] = React.useState();
@@ -130,6 +131,7 @@ export const NationalMap = props => {
   const facilities = useSelector(selectFacilities);
   const filters = useSelector(selectFilters);
   const counties = useSelector(selectCounties);
+  const [chartExpanded, setChartExpanded] = useState(false);
 
   useEffect(() => {
     dispatch(actions.loadFacilities());
@@ -217,18 +219,26 @@ export const NationalMap = props => {
     layers.points = j.filter(filter);
   }
 
+  const hoveredFacility = () => {
+    return state.hover.hoveredObject && state.hover.hoveredLayer !== 'geojson-layer';
+  }
+
   const _onHover = props => {
     const { x, y, object, hoveredObject, layer } = props;
     if (layer.id === 'geojson-layer' && (!object || object?.properties?.fifteenMinute === 0)) {
-      return setState({
-        hover: {
-          x: 0,
-          y: 0,
-          hoveredObject: null,
-          label: ''
-        }
-      });
+      if (state.hover.hoveredObject !== null) {
+        setState({
+          hover: {
+            x: 0,
+            y: 0,
+            hoveredObject: null,
+            label: ''
+          }
+        });
+      }
+      return
     };
+
     // const d = object?.points?.[0]?.source;
 
     // const canonical =
@@ -268,7 +278,10 @@ export const NationalMap = props => {
     //        `
     //     : null
     //   : null;
-    setState({ hover: { x, y, hoveredObject: object, label: `Hello ${layer.id}` } });
+
+    const label = layer.id === 'geojson-layer' ? `${object.properties.name} County` : `${object?.points?.[0]?.source?.hifldByHifldid?.name}`;
+
+    setState({ hover: { x, y, hoveredObject: object, label, hoveredLayer: layer.id } });
   };
 
   const _onHighlight = highlightedHour => {
@@ -290,6 +303,17 @@ export const NationalMap = props => {
     gl.depthFunc(gl.LEQUAL);
   };
 
+  const _onClick = (e) => {
+    const { hoveredObject, hoveredLayer } = state?.hover;
+    if (hoveredLayer !== 'geojson-layer') {
+      const selectedFacility = hoveredObject?.points?.[0]?.source;
+      setState({ ...state, selectedFacility })
+      if (selectedFacility) {
+        setChartExpanded(true);
+      }
+    }
+  }
+
   const _updateLayerSettings = settings => {
     setState({ settings });
   };
@@ -307,49 +331,61 @@ export const NationalMap = props => {
   } as React.CSSProperties;
 
   return (
-    <div
-      id="map-container"
-      style={{
-        height: '100vh',
-      }}
-    >
-      <div id="national-map" className="relative w-full h-full">
-        {hover && hover.hoveredObject && (
-          <div
-            style={hoverStyle}
-          >
-            <div dangerouslySetInnerHTML={{ __html: hover.label }}></div>
+    <>
+      {/* <div style={{ height: 64 }}></div> */}
+      <div
+        id="map-container"
+        style={{
+          // position: 'fixed',/
+          //marginTop: '64px',
+          height: 'calc(100vh - 64px)'
+        }}
+      >
+        <div id="national-map" className="relative w-full h-full">
+          {hover && hover.hoveredObject && (
+            <div
+              style={hoverStyle}
+            >
+              <div dangerouslySetInnerHTML={{ __html: hover.label }}></div>
+            </div>
+          )}
+          <div className={`${loading && 'opacity-50'}`}>
+            <DeckGL
+              {...state.settings}
+              onClick={_onClick}
+              getCursor={() => hoveredFacility() ? "crosshair" : "move"}
+              onWebGLInitialized={_onWebGLInitialize}
+              layers={renderLayers({
+                points: layers.points,
+                geojson: layers.gj,
+                settings: layers.settings,
+                onHover: hover => _onHover(hover)
+              }, forceUpdateNum)}
+              initialViewState={INITIAL_VIEW_STATE}
+              viewState={viewState}
+              controller={controller}
+            >
+              <StaticMap
+                mapStyle={state.style}
+                mapboxApiAccessToken={
+                  'pk.eyJ1Ijoic2VjdXJ1cy12aXN1YWxpemVyIiwiYSI6ImNrZzJlMGpuMDA3Nncyd213OThpczd6ejYifQ.02um_OvAOYmVzyHUxCUFuQ'
+                }
+              />
+            </DeckGL>
           </div>
-        )}
-        <div className={`${loading && 'opacity-50'}`}>
-          <DeckGL
-            {...state.settings}
-            onWebGLInitialized={_onWebGLInitialize}
-            layers={renderLayers({
-              points: layers.points,
-              geojson: layers.gj,
-              settings: layers.settings,
-              onHover: hover => _onHover(hover)
-            }, forceUpdateNum)}
-            initialViewState={INITIAL_VIEW_STATE}
-            viewState={viewState}
-            controller={controller}
-          >
-            <StaticMap
-              mapStyle={state.style}
-              mapboxApiAccessToken={
-                'pk.eyJ1Ijoic2VjdXJ1cy12aXN1YWxpemVyIiwiYSI6ImNrZzJlMGpuMDA3Nncyd213OThpczd6ejYifQ.02um_OvAOYmVzyHUxCUFuQ'
-              }
-            />
-          </DeckGL>
+          {loading && <Loader />}
+          <Charts
+            // {...state}
+            highlight={() => { }}
+            select={() => { }}
+            selectedFacility={state.selectedFacility}
+            chartExpanded={chartExpanded}
+            setChartExpanded={setChartExpanded}
+          // highlight={hour => _onHighlight(hour)}
+          // select={hour => _onSelect(hour)}
+          />
         </div>
-        {loading && <Loader />}
-        {/* <Charts
-              {...state}
-              highlight={hour => _onHighlight(hour)}
-              select={hour => _onSelect(hour)}
-            /> */}
-      </div>
-    </div>
+      </div >
+    </>
   );
 };

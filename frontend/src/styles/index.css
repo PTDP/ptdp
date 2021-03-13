@@ -70,11 +70,35 @@ main {
     font-medium
 }
 
+.charts {
+  @apply
+  bg-white
+  rounded-md
+  shadow-md
+  text-msm
+  h-60
+  p-20
+  w-60
+  absolute
+  /* z:
+  height: 300,
+  padding: '10px',
+  position: 'absolute',
+  left: 20,
+  bottom: 20,
+  width: 500,
+  zIndex: 45, */
+}
+
 .loader,
 .loader-blue {
   border-top-color: #2f80ed;
   -webkit-animation: spinner 1.2s linear infinite;
   animation: spinner 1.2s linear infinite;
+}
+
+body {
+  overflow: hidden;
 }
 
 @-webkit-keyframes spinner {

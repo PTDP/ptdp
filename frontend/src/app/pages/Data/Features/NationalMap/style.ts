@@ -42,7 +42,7 @@ export const charts = {
     'ff-clan-web-pro, "Helvetica Neue", Helvetica, sans-serif !important',
   fontSize: '12px',
   lineHeight: 1.833,
-  height: 210,
+  height: 300,
   padding: '10px',
   position: 'absolute',
   left: 20,
@@ -64,3 +64,7 @@ export const spinner = {
   transformOrigin: '20px 20px',
   zIndex: 110,
 } as CSSProperties;
+
+export const li = {
+  marginLeft: '.5rem',
+};
