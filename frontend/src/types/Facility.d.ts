@@ -32,7 +32,7 @@ export interface Facility {
   };
 }
 
-type CF = {
+export type CF = {
   id: number;
   facilityInternal: string;
   company: number;
@@ -41,7 +41,7 @@ type CF = {
   };
 };
 
-type Rate = {
+export type Rate = {
   amountAdditional: number;
   amountInitial: number;
   company: number;
