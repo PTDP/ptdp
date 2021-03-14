@@ -4,9 +4,19 @@ import { Facility, Rate, CF } from 'types/Facility';
 import { FilterCompanies } from './slice/types';
 import { InfoIcon, ArrowCircleLeft, ArrowCircleRight, ArrowsExpand, Minimize, Mail } from '../../../../components/Icons/index';
 import ReactTooltip from 'react-tooltip';
+import { curveCatmullRom } from 'd3-shape';
 
-
-import { VerticalBarSeries, XAxis, XYPlot, YAxis } from 'react-vis';
+import {
+  XYPlot,
+  XAxis,
+  YAxis,
+  ChartLabel,
+  HorizontalGridLines,
+  VerticalGridLines,
+  LineSeries,
+  LineSeriesCanvas,
+  Line
+} from 'react-vis';
 
 const CicularButton = ({ children, className, onClick }) => {
   return (
@@ -19,8 +29,9 @@ const CicularButton = ({ children, className, onClick }) => {
 const charts = "bg-white rounded-sm shadow-sm text-xs h-80 p-6 absolute bottom-4 left-4"
 
 const chartsStyleExpanded = {
-  width: 500,
-  height: 300,
+  width: '55%',
+  height: '90%',
+  overflow: 'scroll'
 }
 
 const chartsStyleNotExpanded = {
@@ -54,6 +65,9 @@ export default function Charts({
   setChartExpanded: any,
   chartExpanded: any
 }) {
+
+  const Line = LineSeriesCanvas;
+
 
   if (!selectedFacility || !selectedFacility.companyFacilitiesByCanonicalFacilityId) {
     return null;
@@ -108,63 +122,99 @@ export default function Charts({
     <ChartMinimized handleClick={handleClick} />
   )
 
+  // console.log('selectedFacility.companyFacilitiesByCanonicalFacilityId.nodes', selectedFacility.companyFacilitiesByCanonicalFacilityId.nodes)
+  // console.log('selectedFacility', selectedFacility)
   return (
     <div className={charts} style={chartExpanded ? chartsStyleExpanded : chartsStyleNotExpanded} >
       <h2 style={{ textAlign: 'center' }}>{selectedFacility.hifldByHifldid.name}</h2>
       {/* ICS Internal Names*/}
       {/* Securus Internal Names*/}
-      <p></p>
       <CicularButton className="absolute top-2 right-2 " onClick={handleClick}>
         <Minimize _style={{ height: 20, width: 20 }} />
       </CicularButton>
-      <XYPlot
-        margin={{ left: 40, right: 25, top: 10, bottom: 25 }}
-        height={140}
-        width={480}
-        yDomain={[0, 1000]}
-        onMouseLeave={() => highlight(null)}
-      >
-        <YAxis tickFormat={d => (d / 100).toFixed(0) + '%'} />
-        <VerticalBarSeries
-          colorType="literal"
-          data={[{ x: 1, y: 10 },
-          { x: 2, y: 5 },
-          { x: 3, y: 15 }]}
-          onValueMouseOver={d => highlight(d.hour)}
-          onValueClick={d => select(d.hour)}
-          style={{ cursor: 'pointer' }}
-        />
-        <XAxis
-          tickFormat={h =>
-            h % 24 >= 12 ? (h % 12 || 12) + 'PM' : (h % 12 || 12) + 'AM'
-          }
-          tickSizeInner={0}
-          tickValues={[0, 6, 12, 18, 24]}
-        />
-      </XYPlot>
-      <div className="flex"> <div className="mr-1 text-md text-gray-900 font-medium" >Vendor Facilities</div>
-        <a data-tip data-for='product-info'><InfoIcon /> </a>
-        <ReactTooltip multiline={true} id='product-info' className="w-60">
-          Vendor Facilities are a vendor's internal name for a facility. <br /><br /> Sometimes there are multiple "vendor facilities" in a single physical facility. <br /><br />
+      <div id="chart-details-wrapper" className="flex mt-4">
+        <div className="flex-col w-50 bg-gray-50 rounded-sm p-4 pr-8">
+          <div className="flex"> <div className="mr-1 text-md text-gray-900 font-medium" >Vendor Facilities</div>
+            <a data-tip data-for='product-info'><InfoIcon /> </a>
+            <ReactTooltip multiline={true} id='product-info' className="w-60">
+              Vendor Facilities are a vendor's internal name for a facility. <br /><br /> Sometimes there are multiple "vendor facilities" in a single physical facility. <br /><br />
         For example different wings of the same prison may be listed as different vendor facilities, and be associated with different billing rates.
       </ReactTooltip>
+          </div>
+          <div className="mt-2">
+            {Object.entries(products).map(([company, cf]) => {
+              return (
+                <div>
+                  {FilterCompanies[company]}:
+                  <ul>
+                    {cf.map((c) => {
+                      return <li style={li} className="mt-1">- {c.facilityInternal}</li>;
+                    })}
+                  </ul>
+                </div>
+              )
+            })
+            }
+          </div>
+        </div>
+        <div className="flex justify-center" style={{ color: 'black', flex: 1 }}>
+          <XYPlot width={300} height={300}>
+            <HorizontalGridLines />
+            <VerticalGridLines />
+            <XAxis />
+            <YAxis />
+            <ChartLabel
+              text="X Axis"
+              className="alt-x-label"
+              includeMargin={false}
+              xPercent={0.025}
+              yPercent={1.01}
+            />
+
+            <ChartLabel
+              text="Y Axis"
+              className="alt-y-label"
+              includeMargin={false}
+              xPercent={0.06}
+              yPercent={0.06}
+              style={{
+                transform: 'rotate(-90)',
+                textAnchor: 'end'
+              }}
+            />
+            <Line
+              className="first-series"
+              data={[{ x: 1, y: 3 }, { x: 2, y: 5 }, { x: 3, y: 15 }, { x: 4, y: 12 }]}
+            />
+            <Line className="second-series" data={null} />
+            <Line
+              className="third-series"
+              curve={'curveMonotoneX'}
+              data={[{ x: 1, y: 10 }, { x: 2, y: 4 }, { x: 3, y: 2 }, { x: 4, y: 15 }]}
+              strokeDasharray={[7, 3]}
+            />
+            <Line
+              className="fourth-series"
+              curve={curveCatmullRom.alpha(0.5)}
+              style={{
+                // note that this can not be translated to the canvas version
+                strokeDasharray: '2 2'
+              }}
+              data={[{ x: 1, y: 7 }, { x: 2, y: 11 }, { x: 3, y: 9 }, { x: 4, y: 2 }]}
+            />
+          </XYPlot>
+        </div>
       </div>
-      <div className="mt-2">
-        {Object.entries(products).map(([company, cf]) => {
-          return (
-            <div>
-              {FilterCompanies[company]}:
-              <ul>
-                {cf.map((c) => {
-                  return <li style={li} className="mt-1">- {c.facilityInternal}</li>;
-                })}
-              </ul>
-            </div>
-          )
-        })
-        }
+      <div className="mt-4">
+        <div className="text-md text-gray-900 font-medium">Facility Details</div>
+        <div className="flex items-center">
+          Think this facility's information should be changed? Get in touch
+        <CicularButton className="" onClick={handleMail}>
+            <Mail _style={{ height: 16, width: 16 }} />
+          </CicularButton>
+        </div>
       </div>
-      <div className="mt-2">
+      <div className="mt-4">
         <div className="text-md text-gray-900 font-medium">Suggest Edits</div>
         <div className="flex items-center">
           Think this facility's information should be changed? Get in touch
@@ -173,6 +223,20 @@ export default function Charts({
           </CicularButton>
         </div>
       </div>
+      <style>
+        {`.rv-xy-plot__series rv-xy-plot__series--linemark {
+          fill: none;
+          }
+          
+          .rv-xy-canvas {
+            position: absolute;
+          }
+
+          .rv-xy-plot {
+            position: relative;
+          }
+          `}
+      </style>
     </div>
   );
 }

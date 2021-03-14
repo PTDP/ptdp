@@ -8,7 +8,6 @@ export const FACILITIES_QUERY = gql`
         hidden
         hifldid
         id
-        hidden
         longitude
         latitude
         hifldByHifldid {
@@ -25,6 +24,9 @@ export const FACILITIES_QUERY = gql`
           name
           sourcedate
           source
+          address
+          type
+          securelvl
         }
         companyFacilitiesByCanonicalFacilityId {
           nodes {

@@ -24,6 +24,7 @@
     "@types/webpack-env": "1.15.2",
     "chalk": "4.1.0",
     "cross-env": "7.0.2",
+    "d3-shape": "2.1.0",
     "deck.gl": "8.4.5",
     "eslint-config-prettier": "6.11.0",
     "eslint-plugin-prettier": "3.1.4",
