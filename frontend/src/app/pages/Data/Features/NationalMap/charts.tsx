@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { li } from './style';
 import { Facility, Rate, CF } from 'types/Facility';
 import { FilterCompanies } from './slice/types';
 import { InfoIcon, ArrowCircleLeft, ArrowCircleRight, ArrowsExpand, Minimize, Mail } from '../../../../components/Icons/index';
 import ReactTooltip from 'react-tooltip';
 import { curveCatmullRom } from 'd3-shape';
+import axios from 'axios'
 
 import {
   XYPlot,
@@ -31,7 +32,8 @@ const charts = "bg-white rounded-sm shadow-sm text-xs h-80 p-6 absolute bottom-4
 const chartsStyleExpanded = {
   width: '55%',
   height: '90%',
-  overflow: 'scroll'
+  overflow: 'scroll',
+  minWidth: '530px'
 }
 
 const chartsStyleNotExpanded = {
@@ -67,6 +69,19 @@ export default function Charts({
 }) {
 
   const Line = LineSeriesCanvas;
+
+  const get = async () => {
+    try {
+      const res = await axios.get('https://www.googleapis.com/civicinfo/v2/representatives?key=AIzaSyDN4is9An7DygIQ0QW47ZONCMLQQjis4Zw&address=550+1st+Avenue%2C+New+York%2C+NY%2C+USA')
+      console.log(res.data)
+    } catch (err) {
+      console.error(err.toString())
+    }
+  }
+
+  useEffect(() => {
+    get()
+  }, [selectedFacility])
 
 
   if (!selectedFacility || !selectedFacility.companyFacilitiesByCanonicalFacilityId) {
@@ -133,28 +148,55 @@ export default function Charts({
         <Minimize _style={{ height: 20, width: 20 }} />
       </CicularButton>
       <div id="chart-details-wrapper" className="flex mt-4">
-        <div className="flex-col w-50 bg-gray-50 rounded-sm p-4 pr-8">
-          <div className="flex"> <div className="mr-1 text-md text-gray-900 font-medium" >Vendor Facilities</div>
-            <a data-tip data-for='product-info'><InfoIcon /> </a>
-            <ReactTooltip multiline={true} id='product-info' className="w-60">
-              Vendor Facilities are a vendor's internal name for a facility. <br /><br /> Sometimes there are multiple "vendor facilities" in a single physical facility. <br /><br />
+        <div className="flex-col w-1/2 mr-2">
+          <div className="flex-col w-50 bg-gray-50 rounded-sm p-4 pr-8">
+            <div className="flex"> <div className="mr-1 text-md text-gray-900 font-medium" >Vendor Facilities</div>
+              <a data-tip data-for='product-info'><InfoIcon /> </a>
+              <ReactTooltip multiline={true} id='product-info' className="w-60">
+                Vendor Facilities are a vendor's internal name for a facility. <br /><br /> Sometimes there are multiple "vendor facilities" in a single physical facility. <br /><br />
         For example different wings of the same prison may be listed as different vendor facilities, and be associated with different billing rates.
       </ReactTooltip>
+            </div>
+            <div className="mt-2">
+              {Object.entries(products).map(([company, cf]) => {
+                return (
+                  <div>
+                    {FilterCompanies[company]}:
+                    <ul>
+                      {cf.map((c) => {
+                        return <li style={li} className="mt-1">- {c.facilityInternal}</li>;
+                      })}
+                    </ul>
+                  </div>
+                )
+              })
+              }
+            </div>
           </div>
-          <div className="mt-2">
-            {Object.entries(products).map(([company, cf]) => {
-              return (
-                <div>
-                  {FilterCompanies[company]}:
-                  <ul>
-                    {cf.map((c) => {
-                      return <li style={li} className="mt-1">- {c.facilityInternal}</li>;
-                    })}
-                  </ul>
+          <div className="flex mt-4">
+            <div className="w-full">
+              <div className="text-md text-gray-900 font-medium ">Facility Details</div>
+              <div className="flex-col items-center">
+                <div className="flex-col mt-2">
+                  <div>
+                    {selectedFacility.hifldByHifldid.address}
+                  </div>
+                  <div>
+                    {selectedFacility.hifldByHifldid.city}{", "}
+                    {selectedFacility.hifldByHifldid.state} {" "}
+                    {selectedFacility.hifldByHifldid.zip}
+                  </div>
                 </div>
-              )
-            })
-            }
+                <div className="flex-col mt-2 justify-between">
+                  <div className="flex justify-between"><span>Population:</span> <span>{selectedFacility.hifldByHifldid.population === -999 ? 'UNKNOWN' : selectedFacility.hifldByHifldid.population}</span></div>
+                  <div className="flex justify-between"><span>Capacity:</span> <span>{selectedFacility.hifldByHifldid.capacity === -999 ? 'UNKNOWN' : selectedFacility.hifldByHifldid.capacity}</span></div>
+                  <div className="flex justify-between"><span>Secure Level:</span> <span>{selectedFacility.hifldByHifldid.securelvl}</span></div>
+                  <div className="flex justify-between"><span>Type:</span> <span>{selectedFacility.hifldByHifldid.type}</span></div>
+                  <div className="flex justify-between"><span>Details Collected:</span> <span>{selectedFacility.hifldByHifldid.sourcedate && new Date(selectedFacility.hifldByHifldid.sourcedate).toLocaleDateString('en-US')}</span></div>
+                  <div className="flex justify-between"><span>Source:</span>  {selectedFacility.hifldByHifldid.source && <a className="underline cursor-pointer" onClick={() => window.open(selectedFacility.hifldByHifldid.source)}>External Link</a>} </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div className="flex justify-center" style={{ color: 'black', flex: 1 }}>
@@ -205,19 +247,59 @@ export default function Charts({
           </XYPlot>
         </div>
       </div>
-      <div className="mt-4">
-        <div className="text-md text-gray-900 font-medium">Facility Details</div>
-        <div className="flex items-center">
-          Think this facility's information should be changed? Get in touch
-        <CicularButton className="" onClick={handleMail}>
-            <Mail _style={{ height: 16, width: 16 }} />
-          </CicularButton>
+
+      <div className="flex mt-4">
+        <div className="w-full">
+          <div className="text-md text-gray-900 font-medium">Elected Officials</div>
+          <div className="flex flex-col mt-4">
+            <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+              <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+                <div className="overflow-hidden border-bsm:rounded-lg">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th scope="col" className="relative px-6 py-3">
+                          <span className="sr-only">Edit</span>
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Representative
+              </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Office
+              </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Links
+              </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="bg-white">
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-xs font-medium">
+                          <a href="#" className="text-indigo-600 hover:text-indigo-900">Photo</a>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-xs font-medium text-gray-900">
+                          Scott M. Stringer
+              </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
+                          New York City Comptroller
+              </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
+                          Link
+              </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
       <div className="mt-4">
         <div className="text-md text-gray-900 font-medium">Suggest Edits</div>
         <div className="flex items-center">
-          Think this facility's information should be changed? Get in touch
+          Think this facility's information should be updated? Get in touch
         <CicularButton className="" onClick={handleMail}>
             <Mail _style={{ height: 16, width: 16 }} />
           </CicularButton>
