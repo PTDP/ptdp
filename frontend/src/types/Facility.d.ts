@@ -13,6 +13,7 @@ export interface Facility {
   hifldByHifldid: {
     capacity: number;
     city: string;
+    address: string;
     country: string;
     county: string;
     countyfips: number;

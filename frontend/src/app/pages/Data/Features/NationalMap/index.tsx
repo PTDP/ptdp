@@ -162,7 +162,9 @@ export const NationalMap = props => {
           facilitiesByFips[g.id].forEach((f) => {
             f.companyFacilitiesByCanonicalFacilityId.nodes.forEach(el => {
               el.ratesByCompanyFacilityId.nodes.forEach((r, i) => {
-                max = Math.max(max, r.amountInitial + r.amountAdditional * 14);
+
+                const tax = r.tax * 15;
+                max = Math.max(max, r.amountInitial + (r.amountAdditional * 14) + (!Number.isNaN(tax) ? tax : 0));
               });
             });
           })
@@ -186,13 +188,13 @@ export const NationalMap = props => {
   async function setFilters(filters: Filters) {
     layers.settings = filters;
     const filter = (d: Facility) => {
-
       if (d.hidden) return false;
       // Canonical Facility Filters
       try {
         if (!filters.facility_type.includes(d.hifldByHifldid.type)) return false;
         if (!filters.secure_level.includes(d.hifldByHifldid.securelvl)) return false;
       } catch (err) {
+        console.error(err);
       }
 
       // Company Facility Filters
@@ -208,13 +210,20 @@ export const NationalMap = props => {
           return true;
         })
       } catch (err) {
-
+        console.error(err);
       }
 
       return true;
     }
-    const str = await stringifyAsync(facilities);
-    const j = await parseAsync(str);
+
+    let j = [];
+
+    try {
+      const str = await stringifyAsync(facilities);
+      j = await parseAsync(str);
+    } catch (err) {
+      console.error(err);
+    }
 
     layers.points = j.filter(filter);
   }
@@ -323,6 +332,8 @@ export const NationalMap = props => {
   if (!layers.points.length) {
     return null;
   }
+
+
   const { hover } = state;
 
   const hoverStyle = {
