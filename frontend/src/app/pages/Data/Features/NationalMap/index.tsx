@@ -29,6 +29,8 @@ import { createImmutableStateInvariantMiddleware } from '@reduxjs/toolkit';
 import counties from 'us-atlas/counties-10m.json';
 import * as topojson from 'topojson-client';
 import yj from 'yieldable-json';
+import { from } from '@apollo/client';
+import { fifteenMinuteRate } from './utils';
 
 const INITIAL_VIEW_STATE = {
   longitude: -98.5795,
@@ -163,8 +165,7 @@ export const NationalMap = props => {
             f.companyFacilitiesByCanonicalFacilityId.nodes.forEach(el => {
               el.ratesByCompanyFacilityId.nodes.forEach((r, i) => {
 
-                const tax = r.tax * 15;
-                max = Math.max(max, r.amountInitial + (r.amountAdditional * 14) + (!Number.isNaN(tax) ? tax : 0));
+                max = Math.max(max, fifteenMinuteRate(r));
               });
             });
           })

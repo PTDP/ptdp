@@ -55,4 +55,5 @@ export type Rate = {
   service: number;
   uid: string;
   updated: string[];
+  tax: number;
 };
