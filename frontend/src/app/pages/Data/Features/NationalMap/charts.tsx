@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { li } from './style';
+
 import { Facility, Rate, CF } from 'types/Facility';
-import { FilterCompanies } from './slice/types';
+import { Service } from 'types/Service'
+
+import { FilterCompanies, CallType } from './slice/types';
 import { InfoIcon, ArrowCircleLeft, ArrowCircleRight, ArrowsExpand, Minimize, Mail } from '../../../../components/Icons/index';
 import ReactTooltip from 'react-tooltip';
 import { curveCatmullRom } from 'd3-shape';
 import axios from 'axios'
+
+import { fifteenMinuteRate } from './utils';
 
 import {
   XYPlot,
@@ -16,8 +21,12 @@ import {
   VerticalGridLines,
   LineSeries,
   LineSeriesCanvas,
-  Line
+  Line,
+  DiscreteColorLegend,
+  LabelSeries,
+  LineMarkSeries
 } from 'react-vis';
+import { cd } from 'shelljs';
 
 const CicularButton = ({ children, className, onClick }) => {
   return (
@@ -30,7 +39,7 @@ const CicularButton = ({ children, className, onClick }) => {
 const charts = "bg-white rounded-sm shadow-sm text-xs h-80 p-6 absolute bottom-4 left-4"
 
 const chartsStyleExpanded = {
-  width: '55%',
+  width: '65%',
   height: '90%',
   overflow: 'scroll',
   minWidth: '530px'
@@ -51,6 +60,40 @@ const ChartMinimized = ({ handleClick }) => (
   </div>
 )
 
+const Toggle = ({ name, options, filters, setFilters }) => {
+
+  const handleClick = (e) => {
+    setFilters()
+  }
+
+  return (
+    <div id="fieldset">
+      <div className="mt-2 space-y-4 flex-col">
+        {options.map((o) => {
+          return (
+            <div className="relative flex items-start">
+              <div className="flex items-center h-5">
+                <input onClick={handleClick} id={o.id} name={o.name} checked={filters && filters[`${o.id}`] === true} type="checkbox" className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded" />
+              </div>
+              <div className="ml-3 text-xs">
+                <label htmlFor={o.id} className="font-medium text-gray-700">{o.label}</label>
+              </div>
+              {o.description && (
+                <div className="ml-1">
+                  <a data-tip data-for={`${o.id}-description`}><InfoIcon /> </a>
+                  <ReactTooltip multiline={true} id={`${o.id}-description`} className="w-60">
+                    {o.description}
+                  </ReactTooltip>
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 export default function Charts({
   highlight,
   // highlightedHour,
@@ -68,38 +111,121 @@ export default function Charts({
   chartExpanded: any
 }) {
 
+  const [activeCompanyFacility, setActiveCompanyFacility] = useState();
+  const [companyFacilityFilters, setCompanyFacilityFilters] = useState({});
+  const [productFilters, setProductFilters] = useState({});
+  const [callTypeFilters, setCallTypeFilters] = useState({
+    [CallType.IN_STATE]: true,
+    [CallType.OUT_STATE]: true
+  })
+  const [allSeries, setAllSeries]: any = useState(null);
+
   const Line = LineSeriesCanvas;
 
   const get = async () => {
     try {
       const res = await axios.get('https://www.googleapis.com/civicinfo/v2/representatives?key=AIzaSyDN4is9An7DygIQ0QW47ZONCMLQQjis4Zw&address=550+1st+Avenue%2C+New+York%2C+NY%2C+USA')
-      console.log(res.data)
     } catch (err) {
       console.error(err.toString())
     }
   }
 
+
+  const getCompanyFacilityFilters = () => {
+    const names: Record<string, boolean> = {};
+    selectedFacility.companyFacilitiesByCanonicalFacilityId.nodes.forEach((node, i) => {
+      if (i === 0) names[node.facilityInternal] = true;
+      else {
+        names[node.facilityInternal] = false;
+      }
+    })
+
+    return names;
+  }
+
+  const getProductFilters = () => {
+    const products: Record<string, boolean> = {};
+    selectedFacility.companyFacilitiesByCanonicalFacilityId.nodes.forEach((node, i) => {
+      node.ratesByCompanyFacilityId.nodes.forEach((node) => {
+        if (i === 0) products[node.service] = true;
+        else {
+          products[node.service] = false;
+        }
+      })
+    })
+    return products;
+  }
+
+  const createSeries = () => {
+    const validCFs = selectedFacility.companyFacilitiesByCanonicalFacilityId.nodes.filter(f => companyFacilityFilters?.[f.facilityInternal] === true);
+    const series = {};
+
+    const flattenedRates: Rate[] = [];
+
+    validCFs.forEach((cf) => {
+      cf.ratesByCompanyFacilityId.nodes.forEach((n) => {
+        for (const elt of n.updated) {
+          const flatted = { ...n };
+          flatted.updated = [elt];
+          flattenedRates.push(flatted);
+        }
+      })
+    })
+
+    flattenedRates.forEach((r) => {
+      const key = `${r.inState ? CallType.IN_STATE : CallType.OUT_STATE}-${r.service}`;
+      if (series[key]) series[key].push({
+        x: new Date(r.updated[0]),
+        y: fifteenMinuteRate(r)
+      });
+      else {
+        series[key] = [{
+          x: new Date(r.updated[0]),
+          y: fifteenMinuteRate(r)
+        }]
+      }
+    })
+
+    for (const key in series) {
+      series[key].sort((a, b) => {
+        return a.x.getTime() - b.x.getTime()
+      })
+    }
+
+    console.log('series', series)
+
+    setAllSeries(series)
+  }
+
+
   useEffect(() => {
-    get()
+    if (!selectedFacility || !selectedFacility.companyFacilitiesByCanonicalFacilityId) return;
+    setCompanyFacilityFilters(getCompanyFacilityFilters());
+    setProductFilters(getProductFilters());
   }, [selectedFacility])
+
+  useEffect(() => {
+    if (!selectedFacility || !selectedFacility.companyFacilitiesByCanonicalFacilityId) return;
+
+    createSeries();
+  }, [productFilters, companyFacilityFilters, selectedFacility])
 
 
   if (!selectedFacility || !selectedFacility.companyFacilitiesByCanonicalFacilityId) {
     return null;
   }
-  // }
-  // const data = pickups.map(d => {
-  //   let color = '#125C77';
-  //   if (d.hour === selectedHour) {
-  //     color = '#19CDD7';
-  //   }
-  //   if (d.hour === highlightedHour) {
-  //     color = '#17B8BE';
-  //   }
-  //   return { ...d, color };
-  // });
-  const rates: Rate[] = []
 
+  const max15 = () => {
+    let max = 0;
+    selectedFacility.companyFacilitiesByCanonicalFacilityId.nodes.forEach((node) => {
+      node.ratesByCompanyFacilityId.nodes.forEach((r) => {
+        max = Math.max(max, fifteenMinuteRate(r));
+      })
+    })
+    return max;
+  }
+
+  const rates: Rate[] = []
   selectedFacility.companyFacilitiesByCanonicalFacilityId.nodes.forEach((node) => {
     node.ratesByCompanyFacilityId.nodes.forEach((r) => {
       rates.push(r);
@@ -121,12 +247,14 @@ export default function Charts({
       selectedFacility.companyFacilitiesByCanonicalFacilityId.nodes.filter(cf => cf.company === comp).forEach(
         (cf) => { products[comp].push(cf) })
     })
-
-  console.log(products);
   // show all services on the graph at once
 
   const handleClick = () => {
     setChartExpanded(!chartExpanded);
+  }
+
+  const handleCompanyFacilityClick = (e) => {
+    // setActiveCompanyFacility(e.target.innerText.);
   }
 
   const handleMail = () => {
@@ -137,6 +265,32 @@ export default function Charts({
     <ChartMinimized handleClick={handleClick} />
   )
 
+  const JAN_1_2021 = 1609459200 * 1000;
+
+  const lastScrapedDate: any = (series) => {
+    const flattenedDates: Date[] = [];
+
+    Object.values(series).forEach((s: any) => {
+      s.forEach(r => flattenedDates.push((r as any).x));
+    })
+    flattenedDates.sort((a, b) => a.getTime() - b.getTime());
+    return flattenedDates.pop();
+  }
+
+  const addDaysToDate = (d: Date[], days) => {
+    var date = new Date();
+    date.setDate(date.getDate() + days);
+    return date;
+  }
+
+  if (!allSeries) return null;
+
+  if (allSeries) console.log(lastScrapedDate(allSeries));
+
+  // console.log(productFilters, callTypeFilters, companyFacilityFilters)
+
+  // [company, cf]
+  // vendor
   // console.log('selectedFacility.companyFacilitiesByCanonicalFacilityId.nodes', selectedFacility.companyFacilitiesByCanonicalFacilityId.nodes)
   // console.log('selectedFacility', selectedFacility)
   return (
@@ -149,13 +303,15 @@ export default function Charts({
       </CicularButton>
       <div id="chart-details-wrapper" className="flex mt-4">
         <div className="flex-col w-1/2 mr-2">
-          <div className="flex-col w-50 bg-gray-50 rounded-sm p-4 pr-8">
-            <div className="flex"> <div className="mr-1 text-md text-gray-900 font-medium" >Vendor Facilities</div>
-              <a data-tip data-for='product-info'><InfoIcon /> </a>
-              <ReactTooltip multiline={true} id='product-info' className="w-60">
-                Vendor Facilities are a vendor's internal name for a facility. <br /><br /> Sometimes there are multiple "vendor facilities" in a single physical facility. <br /><br />
+          <div className="flex-col w-50 bg-gray-50 rounded-sm p-4 pr-8 mt-2">
+            <div className="mr-1 text-md text-gray-900 font-medium flex mr-2" ><div>Select Vendor Facility Data{" "}</div>
+              <div className="ml-1">
+                <a data-tip data-for='product-info'><InfoIcon /> </a>
+                <ReactTooltip multiline={true} id='product-info' className="w-60">
+                  The facility names below reflect all of a vendor's internal names for a facility. <br /><br /> Sometimes there are multiple "vendor facilities" in a single physical facility. <br /><br />
         For example different wings of the same prison may be listed as different vendor facilities, and be associated with different billing rates.
       </ReactTooltip>
+              </div>
             </div>
             <div className="mt-2">
               {Object.entries(products).map(([company, cf]) => {
@@ -163,14 +319,55 @@ export default function Charts({
                   <div>
                     {FilterCompanies[company]}:
                     <ul>
-                      {cf.map((c) => {
-                        return <li style={li} className="mt-1">- {c.facilityInternal}</li>;
-                      })}
+                      {
+                        <Toggle
+                          name="CompanyFacilities"
+                          filters={companyFacilityFilters}
+                          setFilters={setCompanyFacilityFilters}
+                          options={cf.map(c => {
+                            return {
+                              id: c.facilityInternal,
+                              name: "company_facility",
+                              label: c.facilityInternal
+                            }
+                          })} />
+                      }
                     </ul>
                   </div>
                 )
-              })
-              }
+              })}
+              <div className="mt-2 font-medium">
+                Service
+                <Toggle
+                  name="Services"
+                  filters={productFilters}
+                  setFilters={setProductFilters}
+                  options={Object.keys(getProductFilters()).map((v) => ({
+                    id: Service[v].name,
+                    name: "services",
+                    label: Service[v].name,
+                    description: Service[v].description
+                  }))} />
+              </div>
+              <div className="mt-2">
+                Call Type
+                <Toggle
+                  name="Call Type"
+                  filters={callTypeFilters}
+                  setFilters={setCallTypeFilters}
+                  options={[
+                    {
+                      id: CallType.IN_STATE,
+                      name: "call_type",
+                      label: 'In-State'
+                    },
+                    {
+                      id: CallType.OUT_STATE,
+                      name: "call_type",
+                      label: "Out-State"
+                    }
+                  ]} />
+              </div>
             </div>
           </div>
           <div className="flex mt-4">
@@ -200,13 +397,19 @@ export default function Charts({
           </div>
         </div>
         <div className="flex justify-center" style={{ color: 'black', flex: 1 }}>
-          <XYPlot width={300} height={300}>
+          <XYPlot width={300} height={300} xType="time" yDomain={[0, Math.ceil(max15()) + 5]} xDomain={[JAN_1_2021, addDaysToDate(lastScrapedDate(allSeries), 7)]}>
             <HorizontalGridLines />
             <VerticalGridLines />
-            <XAxis />
+            <XAxis
+              tickFormat={(d: Date) => d.toLocaleDateString('en-US')}
+            // tickFormat={function tickFormat(d) {
+            //   return d.toISOString().substr(11, 8)
+            // }}
+            // totalTicks={3}
+            />
             <YAxis />
             <ChartLabel
-              text="X Axis"
+              text="Data Collected"
               className="alt-x-label"
               includeMargin={false}
               xPercent={0.025}
@@ -214,7 +417,7 @@ export default function Charts({
             />
 
             <ChartLabel
-              text="Y Axis"
+              text="15 Minute Rate (USD)"
               className="alt-y-label"
               includeMargin={false}
               xPercent={0.06}
@@ -224,7 +427,24 @@ export default function Charts({
                 textAnchor: 'end'
               }}
             />
-            <Line
+            {/* <LabelSeries
+              animation
+              allowOffsetToBeReversed
+              data={[
+                { x: 5, y: 15, label: 'woah!', style: { fontSize: 10 } },
+              ]} /> */}
+            {Object.entries(allSeries).map(([name, s]) => {
+
+              console.log('<><><><', s)
+              return (
+                <LineMarkSeries
+                  curve={curveCatmullRom.alpha(0.5)}
+                  className={`${name}`}
+                  data={s}
+                />
+              )
+            })}
+            {/* <Line
               className="first-series"
               data={[{ x: 1, y: 3 }, { x: 2, y: 5 }, { x: 3, y: 15 }, { x: 4, y: 12 }]}
             />
@@ -243,7 +463,7 @@ export default function Charts({
                 strokeDasharray: '2 2'
               }}
               data={[{ x: 1, y: 7 }, { x: 2, y: 11 }, { x: 3, y: 9 }, { x: 4, y: 2 }]}
-            />
+            /> */}
           </XYPlot>
         </div>
       </div>
@@ -317,8 +537,14 @@ export default function Charts({
           .rv-xy-plot {
             position: relative;
           }
+
+          .rv-xy-plot__grid-lines__line {
+            stroke: gray;
+            stroke-width: 1;
+            opacity: .25;
+          }
           `}
       </style>
-    </div>
+    </div >
   );
 }
