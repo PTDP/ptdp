@@ -237,7 +237,7 @@ export default function Charts({
       return false;
     }
 
-    console.log('validCfs', validCFs);
+    console.log('validCfs', validCFs)
     console.log('flattenedRates', flattenedRates);
 
     flattenedRates = flattenedRates.filter(filterOnCallType).filter(filterOnService);
