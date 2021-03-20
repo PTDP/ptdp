@@ -12,7 +12,7 @@ const Radio = ({ name, options }) => {
 
     const handleClick = (e) => {
         let { id, name } = e.target;
-        console.log(filters)
+
         if (!Number.isNaN(parseInt(id))) id = parseInt(id);
         dispatch(actions.updateFilters({ ...filters, [name]: id }));
     }

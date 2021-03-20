@@ -27,6 +27,7 @@ import {
   LineMarkSeries
 } from 'react-vis';
 import { cd } from 'shelljs';
+import { latestOutstateRate } from './deckgl-layers';
 
 const CicularButton = ({ children, className, onClick }) => {
   return (
@@ -60,10 +61,60 @@ const ChartMinimized = ({ handleClick }) => (
   </div>
 )
 
+const ElectedOfficials = () => (
+  <div className="flex mt-4">
+    <div className="w-full">
+      <div className="text-md text-gray-900 font-medium">Elected Officials</div>
+      <div className="flex flex-col mt-4">
+        <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+          <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+            <div className="overflow-hidden border-bsm:rounded-lg">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="relative px-6 py-3">
+                      <span className="sr-only">Edit</span>
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Representative
+        </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Office
+        </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Links
+        </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="bg-white">
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-xs font-medium">
+                      <a href="#" className="text-indigo-600 hover:text-indigo-900">Photo</a>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-xs font-medium text-gray-900">
+                      Scott M. Stringer
+        </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
+                      New York City Comptroller
+        </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
+                      Link
+        </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)
+
 const Toggle = ({ name, options, filters, setFilters }) => {
 
   const handleClick = (e) => {
-    setFilters()
+    setFilters({ ...filters, [e.target.id.split('-')[0]]: e.target.checked });
   }
 
   return (
@@ -73,10 +124,10 @@ const Toggle = ({ name, options, filters, setFilters }) => {
           return (
             <div className="relative flex items-start">
               <div className="flex items-center h-5">
-                <input onClick={handleClick} id={o.id} name={o.name} checked={filters && filters[`${o.id}`] === true} type="checkbox" className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded" />
+                <input onClick={handleClick} id={`${o.id}-${o.name}`} name={o.name} checked={filters && filters[`${o.id}`] === true} type="checkbox" className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded" />
               </div>
               <div className="ml-3 text-xs">
-                <label htmlFor={o.id} className="font-medium text-gray-700">{o.label}</label>
+                <label htmlFor={`${o.id}-${o.name}`} className="font-medium text-gray-700">{o.label}</label>
               </div>
               {o.description && (
                 <div className="ml-1">
@@ -120,8 +171,6 @@ export default function Charts({
   })
   const [allSeries, setAllSeries]: any = useState(null);
 
-  const Line = LineSeriesCanvas;
-
   const get = async () => {
     try {
       const res = await axios.get('https://www.googleapis.com/civicinfo/v2/representatives?key=AIzaSyDN4is9An7DygIQ0QW47ZONCMLQQjis4Zw&address=550+1st+Avenue%2C+New+York%2C+NY%2C+USA')
@@ -157,10 +206,14 @@ export default function Charts({
   }
 
   const createSeries = () => {
-    const validCFs = selectedFacility.companyFacilitiesByCanonicalFacilityId.nodes.filter(f => companyFacilityFilters?.[f.facilityInternal] === true);
+    const validCFs = selectedFacility
+      .companyFacilitiesByCanonicalFacilityId
+      .nodes
+      .filter(f => companyFacilityFilters?.[f.facilityInternal] === true);
+
     const series = {};
 
-    const flattenedRates: Rate[] = [];
+    let flattenedRates: Rate[] = [];
 
     validCFs.forEach((cf) => {
       cf.ratesByCompanyFacilityId.nodes.forEach((n) => {
@@ -171,6 +224,23 @@ export default function Charts({
         }
       })
     })
+
+    const filterOnCallType = (elt: Rate) => {
+      if (callTypeFilters[CallType.IN_STATE] && elt.inState) return true;
+      if (callTypeFilters[CallType.OUT_STATE] && !elt.inState) return true;
+      return false;
+    }
+
+
+    const filterOnService = (elt) => {
+      if (productFilters[elt.service]) return true;
+      return false;
+    }
+
+    console.log('validCfs', validCFs);
+    console.log('flattenedRates', flattenedRates);
+
+    flattenedRates = flattenedRates.filter(filterOnCallType).filter(filterOnService);
 
     flattenedRates.forEach((r) => {
       const key = `${r.inState ? CallType.IN_STATE : CallType.OUT_STATE}-${r.service}`;
@@ -208,7 +278,7 @@ export default function Charts({
     if (!selectedFacility || !selectedFacility.companyFacilitiesByCanonicalFacilityId) return;
 
     createSeries();
-  }, [productFilters, companyFacilityFilters, selectedFacility])
+  }, [productFilters, companyFacilityFilters, selectedFacility, callTypeFilters])
 
 
   if (!selectedFacility || !selectedFacility.companyFacilitiesByCanonicalFacilityId) {
@@ -284,15 +354,6 @@ export default function Charts({
   }
 
   if (!allSeries) return null;
-
-  if (allSeries) console.log(lastScrapedDate(allSeries));
-
-  // console.log(productFilters, callTypeFilters, companyFacilityFilters)
-
-  // [company, cf]
-  // vendor
-  // console.log('selectedFacility.companyFacilitiesByCanonicalFacilityId.nodes', selectedFacility.companyFacilitiesByCanonicalFacilityId.nodes)
-  // console.log('selectedFacility', selectedFacility)
   return (
     <div className={charts} style={chartExpanded ? chartsStyleExpanded : chartsStyleNotExpanded} >
       <h2 style={{ textAlign: 'center' }}>{selectedFacility.hifldByHifldid.name}</h2>
@@ -343,7 +404,7 @@ export default function Charts({
                   filters={productFilters}
                   setFilters={setProductFilters}
                   options={Object.keys(getProductFilters()).map((v) => ({
-                    id: Service[v].name,
+                    id: v,
                     name: "services",
                     label: Service[v].name,
                     description: Service[v].description
@@ -358,12 +419,12 @@ export default function Charts({
                   options={[
                     {
                       id: CallType.IN_STATE,
-                      name: "call_type",
+                      name: "call_type_detail",
                       label: 'In-State'
                     },
                     {
                       id: CallType.OUT_STATE,
-                      name: "call_type",
+                      name: "call_type_detail",
                       label: "Out-State"
                     }
                   ]} />
@@ -397,15 +458,11 @@ export default function Charts({
           </div>
         </div>
         <div className="flex justify-center" style={{ color: 'black', flex: 1 }}>
-          <XYPlot width={300} height={300} xType="time" yDomain={[0, Math.ceil(max15()) + 5]} xDomain={[JAN_1_2021, addDaysToDate(lastScrapedDate(allSeries), 7)]}>
+          <XYPlot dontCheckIfEmpty width={300} height={300} xType="time" yDomain={[0, Math.ceil(max15()) + 5]} xDomain={[JAN_1_2021, addDaysToDate(lastScrapedDate(allSeries), 7)]}>
             <HorizontalGridLines />
             <VerticalGridLines />
             <XAxis
               tickFormat={(d: Date) => d.toLocaleDateString('en-US')}
-            // tickFormat={function tickFormat(d) {
-            //   return d.toISOString().substr(11, 8)
-            // }}
-            // totalTicks={3}
             />
             <YAxis />
             <ChartLabel
@@ -427,15 +484,7 @@ export default function Charts({
                 textAnchor: 'end'
               }}
             />
-            {/* <LabelSeries
-              animation
-              allowOffsetToBeReversed
-              data={[
-                { x: 5, y: 15, label: 'woah!', style: { fontSize: 10 } },
-              ]} /> */}
             {Object.entries(allSeries).map(([name, s]) => {
-
-              console.log('<><><><', s)
               return (
                 <LineMarkSeries
                   curve={curveCatmullRom.alpha(0.5)}
@@ -444,75 +493,7 @@ export default function Charts({
                 />
               )
             })}
-            {/* <Line
-              className="first-series"
-              data={[{ x: 1, y: 3 }, { x: 2, y: 5 }, { x: 3, y: 15 }, { x: 4, y: 12 }]}
-            />
-            <Line className="second-series" data={null} />
-            <Line
-              className="third-series"
-              curve={'curveMonotoneX'}
-              data={[{ x: 1, y: 10 }, { x: 2, y: 4 }, { x: 3, y: 2 }, { x: 4, y: 15 }]}
-              strokeDasharray={[7, 3]}
-            />
-            <Line
-              className="fourth-series"
-              curve={curveCatmullRom.alpha(0.5)}
-              style={{
-                // note that this can not be translated to the canvas version
-                strokeDasharray: '2 2'
-              }}
-              data={[{ x: 1, y: 7 }, { x: 2, y: 11 }, { x: 3, y: 9 }, { x: 4, y: 2 }]}
-            /> */}
           </XYPlot>
-        </div>
-      </div>
-
-      <div className="flex mt-4">
-        <div className="w-full">
-          <div className="text-md text-gray-900 font-medium">Elected Officials</div>
-          <div className="flex flex-col mt-4">
-            <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-              <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-                <div className="overflow-hidden border-bsm:rounded-lg">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th scope="col" className="relative px-6 py-3">
-                          <span className="sr-only">Edit</span>
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Representative
-              </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Office
-              </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Links
-              </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr className="bg-white">
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-xs font-medium">
-                          <a href="#" className="text-indigo-600 hover:text-indigo-900">Photo</a>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-xs font-medium text-gray-900">
-                          Scott M. Stringer
-              </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
-                          New York City Comptroller
-              </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
-                          Link
-              </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 

@@ -189,7 +189,6 @@ export const NationalMap = props => {
   async function setFilters(filters: Filters) {
     layers.settings = filters;
     const filter = (d: Facility) => {
-      if (d.hidden) return false;
       // Canonical Facility Filters
       try {
         if (!filters.facility_type.includes(d.hifldByHifldid.type)) return false;
@@ -220,7 +219,8 @@ export const NationalMap = props => {
     let j = [];
 
     try {
-      const str = await stringifyAsync(facilities);
+      const str = await JSON.stringify(facilities);
+      // console.log('<><><>><><><><>', str);
       j = await parseAsync(str);
     } catch (err) {
       console.error(err);
@@ -316,7 +316,14 @@ export const NationalMap = props => {
   const _onClick = (e) => {
     const { hoveredObject, hoveredLayer } = state?.hover;
     if (hoveredLayer !== 'geojson-layer') {
-      const selectedFacility = hoveredObject?.points?.[0]?.source;
+      const source = hoveredObject?.points?.[0]?.source;
+      if (!source) {
+        console.error('No source for hoveredObject found');
+        return;
+      }
+
+      const selectedFacility = facilities.find((f) => f.hifldid === source.hifldid);
+
       setState({ ...state, selectedFacility })
       if (selectedFacility) {
         setChartExpanded(true);
