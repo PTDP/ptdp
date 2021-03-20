@@ -148,20 +148,27 @@ export const NationalMap = props => {
     const facilitiesByFips = {};
 
     layers.points.forEach((f) => {
-      if (facilitiesByFips[f.hifldByHifldid.countyfips]) {
-        facilitiesByFips[f.hifldByHifldid.countyfips].push(f)
+      const paddedFips = ("00000" + f.hifldByHifldid.countyfips).slice(-5)
+
+      if (facilitiesByFips[`${paddedFips}-${f.hifldByHifldid.county}`]) {
+        facilitiesByFips[`${paddedFips}-${f.hifldByHifldid.county}`].push(f)
       } else {
-        facilitiesByFips[f.hifldByHifldid.countyfips] = [f];
+        facilitiesByFips[`${paddedFips}-${f.hifldByHifldid.county}`] = [f];
       }
     })
+
+    console.log('facilitiesByFips', facilitiesByFips);
+
 
     let filteredGeoJSON = { ...counties };
 
     filteredGeoJSON.features.forEach((g) => {
       let max = 0;
-      if (facilitiesByFips[g.id]) {
+      // console.log(`${g.id}-${g.properties.name}`);
+      if (facilitiesByFips[`${g.id}-${g.properties.name.toUpperCase()}`]) {
         try {
-          facilitiesByFips[g.id].forEach((f) => {
+          // console.log('here')
+          facilitiesByFips[`${g.id}-${g.properties.name.toUpperCase()}`].forEach((f) => {
             max = Math.max(max, maxCanonicalFacilityRate(f));
           });
         } catch (err) { }
@@ -184,6 +191,9 @@ export const NationalMap = props => {
     layers.settings = filters;
     const filter = (d: Facility) => {
       // Canonical Facility Filters
+
+      if (d.hifldid === 10005337) console.log('<><><><><><><>', d);
+
       try {
         if (!filters.facility_type.includes(d.hifldByHifldid.type)) return false;
         if (!filters.secure_level.includes(d.hifldByHifldid.securelvl)) return false;
@@ -282,7 +292,9 @@ export const NationalMap = props => {
     //     : null
     //   : null;
 
-    const label = layer.id === 'geojson-layer' ? `${object.properties.name} County` : `${object?.points?.[0]?.source?.hifldByHifldid?.name}`;
+    if (layer.id !== 'geojson-layer') console.log('<><><><><>', object)
+
+    const label = layer.id === 'geojson-layer' ? `${object.properties.name} County` : `${object?.hifldByHifldid?.name}`;
 
     setState({ hover: { x, y, hoveredObject: object, label, hoveredLayer: layer.id } });
   };
@@ -309,7 +321,7 @@ export const NationalMap = props => {
   const _onClick = (e) => {
     const { hoveredObject, hoveredLayer } = state?.hover;
     if (hoveredLayer !== 'geojson-layer') {
-      const source = hoveredObject?.points?.[0]?.source;
+      const source = hoveredObject;
       if (!source) {
         console.error('No source for hoveredObject found');
         return;

@@ -1,12 +1,14 @@
-import { ScatterplotLayer, HexagonLayer, GeoJsonLayer } from 'deck.gl';
+import { ScatterplotLayer, HexagonLayer, GeoJsonLayer,ColumnLayer } from 'deck.gl';
 import { Service } from 'types/Service';
 import { Facility } from 'types/Facility';
 import { GeospatialAppBarChartXDomain } from './examples';
 import { Filters, Geography } from './slice/types';
 import { scaleThreshold } from 'd3-scale';
 import { maxCanonicalFacilityRate } from './utils';
+import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {CubeGeometry} from '@luma.gl/core'
 
-const COLOR_RANGE = [
+const COLOR_RANGE_COUNTY = [
   [0, 0, 0, 0],
   [127, 205, 187, 0],
   [199, 233, 180],
@@ -23,9 +25,26 @@ const COLOR_RANGE = [
   [168, 0, 38],
 ]
 
+const COLOR_RANGE = [
+  [0, 0, 0, 0],
+  [157, 205, 187, 0],
+  [227, 233, 180],
+  [237, 248, 177],
+  // zero
+  [255, 255, 204],
+  [255, 237, 160],
+  [254, 217, 118],
+  [254, 178, 76],
+  [253, 141, 60],
+  [252, 78, 42],
+  [227, 26, 28],
+  [189, 0, 38],
+  [168, 0, 38],
+]
+
 export const COLOR_SCALE = scaleThreshold()
   .domain(new Array(13).fill(0).map((_, i) => (25 / 13) * i + 0))
-  .range(COLOR_RANGE);
+  .range(COLOR_RANGE_COUNTY);
 
 // TODO Make imports work so this can be removed!
 export enum Company {
@@ -147,45 +166,109 @@ export function renderLayers(
     return max;
   }
 
-  const hexagon =
-    settings.geography.includes(Geography.FACILITY) &&
-    new HexagonLayer({
-      onHover,
-      data: points,  
-      radius: 5000,
-      elevationScale: 125,
-      elevationDomain: [0, 25],
-      extruded: true,
-      filled: true,
-      getElevationValue: d => {
-        try {
-          return maxCanFacilitiesArray(d) 
-        } catch(err) {
-          return 0
-        }
-      },
-      getPosition: d => {
+  // const mesh = new SimpleMeshLayer({
+  //   id: 'mesh-layer',
+  //   data: points,  
+  //   // texture: 'texture.png',
+  //   mesh: new CubeGeometry(),
+  //   sizeScale:10000,
+  //   getPosition: d => {
+  //     try {
+  //       // console.log(d)
+  //       if (d.hifldid === 10005337) console.log(d);
+  //       const { latitude, longitude } = d;
+  //       return [longitude, latitude];
+  //     } catch (err) {
+  //       console.error(err);
+  //     }
+  //   },
+  //   getColor: d => {
+  //     try {
+  //       // return [255, 255, 255];
+  //       return COLOR_SCALE(maxCanonicalFacilityRate(d))
+  //     } catch(err) {
+  //       console.error(err);
+  //     }
+  //   },
+  //   autoHighlight: true,
+  //   onHover
+  //   // // getOrientation: d => [0, 90, 0]
+  // });
+
+  const column = new ColumnLayer({
+    id: 'column-layer',
+    onHover,
+    data: points,  
+    diskResolution: 12,
+    radius: 3500,
+    extruded: true,
+    pickable: true,
+    elevationScale: 5000,
+    getPosition: d => {
       try {
+        if (d.hifldid === 10005337) console.log(d);
         const { latitude, longitude } = d;
         return [longitude, latitude];
-      } catch (err) {}
+      } catch (err) {
+        console.error(err);
+      }
     },
-      getColorValue: d => {
-        try {
-          return maxCanFacilitiesArray(d);
-        } catch(err) {
-          console.error(err);
-        }
-      },
-      wireframe: false,
-  
-      autoHighlight: true,
-      // highlightColor: [0, 0, 128, 128],
-      opacity: 25,
-      pickable: true,
-      // lightSettings: LIGHT_SETTINGS,
-      colorRange: COLOR_RANGE
-    });
+    getFillColor: d => {
+      try {
+        return COLOR_SCALE(maxCanFacilitiesArray([d]));
+      } catch(err) {
+        console.error(err);
+      }
+    },
+    getLineColor: [0, 0, 0],
+    getElevation: d => maxCanFacilitiesArray([d]),
+    // offset: d => [d.name.charCodeAt(0) * 50, d.name.charCodeAt(0) * 50]
+  });
 
-  return [geo, hexagon];
+
+  // const hexagon =
+  //   settings.geography.includes(Geography.FACILITY) &&
+  //   new HexagonLayer({
+  //     onHover,
+  //     data: points,  
+  //     radius: 1,
+  //     coverage: 5,
+  //     elevationScale: 125,
+  //     elevationDomain: [0, 25],
+  //     extruded: true,
+  //     filled: true,
+  //     getElevationValue: d => {
+  //       try {
+  //         return maxCanFacilitiesArray(d) 
+  //       } catch(err) {
+  //         return 0
+  //       }
+  //     },
+  //     getPosition: d => {
+  //     try {
+  //       if (d.hifldid === 10005337) console.log(d);
+  //       const { latitude, longitude } = d;
+  //       return [longitude, latitude];
+  //     } catch (err) {
+  //       console.error(err);
+  //     }
+  //   },
+  //     getColorValue: d => {
+  //       try {
+  //         return maxCanFacilitiesArray(d);
+  //       } catch(err) {
+  //         console.error(err);
+  //       }
+  //     },
+  //     wireframe: false,
+  
+  //     autoHighlight: true,
+  //     // highlightColor: [0, 0, 128, 128],
+  //     opacity: 25,
+  //     pickable: true,
+  //     // lightSettings: LIGHT_SETTINGS,
+  //     colorRange: COLOR_RANGE
+  //   });
+
+  return [geo, column];
 }

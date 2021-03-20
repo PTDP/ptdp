@@ -57,6 +57,7 @@ export function* loadFacilities() {
     if (facilities?.length > 0) {
       yield put(actions.facilitiesLoaded(facilities));
       const geojson = topojson.feature(counties, counties.objects.counties);
+      console.log('topojson', counties)
       yield put(actions.countiesLoaded(geojson));
     } else {
       yield put(actions.facilitiesError(RepoErrorType.USER_HAS_NO_REPO));
