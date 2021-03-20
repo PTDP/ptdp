@@ -30,7 +30,7 @@ import counties from 'us-atlas/counties-10m.json';
 import * as topojson from 'topojson-client';
 import yj from 'yieldable-json';
 import { from } from '@apollo/client';
-import { fifteenMinuteRate } from './utils';
+import { fifteenMinuteRate, maxCanonicalFacilityRate } from './utils';
 
 const INITIAL_VIEW_STATE = {
   longitude: -98.5795,
@@ -162,16 +162,10 @@ export const NationalMap = props => {
       if (facilitiesByFips[g.id]) {
         try {
           facilitiesByFips[g.id].forEach((f) => {
-            f.companyFacilitiesByCanonicalFacilityId.nodes.forEach(el => {
-              el.ratesByCompanyFacilityId.nodes.forEach((r, i) => {
-
-                max = Math.max(max, fifteenMinuteRate(r));
-              });
-            });
-          })
+            max = Math.max(max, maxCanonicalFacilityRate(f));
+          });
         } catch (err) { }
       }
-
       g.properties.fifteenMinute = max;
     })
 
@@ -220,7 +214,6 @@ export const NationalMap = props => {
 
     try {
       const str = await JSON.stringify(facilities);
-      // console.log('<><><>><><><><>', str);
       j = await parseAsync(str);
     } catch (err) {
       console.error(err);
