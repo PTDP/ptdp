@@ -4,25 +4,28 @@ import { Facility } from 'types/Facility';
 import { GeospatialAppBarChartXDomain } from './examples';
 import { Filters, Geography } from './slice/types';
 import { scaleThreshold } from 'd3-scale';
+import { maxCanonicalFacilityRate } from './utils';
+
+const COLOR_RANGE = [
+  [0, 0, 0, 0],
+  [127, 205, 187, 0],
+  [199, 233, 180],
+  [237, 248, 177],
+  // zero
+  [255, 255, 204],
+  [255, 237, 160],
+  [254, 217, 118],
+  [254, 178, 76],
+  [253, 141, 60],
+  [252, 78, 42],
+  [227, 26, 28],
+  [189, 0, 38],
+  [168, 0, 38],
+]
 
 export const COLOR_SCALE = scaleThreshold()
   .domain(new Array(13).fill(0).map((_, i) => (25 / 13) * i + 0))
-  .range([
-    [0, 0, 0, 0],
-    [127, 205, 187, 0],
-    [199, 233, 180],
-    [237, 248, 177],
-    // zero
-    [255, 255, 204],
-    [255, 237, 160],
-    [254, 217, 118],
-    [254, 178, 76],
-    [253, 141, 60],
-    [252, 78, 42],
-    [227, 26, 28],
-    [189, 0, 38],
-    [128, 0, 38],
-  ]);
+  .range(COLOR_RANGE);
 
 // TODO Make imports work so this can be removed!
 export enum Company {
@@ -77,12 +80,12 @@ const HEATMAP_COLORS = [
 ];
 
 const LIGHT_SETTINGS = {
-  lightsPosition: [-73.8, 40.5, 8000, -74.2, 40.9, 8000],
-  ambientRatio: 0.4,
-  diffuseRatio: 0.6,
-  specularRatio: 0.2,
-  lightsStrength: [0.8, 0.0, 0.8, 0.0],
-  numberOfLights: 2,
+  lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.00, 5000],
+  ambientRatio:  0.3,
+  diffuseRatio: 0.5,
+  specularRatio: 0.9,
+  lightsStrength: [2.0, 0, 0, 0],
+  numberOfLights: 3
 };
 
 const elevationRange = [0, 100];
@@ -136,24 +139,52 @@ export function renderLayers(
       onHover,
     });
 
+  const maxCanFacilitiesArray = (arr: Facility[]) => {
+    let max = 0;
+    arr.forEach((cf) => {
+      max = Math.max(maxCanonicalFacilityRate(cf), max);
+    })
+    return max;
+  }
+
   const hexagon =
     settings.geography.includes(Geography.FACILITY) &&
     new HexagonLayer({
-      data: points,
-      pickable: true,
-      extruded: true,
-      radius: 5000,
-      elevationScale: 200,
-      elevationDomain: [0, 25],
-      getElevationValue: fifteenMinute,
-      getFillColor: d => COLOR_SCALE(fifteenMinute(d)),
-      getPosition: d => {
-        try {
-          const { latitude, longitude } = d;
-          return [longitude, latitude];
-        } catch (err) {}
-      },
       onHover,
+      data: points,  
+      radius: 5000,
+      elevationScale: 125,
+      elevationDomain: [0, 25],
+      extruded: true,
+      filled: true,
+      getElevationValue: d => {
+        try {
+          return maxCanFacilitiesArray(d) 
+        } catch(err) {
+          return 0
+        }
+      },
+      getPosition: d => {
+      try {
+        const { latitude, longitude } = d;
+        return [longitude, latitude];
+      } catch (err) {}
+    },
+      getColorValue: d => {
+        try {
+          return maxCanFacilitiesArray(d);
+        } catch(err) {
+          console.error(err);
+        }
+      },
+      wireframe: false,
+  
+      autoHighlight: true,
+      // highlightColor: [0, 0, 128, 128],
+      opacity: 25,
+      pickable: true,
+      // lightSettings: LIGHT_SETTINGS,
+      colorRange: COLOR_RANGE
     });
 
   return [geo, hexagon];
