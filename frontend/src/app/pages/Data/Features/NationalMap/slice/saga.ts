@@ -7,7 +7,7 @@ import { Rate } from 'types/Rate';
 import client from '../../../../../../api';
 import { FACILITIES_QUERY } from '../../../../../../api/queries';
 // import data from './facilities_data.json';
-import data from './facilities_data_min.json';
+import data from './facilities_data.json';
 import * as topojson from 'topojson-client';
 import counties from 'us-atlas/counties-10m.json';
 
@@ -44,7 +44,15 @@ export function* loadFacilities() {
     // match all
     // console.log(f_response[0]);
 
-    const facilities = f_response?.data?.allCanonicalFacilities?.nodes;
+    let facilities : Facility[] = f_response?.data?.allCanonicalFacilities?.nodes;
+
+    // filter facilities we should never see
+    facilities = facilities.filter((elt) => {
+      if (elt.hifldByHifldid.status === "CLOSED") return false;
+      if (elt.hidden) return false;
+      return true;
+    });
+
 
     if (facilities?.length > 0) {
       yield put(actions.facilitiesLoaded(facilities));

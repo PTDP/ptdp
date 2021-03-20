@@ -10,14 +10,19 @@ const Logo = () => (
   </Avatar>
 )
 
-const LogoFull = () => (
-  <div className="flex">
-    <Logo />
-    <span className="ml-4 flex items-center font-bold">
-      Prison Telecom Data Project
+const LogoFull = () => {
+
+  const history = useHistory();
+
+  return (
+    <div className="flex cursor-pointer" onClick={() => history.push('/')}>
+      <Logo />
+      <span className="ml-4 flex items-center font-bold">
+        Prison Telecom Data Project
     </span>
-  </div>
-)
+    </div>
+  )
+}
 export function Nav() {
   const history = useHistory();
 
