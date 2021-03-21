@@ -14,6 +14,8 @@ import { GlobalStyle } from '../styles/global-styles';
 import { NavBar } from 'app/components/NavBar';
 
 import { HomePage } from './pages/HomePage/Loadable';
+import { Resources } from './pages/Resources/Loadable';
+
 import { Data } from './pages/Data/Loadable';
 import { About } from './pages/About/Loadable';
 import { NotFoundPage } from './pages/NotFoundPage/Loadable';
@@ -35,6 +37,7 @@ export function App() {
         <Route exact path={process.env.PUBLIC_URL + '/about'} component={About} />
         <Route exact path={process.env.PUBLIC_URL + '/data'} component={Data} />
         <Route exact path={process.env.PUBLIC_URL + '/'} component={HomePage} />
+        <Route exact path={process.env.PUBLIC_URL + '/resources'} component={Resources} />
         <Route component={NotFoundPage} />
       </Switch>
       <GlobalStyle />

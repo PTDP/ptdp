@@ -53,6 +53,7 @@ export const Layout = () => {
                         <div className="col-span-1 space-y-5 sm:space-y-4 sm:col-span-1">
                             <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl mt-8">Our Mission</h2>
                             <p className="text-xl text-gray-500">Make prison and jail communication free, nationwide.</p>
+                            <p className="text-md text-gray-500">We draw our mission from <a className="underline cursor-pointer" onClick={() => window.open("https://connectfamiliesnow.com/")}>#ConnectFamiliesNow</a>.</p>
                             <p className="text-md text-gray-500">We believe that in a time of ubiquitous, free telecommunications products, it is unconscionable for incarcerated people and their families to be forced to pay to communicate.</p>
                         </div>
                         <div className="col-span-2 sm:col-span-2">

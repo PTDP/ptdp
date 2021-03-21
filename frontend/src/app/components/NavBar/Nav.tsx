@@ -92,6 +92,9 @@ export function Nav() {
                     <a href="/methods" onClick={handleClick} className={getNavClass("/methods")}>
                       Methods & FAQ
                   </a>
+                    <a href="/resources" onClick={handleClick} className={getNavClass("/resources")}>
+                      Resources
+                  </a>
                     {/* <a href="/contact" onClick={handleClick} className={getNavClass("/contact")}>
                       Get Involved
                   </a> */}
