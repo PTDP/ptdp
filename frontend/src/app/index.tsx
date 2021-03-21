@@ -15,6 +15,7 @@ import { NavBar } from 'app/components/NavBar';
 
 import { HomePage } from './pages/HomePage/Loadable';
 import { Data } from './pages/Data/Loadable';
+import { About } from './pages/About/Loadable';
 import { NotFoundPage } from './pages/NotFoundPage/Loadable';
 import { useTranslation } from 'react-i18next';
 import '../styles/tailwind.css';
@@ -31,6 +32,7 @@ export function App() {
         <meta name="description" content="Prison Telecom Data Project" />
       </Helmet>
       <Switch>
+        <Route exact path={process.env.PUBLIC_URL + '/about'} component={About} />
         <Route exact path={process.env.PUBLIC_URL + '/data'} component={Data} />
         <Route exact path={process.env.PUBLIC_URL + '/'} component={HomePage} />
         <Route component={NotFoundPage} />

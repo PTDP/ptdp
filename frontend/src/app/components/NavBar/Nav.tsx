@@ -84,7 +84,7 @@ export function Nav() {
                 <div className="flex justify-end w-full">
                   <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
                     <a href="/" onClick={handleClick} className={getNavClass("/")}>
-                      About
+                      Home
                   </a>
                     <a href="/data" onClick={handleClick} className={getNavClass("/data")}>
                       Data
@@ -92,8 +92,11 @@ export function Nav() {
                     <a href="/methods" onClick={handleClick} className={getNavClass("/methods")}>
                       Methods & FAQ
                   </a>
-                    <a href="/contact" onClick={handleClick} className={getNavClass("/contact")}>
-                      Contact
+                    {/* <a href="/contact" onClick={handleClick} className={getNavClass("/contact")}>
+                      Get Involved
+                  </a> */}
+                    <a href="/about" onClick={handleClick} className={getNavClass("/about")}>
+                      About Us
                   </a>
                   </div>
                 </div>
