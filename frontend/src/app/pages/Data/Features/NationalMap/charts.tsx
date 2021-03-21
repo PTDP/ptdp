@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { li } from './style';
 
 import { Facility, Rate, CF } from 'types/Facility';
@@ -24,10 +24,25 @@ import {
   Line,
   DiscreteColorLegend,
   LabelSeries,
-  LineMarkSeries
+  LineMarkSeries,
+  Hint,
+  Crosshair
 } from 'react-vis';
 import { cd } from 'shelljs';
 import { latestOutstateRate } from './deckgl-layers';
+
+function formatPhoneNumber(phoneNumberString) {
+  //normalize string and remove all unnecessary characters
+  let phone = phoneNumberString.slice(1).replace(/[^\d]/g, "");
+
+  //check if number length equals to 10
+  if (phone.length == 10) {
+    //reformat and return phone number
+    return phone.replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3");
+  }
+
+  return null;
+}
 
 const CicularButton = ({ children, className, onClick }) => {
   return (
@@ -170,6 +185,12 @@ export default function Charts({
     [CallType.OUT_STATE]: true
   })
   const [allSeries, setAllSeries]: any = useState(null);
+  const isHoveringOverLine = useRef<{ [key: string]: Boolean }>({});
+  const [hoveredPoint, setHoveredPoint] = useState<{
+    x: number;
+    y: number;
+    number: string;
+  } | null>();
 
   const get = async () => {
     try {
@@ -237,21 +258,20 @@ export default function Charts({
       return false;
     }
 
-    console.log('validCfs', validCFs)
-    console.log('flattenedRates', flattenedRates);
-
     flattenedRates = flattenedRates.filter(filterOnCallType).filter(filterOnService);
 
     flattenedRates.forEach((r) => {
       const key = `${r.inState ? CallType.IN_STATE : CallType.OUT_STATE}-${r.service}`;
       if (series[key]) series[key].push({
         x: new Date(r.updated[0]),
-        y: fifteenMinuteRate(r)
+        y: fifteenMinuteRate(r),
+        number: r.phone
       });
       else {
         series[key] = [{
           x: new Date(r.updated[0]),
-          y: fifteenMinuteRate(r)
+          y: fifteenMinuteRate(r),
+          number: r.phone
         }]
       }
     })
@@ -261,8 +281,6 @@ export default function Charts({
         return a.x.getTime() - b.x.getTime()
       })
     }
-
-    console.log('series', series)
 
     setAllSeries(series)
   }
@@ -278,6 +296,7 @@ export default function Charts({
     if (!selectedFacility || !selectedFacility.companyFacilitiesByCanonicalFacilityId) return;
 
     createSeries();
+    setHoveredPoint(null);
   }, [productFilters, companyFacilityFilters, selectedFacility, callTypeFilters])
 
 
@@ -458,7 +477,10 @@ export default function Charts({
           </div>
         </div>
         <div className="flex justify-center" style={{ color: 'black', flex: 1 }}>
-          <XYPlot dontCheckIfEmpty width={300} height={300} xType="time" yDomain={[0, Math.ceil(max15()) + 5]} xDomain={[JAN_1_2021, addDaysToDate(lastScrapedDate(allSeries), 7)]}>
+          <XYPlot
+            // onMouseLeave={() => setHoveredPoint(null)}
+
+            dontCheckIfEmpty width={300} height={300} xType="time" yDomain={[0, Math.ceil(max15()) + 5]} xDomain={[JAN_1_2021, addDaysToDate(lastScrapedDate(allSeries), 7)]}>
             <HorizontalGridLines />
             <VerticalGridLines />
             <XAxis
@@ -487,12 +509,47 @@ export default function Charts({
             {Object.entries(allSeries).map(([name, s]) => {
               return (
                 <LineMarkSeries
+                  key={name}
+                  onSeriesMouseOver={(e) => {
+                    isHoveringOverLine.current[name] = true;
+                  }}
+                  onSeriesMouseOut={(e: React.MouseEvent<HTMLOrSVGElement>) => {
+                    isHoveringOverLine.current[name] = false;
+                  }}
+                  onNearestXY={(e, { index }) => {
+                    if (isHoveringOverLine.current[name]) {
+                      const hoveredLine = (s as any)[index];
+
+                      console.log('(s as any)[index]', (s as any)[index])
+
+                      setHoveredPoint({
+                        x: hoveredLine.x,
+                        y: hoveredLine.y,
+                        number: (s as any)[index].number
+                      });
+                    }
+                  }}
                   curve={curveCatmullRom.alpha(0.5)}
                   className={`${name}`}
                   data={s}
                 />
               )
             })}
+            {hoveredPoint && (
+              <Hint value={hoveredPoint}>
+                <div >
+                  <div>
+                    15 Minute Rate: ${hoveredPoint.y.toFixed(2)}
+                  </div>
+                  <div>
+                    Data Collected: {(hoveredPoint.x as any as Date).toLocaleDateString('en-US')}
+                  </div>
+                  <div>
+                    Test Phone: {formatPhoneNumber(hoveredPoint.number)}
+                  </div>
+                </div>
+              </Hint>
+            )}
           </XYPlot>
         </div>
       </div>

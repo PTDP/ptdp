@@ -10,7 +10,7 @@ import {CubeGeometry} from '@luma.gl/core'
 
 const COLOR_RANGE_COUNTY = [
   [0, 0, 0, 0],
-  [127, 205, 187, 0],
+  [127, 205, 187, 50],
   [199, 233, 180],
   [237, 248, 177],
   // zero
@@ -27,7 +27,7 @@ const COLOR_RANGE_COUNTY = [
 
 const COLOR_RANGE = [
   [0, 0, 0, 0],
-  [157, 205, 187, 0],
+  [127, 205, 187],
   [227, 233, 180],
   [237, 248, 177],
   // zero
@@ -195,56 +195,16 @@ export function renderLayers(
   //   // // getOrientation: d => [0, 90, 0]
   // });
 
-  const column = new ColumnLayer({
-    id: 'column-layer',
-    onHover,
-    data: points,  
-    diskResolution: 12,
-    radius: 3500,
-    extruded: true,
-    pickable: true,
-    elevationScale: 5000,
-    getPosition: d => {
-      try {
-        if (d.hifldid === 10005337) console.log(d);
-        const { latitude, longitude } = d;
-        return [longitude, latitude];
-      } catch (err) {
-        console.error(err);
-      }
-    },
-    getFillColor: d => {
-      try {
-        return COLOR_SCALE(maxCanFacilitiesArray([d]));
-      } catch(err) {
-        console.error(err);
-      }
-    },
-    getLineColor: [0, 0, 0],
-    getElevation: d => maxCanFacilitiesArray([d]),
-    // offset: d => [d.name.charCodeAt(0) * 50, d.name.charCodeAt(0) * 50]
-  });
-
-
-  // const hexagon =
-  //   settings.geography.includes(Geography.FACILITY) &&
-  //   new HexagonLayer({
-  //     onHover,
-  //     data: points,  
-  //     radius: 1,
-  //     coverage: 5,
-  //     elevationScale: 125,
-  //     elevationDomain: [0, 25],
-  //     extruded: true,
-  //     filled: true,
-  //     getElevationValue: d => {
-  //       try {
-  //         return maxCanFacilitiesArray(d) 
-  //       } catch(err) {
-  //         return 0
-  //       }
-  //     },
-  //     getPosition: d => {
+  // const column = new ColumnLayer({
+  //   id: 'column-layer',
+  //   onHover,
+  //   data: points,  
+  //   diskResolution: 12,
+  //   radius: 2500,
+  //   extruded: true,
+  //   pickable: true,
+  //   elevationScale: 5000,
+  //   getPosition: d => {
   //     try {
   //       if (d.hifldid === 10005337) console.log(d);
   //       const { latitude, longitude } = d;
@@ -253,22 +213,69 @@ export function renderLayers(
   //       console.error(err);
   //     }
   //   },
-  //     getColorValue: d => {
-  //       try {
-  //         return maxCanFacilitiesArray(d);
-  //       } catch(err) {
-  //         console.error(err);
-  //       }
-  //     },
-  //     wireframe: false,
+  //   getFillColor: d => {
+  //     try {
+  //       return COLOR_SCALE(maxCanFacilitiesArray([d]));
+  //     } catch(err) {
+  //       console.error(err);
+  //     }
+  //   },
+  //   getLineColor: [0, 0, 0],
+  //   getElevation: d => maxCanFacilitiesArray([d]),
+  //   // offset: d => [d.name.charCodeAt(0) * 50, d.name.charCodeAt(0) * 50]
+  // });
+
+
+  const column =
+    settings.geography.includes(Geography.FACILITY) &&
+    new HexagonLayer({
+      onHover,
+      data: points,  
+      radius: 2500,
+      coverage: 1,
+      elevationScale: 200,
+      elevationDomain: [0, 25],
+      extruded: true,
+      filled: true,
+      lowerPercentile: 0,
+      getElevationValue: d => {
+        try {
+          d.forEach((el) => {
+            if (el.hifldid === 10003791) {
+              console.log(maxCanFacilitiesArray(d));
+              console.log(d)
+            }
+          })
+          return maxCanFacilitiesArray(d) 
+        } catch(err) {
+          return 0
+        }
+      },
+      getPosition: d => {
+      try {
+        if (d.hifldid === 10005337) console.log(d);
+        const { latitude, longitude } = d;
+        return [longitude, latitude];
+      } catch (err) {
+        console.error(err);
+      }
+    },
+      getColorValue: d => {
+        try {
+          return maxCanFacilitiesArray(d);
+        } catch(err) {
+          console.error(err);
+        }
+      },
+      wireframe: false,
   
-  //     autoHighlight: true,
-  //     // highlightColor: [0, 0, 128, 128],
-  //     opacity: 25,
-  //     pickable: true,
-  //     // lightSettings: LIGHT_SETTINGS,
-  //     colorRange: COLOR_RANGE
-  //   });
+      autoHighlight: true,
+      // highlightColor: [0, 0, 128, 128],
+      opacity: 25,
+      pickable: true,
+      // lightSettings: LIGHT_SETTINGS,
+      colorRange: COLOR_RANGE
+    });
 
   return [geo, column];
 }
