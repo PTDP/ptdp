@@ -9,8 +9,7 @@ import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {CubeGeometry} from '@luma.gl/core'
 
 const COLOR_RANGE_COUNTY = [
-  [0, 0, 0, 0],
-  [127, 205, 187, 50],
+  [127, 205, 187],
   [199, 233, 180],
   [237, 248, 177],
   // zero
@@ -26,7 +25,7 @@ const COLOR_RANGE_COUNTY = [
 ]
 
 const COLOR_RANGE = [
-  [0, 0, 0, 0],
+  [100, 205, 187],
   [127, 205, 187],
   [227, 233, 180],
   [237, 248, 177],
@@ -43,7 +42,7 @@ const COLOR_RANGE = [
 ]
 
 export const COLOR_SCALE = scaleThreshold()
-  .domain(new Array(13).fill(0).map((_, i) => (25 / 13) * i + 0))
+  .domain(new Array(14).fill(0).map((_, i) => -1 + (25 / 14) * i + 0))
   .range(COLOR_RANGE_COUNTY);
 
 // TODO Make imports work so this can be removed!
