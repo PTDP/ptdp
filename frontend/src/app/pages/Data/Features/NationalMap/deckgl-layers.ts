@@ -1,4 +1,4 @@
-import { ScatterplotLayer, HexagonLayer, GeoJsonLayer,ColumnLayer } from 'deck.gl';
+import { ScatterplotLayer, HexagonLayer, GeoJsonLayer,ColumnLayer, H3HexagonLayer } from 'deck.gl';
 import { Service } from 'types/Service';
 import { Facility } from 'types/Facility';
 import { GeospatialAppBarChartXDomain } from './examples';
@@ -25,9 +25,8 @@ const COLOR_RANGE_COUNTY = [
 ]
 
 const COLOR_RANGE = [
-  [100, 205, 187],
   [127, 205, 187],
-  [227, 233, 180],
+  [199, 233, 180],
   [237, 248, 177],
   // zero
   [255, 255, 204],
@@ -41,8 +40,10 @@ const COLOR_RANGE = [
   [168, 0, 38],
 ]
 
+const COLOR_DOMAIN = new Array(14).fill(0).map((_, i) => -1 + (25 / 14) * i + 0);
+
 export const COLOR_SCALE = scaleThreshold()
-  .domain(new Array(14).fill(0).map((_, i) => -1 + (25 / 14) * i + 0))
+  .domain(COLOR_DOMAIN)
   .range(COLOR_RANGE_COUNTY);
 
 // TODO Make imports work so this can be removed!
@@ -273,8 +274,62 @@ export function renderLayers(
       opacity: 25,
       pickable: true,
       // lightSettings: LIGHT_SETTINGS,
-      colorRange: COLOR_RANGE
+      colorRange: COLOR_RANGE_COUNTY,
+      colorDomain: [0,25]
+      // getFillColor: d => COLOR_SCALE(d.properties.fifteenMinute),
     });
+
+    // const column =
+    // settings.geography.includes(Geography.FACILITY) &&
+    // new H3HexagonLayer({
+    //   onHover,
+    //   data: points,  
+    //   radius: 2500,
+    //   coverage: 1,
+    //   elevationScale: 200,
+    //   elevationDomain: [0, 25],
+    //   extruded: true,
+    //   filled: true,
+    //   lowerPercentile: 0,
+    //   getElevation: d => {
+    //     try {
+    //       d.forEach((el) => {
+    //         if (el.hifldid === 10003791) {
+    //           console.log(maxCanFacilitiesArray(d));
+    //           console.log(d)
+    //         }
+    //       })
+    //       return maxCanFacilitiesArray(d) 
+    //     } catch(err) {
+    //       return 0
+    //     }
+    //   },
+    //   getPosition: d => {
+    //   try {
+    //     if (d.hifldid === 10005337) console.log(d);
+    //     const { latitude, longitude } = d;
+    //     return [longitude, latitude];
+    //   } catch (err) {
+    //     console.error(err);
+    //   }
+    // },
+      // getColorValue: d => {
+      //   try {
+      //     return maxCanFacilitiesArray(d);
+      //   } catch(err) {
+      //     console.error(err);
+      //   }
+      // },
+      // wireframe: false,
+  
+      // autoHighlight: true,
+      // // highlightColor: [0, 0, 128, 128],
+      // opacity: 25,
+      // pickable: true,
+      // // lightSettings: LIGHT_SETTINGS,
+      // // colorRange: COLOR_RANGE
+      // getFillColor: d => COLOR_SCALE(d.properties.fifteenMinute),
+    // });
 
   return [geo, column];
 }
