@@ -162,7 +162,7 @@ export const NationalMap = props => {
 
     let filteredGeoJSON = { ...counties };
 
-    filteredGeoJSON.features.forEach((g) => {
+    filteredGeoJSON = (filteredGeoJSON.features as any).map((g) => {
       let max = 0;
       // console.log(`${g.id}-${g.properties.name}`);
       if (facilitiesByFips[`${g.id}-${g.properties.name.toUpperCase()}`]) {
@@ -173,8 +173,20 @@ export const NationalMap = props => {
           });
         } catch (err) { }
       }
-      g.properties.fifteenMinute = max;
-    })
+
+      if (max === 0) return null;
+      else {
+        return {
+          ...g,
+          properties: {
+            ...g.properties,
+            fifteenMinute: max
+          }
+        }
+      }
+    }).filter((el) => !!el);
+
+    console.log('filteredGeoJSON', filteredGeoJSON)
 
     layers.gj = filteredGeoJSON;
   }
