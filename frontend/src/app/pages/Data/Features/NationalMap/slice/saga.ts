@@ -8,6 +8,8 @@ import client from '../../../../../../api';
 import { FACILITIES_QUERY } from '../../../../../../api/queries';
 // import data from './facilities_data.json';
 import data from './facilities_data.json';
+// import topo_data from './boundaries_topo_json.json';
+// import geo_data from './boundaries.json';
 import * as topojson from 'topojson-client';
 import counties from 'us-atlas/counties-10m.json';
 
@@ -57,8 +59,10 @@ export function* loadFacilities() {
     if (facilities?.length > 0) {
       yield put(actions.facilitiesLoaded(facilities));
       const geojson = topojson.feature(counties, counties.objects.counties);
-      console.log('topojson', counties)
       yield put(actions.countiesLoaded(geojson));
+
+      // yield put(actions.boundariesLoaded(geo_data))
+      // yield put(actions.boundariesLoaded(topojson.feature(topo_data, (topo_data as any).objects['Prison_Boundaries'])));
     } else {
       yield put(actions.facilitiesError(RepoErrorType.USER_HAS_NO_REPO));
     }

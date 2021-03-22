@@ -22,7 +22,7 @@ import Charts from './charts';
 /* Data Fetching */
 import { useSelector, useDispatch } from 'react-redux';
 import { useNationalMapSlice } from './slice';
-import { selectFacilities, selectLoading, selectError, selectFilters, selectCounties } from './slice/selectors';
+import { selectFacilities, selectLoading, selectError, selectFilters, selectCounties, selectBoundaries } from './slice/selectors';
 import { Filters, FilterCompanies, Geography, CallType, FacilityType, SecureLVL } from './slice/types';
 import { Facility } from 'types/Facility'
 import { createImmutableStateInvariantMiddleware } from '@reduxjs/toolkit';
@@ -133,6 +133,8 @@ export const NationalMap = props => {
   const facilities = useSelector(selectFacilities);
   const filters = useSelector(selectFilters);
   const counties = useSelector(selectCounties);
+  const boundaries = useSelector(selectBoundaries);
+
   const [chartExpanded, setChartExpanded] = useState(false);
 
   useEffect(() => {
@@ -250,7 +252,6 @@ export const NationalMap = props => {
 
   const _onHover = props => {
     const { x, y, object, hoveredObject, layer } = props;
-    console.log('props', props);
     if (layer.id === 'geojson-layer' && (!object || object?.properties?.fifteenMinute === 0)) {
       if (state.hover.hoveredObject !== null) {
         setState({
@@ -396,7 +397,8 @@ export const NationalMap = props => {
                 points: layers.points,
                 geojson: layers.gj,
                 settings: layers.settings,
-                onHover: hover => _onHover(hover)
+                onHover: hover => _onHover(hover),
+                boundaries: boundaries
               }, forceUpdateNum)}
               initialViewState={INITIAL_VIEW_STATE}
               viewState={viewState}
