@@ -18,6 +18,9 @@ export default class CanonicalLoader {
   HIFLD_URL =
     "https://opendata.arcgis.com/datasets/2d6109d4127d458eaf0958e4c5296b67_0.csv?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D";
 
+  HIFLD_GEOCODED_URL =
+    "https://raw.githubusercontent.com/PTDP/data/main/intermediate_data/hifld_geocoded.csv";
+
   constructor() {}
 
   parse(data: string): Promise<any[]> {
@@ -41,6 +44,7 @@ export default class CanonicalLoader {
 
   async insertNewCanonical() {
     const csv = (await axios.get(this.URL)).data;
+
     const parsed: JoinedCompanyFacility[] = await this.parse(csv);
     const insertables: ICanonicalFacility[] = [];
 
@@ -96,7 +100,7 @@ export default class CanonicalLoader {
   }
 
   async insertNewHIFLD() {
-    const csv = (await axios.get(this.HIFLD_URL)).data;
+    const csv = (await axios.get(this.HIFLD_GEOCODED_URL)).data;
     const parsed: HIFLDData[] = (await this.parse(csv)).map((elt) => ({
       ...elt,
       FID: parseInt(elt.FID) || null,
@@ -110,6 +114,8 @@ export default class CanonicalLoader {
       SHAPE_Leng: parseFloat(elt.SHAPE_Leng) || null,
       SHAPE_Length: parseFloat(elt.SHAPE_Length) || null,
       SHAPE_Area: parseFloat(elt.SHAPE_Area) || null,
+      LONGITUDE: parseFloat(elt.LONGITUDE) || null,
+      LATITUDE: parseFloat(elt.LATITUDE) || null,
     }));
 
     await connection.batchInsert(Tables.hifld, parsed, 1000);

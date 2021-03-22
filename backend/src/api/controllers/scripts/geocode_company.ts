@@ -5,6 +5,7 @@ import * as functions from "firebase-functions";
 import axios from "axios";
 import * as csv from "fast-csv";
 // import querystring from "querystring";
+import * as turf from "@turf/turf";
 import * as fs from "fs";
 
 // import fs from "fs";
@@ -344,4 +345,33 @@ export const intCompare = async () => {
   });
 
   console.log(missing.length);
+};
+
+export const centroid = async () => {
+  const BOUNDARIES_GEOJSON = (
+    await axios.get(
+      "https://firebasestorage.googleapis.com/v0/b/ptdp-staging.appspot.com/o/boundaries.json?alt=media&token=4468ee6a-57b1-4739-b039-1578544ca45d"
+    )
+  ).data;
+
+  const HIFLD: any = await readCSV(
+    "https://opendata.arcgis.com/datasets/2d6109d4127d458eaf0958e4c5296b67_0.csv?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D"
+  );
+
+  for (const f of BOUNDARIES_GEOJSON.features) {
+    f.geometry = {
+      type: "Point",
+      coordinates: turf.center(f).geometry!.coordinates,
+    };
+
+    const h = HIFLD.find(
+      (el: any) => el.FACILITYID === f.properties.FACILITYID
+    );
+
+    const coords = turf.center(f).geometry!.coordinates;
+    h.LONGITUDE = coords[0];
+    h.LATITUDE = coords[1];
+  }
+
+  await serialize(HIFLD, "./hifld_geocoded.csv");
 };

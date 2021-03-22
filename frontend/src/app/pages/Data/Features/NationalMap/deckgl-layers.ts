@@ -212,7 +212,7 @@ export function renderLayers(
       getPosition: d => {
       try {
         if (d.hifldid === 10005337) console.log(d);
-        const { latitude, longitude } = d;
+        const { latitude, longitude } = d.hifldByHifldid;
         return [longitude, latitude];
       } catch (err) {
         console.error(err);
