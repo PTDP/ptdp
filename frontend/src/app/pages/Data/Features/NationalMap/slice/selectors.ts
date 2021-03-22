@@ -30,3 +30,8 @@ export const selectCounties = createSelector(
   [selectDomain],
   nationalMapState => nationalMapState.counties,
 );
+
+export const selectBoundaries = createSelector(
+  [selectDomain],
+  nationalMapState => nationalMapState.boundaries,
+);

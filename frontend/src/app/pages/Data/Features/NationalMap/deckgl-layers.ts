@@ -115,6 +115,7 @@ export function renderLayers(
     points: any;
     settings: Filters;
     onHover: any;
+    boundaries: any;
   },
   forceUpdateNum,
 ) {
@@ -166,65 +167,22 @@ export function renderLayers(
     return max;
   }
 
-  // const mesh = new SimpleMeshLayer({
-  //   id: 'mesh-layer',
-  //   data: points,  
-  //   // texture: 'texture.png',
-  //   mesh: new CubeGeometry(),
-  //   sizeScale:10000,
-  //   getPosition: d => {
-  //     try {
-  //       // console.log(d)
-  //       if (d.hifldid === 10005337) console.log(d);
-  //       const { latitude, longitude } = d;
-  //       return [longitude, latitude];
-  //     } catch (err) {
-  //       console.error(err);
-  //     }
-  //   },
-  //   getColor: d => {
-  //     try {
-  //       // return [255, 255, 255];
-  //       return COLOR_SCALE(maxCanonicalFacilityRate(d))
-  //     } catch(err) {
-  //       console.error(err);
-  //     }
-  //   },
-  //   autoHighlight: true,
-  //   onHover
-  //   // // getOrientation: d => [0, 90, 0]
-  // });
-
-  // const column = new ColumnLayer({
-  //   id: 'column-layer',
-  //   onHover,
-  //   data: points,  
-  //   diskResolution: 12,
-  //   radius: 2500,
+  // const bs =
+  // new GeoJsonLayer({
+  //   id: 'geojson-layer',
+  //   data: props.boundaries,
+  //   opacity: 0.8,
+  //   stroked: false,
+  //   filled: true,
   //   extruded: true,
-  //   pickable: true,
-  //   elevationScale: 5000,
-  //   getPosition: d => {
-  //     try {
-  //       if (d.hifldid === 10005337) console.log(d);
-  //       const { latitude, longitude } = d;
-  //       return [longitude, latitude];
-  //     } catch (err) {
-  //       console.error(err);
-  //     }
-  //   },
-  //   getFillColor: d => {
-  //     try {
-  //       return COLOR_SCALE(maxCanFacilitiesArray([d]));
-  //     } catch(err) {
-  //       console.error(err);
-  //     }
-  //   },
-  //   getLineColor: [0, 0, 0],
-  //   getElevation: d => maxCanFacilitiesArray([d]),
-  //   // offset: d => [d.name.charCodeAt(0) * 50, d.name.charCodeAt(0) * 50]
-  // });
+  //   wireframe: true,
 
+  //   getElevation: f => 20000,
+  //   getFillColor: f => [100, 255, 255],
+  //   getLineColor: [255, 255, 255],
+  //   getLineWidth: 10000,
+  //   pickable: true
+  // });
 
   const column =
     settings.geography.includes(Geography.FACILITY) &&
@@ -279,57 +237,6 @@ export function renderLayers(
       // getFillColor: d => COLOR_SCALE(d.properties.fifteenMinute),
     });
 
-    // const column =
-    // settings.geography.includes(Geography.FACILITY) &&
-    // new H3HexagonLayer({
-    //   onHover,
-    //   data: points,  
-    //   radius: 2500,
-    //   coverage: 1,
-    //   elevationScale: 200,
-    //   elevationDomain: [0, 25],
-    //   extruded: true,
-    //   filled: true,
-    //   lowerPercentile: 0,
-    //   getElevation: d => {
-    //     try {
-    //       d.forEach((el) => {
-    //         if (el.hifldid === 10003791) {
-    //           console.log(maxCanFacilitiesArray(d));
-    //           console.log(d)
-    //         }
-    //       })
-    //       return maxCanFacilitiesArray(d) 
-    //     } catch(err) {
-    //       return 0
-    //     }
-    //   },
-    //   getPosition: d => {
-    //   try {
-    //     if (d.hifldid === 10005337) console.log(d);
-    //     const { latitude, longitude } = d;
-    //     return [longitude, latitude];
-    //   } catch (err) {
-    //     console.error(err);
-    //   }
-    // },
-      // getColorValue: d => {
-      //   try {
-      //     return maxCanFacilitiesArray(d);
-      //   } catch(err) {
-      //     console.error(err);
-      //   }
-      // },
-      // wireframe: false,
-  
-      // autoHighlight: true,
-      // // highlightColor: [0, 0, 128, 128],
-      // opacity: 25,
-      // pickable: true,
-      // // lightSettings: LIGHT_SETTINGS,
-      // // colorRange: COLOR_RANGE
-      // getFillColor: d => COLOR_SCALE(d.properties.fifteenMinute),
-    // });
-
+  // console.log('bs', bs);
   return [geo, column];
 }

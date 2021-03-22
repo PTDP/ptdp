@@ -17,6 +17,7 @@ import {
 export const initialState: NationalMapState = {
   facilities: [],
   counties: { features: [] },
+  boundaries: { features: [] },
   filters: {
     call_type: CallType.IN_STATE,
     geography: [Geography.FACILITY, Geography.COUNTY],
@@ -68,6 +69,9 @@ const slice = createSlice({
     countiesLoaded(state, action: PayloadAction<any>) {
       state.counties = action.payload;
     },
+    boundariesLoaded(state, action: PayloadAction<any>) {
+      state.boundaries = action.payload;
+    }
   },
 });
 
