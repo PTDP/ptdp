@@ -115,7 +115,7 @@ export const NationalMap = props => {
         }),
         {},
       ),
-      selectedFacility: {},
+      selectedFacilities: [],
       style: 'mapbox://styles/mapbox/light-v9',
       hexagonRadius: 2000
     },
@@ -158,12 +158,7 @@ export const NationalMap = props => {
         facilitiesByFips[`${paddedFips}-${f.hifldByHifldid.county}`] = [f];
       }
     })
-
-    console.log('facilitiesByFips', facilitiesByFips);
-
-
     let filteredGeoJSON = { ...counties };
-
     filteredGeoJSON = (filteredGeoJSON.features as any).map((g) => {
       let max = 0;
       // console.log(`${g.id}-${g.properties.name}`);
@@ -187,8 +182,6 @@ export const NationalMap = props => {
         }
       }
     }).filter((el) => !!el);
-
-    console.log('filteredGeoJSON', filteredGeoJSON)
 
     layers.gj = filteredGeoJSON;
   }
@@ -266,51 +259,12 @@ export const NationalMap = props => {
       return
     };
 
-    // const d = object?.points?.[0]?.source;
-
-    // const canonical =
-    //   props.layer.id === 'in-state'
-    //     ? latestInStateCanonical([d])
-    //     : latestOutStateCanonical([d]);
-    // const rate = latestRateFromCanonical(canonical);
-    // const seen = rate?.seenAt;
-
-    // let str = '';
-    // if (seen) {
-    //   const latest = seen?.[seen.length - 1];
-    //   str = new Date(latest).toLocaleString('en-US', { timeZone: 'UTC' });
-    // }
-
-    // const label = object
-    //   ? object.points
-    //     ? `
-    //       <div>
-    //       Facility: ${d?.name}
-    //       </div>
-    //       <div>
-    //        Agency: ${d?.agencyByAgencyId?.name || 'Unknown'}
-    //        </div>
-    //        <div>
-    //        15 Minute Rate: $${(fifteenMinute(rate) / 100).toFixed(2)}
-    //        </div>
-    //        <div>
-    //        Company: ${canonical?.companyByCompanyId?.['name']}
-    //        </div>
-    //        <div>
-    //        Number used: ${canonical?.phoneNumber}
-    //        </div>
-    //        <div>
-    //        Rate Collected At: ${str}
-    //        </div>
-    //        `
-    //     : null
-    //   : null;
-
     if (layer.id !== 'geojson-layer') console.log('<><><><><>', object)
 
-    const label = layer.id === 'geojson-layer' ? `${object.properties.name} County` : `${object?.hifldByHifldid?.name}`;
+    const label = layer.id === 'geojson-layer' ? `${object.properties.name} County` : `${object?.points?.map(p => p?.source?.hifldByHifldid?.name).filter((elt, i, arr) => arr.indexOf(elt) === i).join('</br>')}`;
 
-    setState({ hover: { x, y, hoveredObject: object, label, hoveredLayer: layer.id } });
+    console.log('object?.points?', object?.points)
+    setState({ hover: { x, y, hoveredObject: object?.points ? object?.points : object, label, hoveredLayer: layer.id } });
   };
 
   const _onHighlight = highlightedHour => {
@@ -340,11 +294,13 @@ export const NationalMap = props => {
         console.error('No source for hoveredObject found');
         return;
       }
+      const hiflds = Array.from(new Set(source.map(f => f.source.hifldid)));
 
-      const selectedFacility = facilities.find((f) => f.hifldid === source.hifldid);
-
-      setState({ ...state, selectedFacility })
-      if (selectedFacility) {
+      console.log('hiflds', hiflds)
+      const selectedFacilities = facilities.filter((f) => hiflds.includes(f.hifldid));
+      console.log('selectedFacilities', selectedFacilities)
+      setState({ ...state, selectedFacilities })
+      if (selectedFacilities.length) {
         setChartExpanded(true);
       }
     }
@@ -431,7 +387,7 @@ export const NationalMap = props => {
             // {...state}
             highlight={() => { }}
             select={() => { }}
-            selectedFacility={state.selectedFacility}
+            selectedFacilities={state.selectedFacilities}
             chartExpanded={chartExpanded}
             setChartExpanded={setChartExpanded}
           // highlight={hour => _onHighlight(hour)}

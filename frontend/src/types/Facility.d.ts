@@ -10,6 +10,7 @@ export interface Facility {
   id: number;
   longitude: number;
   latitude: number;
+  name: string;
   hifldByHifldid: {
     capacity: number;
     city: string;
