@@ -199,7 +199,7 @@ export default function Charts({
 
   const tab = "py-4 px-1 text-center border-b-2 font-medium text-xs"
   const inActiveTab = "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300";
-  const activeTab = "border-indigo-500 text-indigo-600";
+  const activeTab = "border-green-500 text-green-600";
 
   const groupByHIFLD = () => {
     const grouped: Facility[] = [];

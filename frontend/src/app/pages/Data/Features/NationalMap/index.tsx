@@ -42,27 +42,6 @@ const INITIAL_VIEW_STATE = {
   bearing: 0,
 };
 
-// const Fetcher = () => {
-//   const dispatch = useDispatch();
-//   const { actions } = useNationalMapSlice();
-
-//   const isLoading = useSelector(selectLoading);
-//   const points = useSelector(selectPoints);
-
-//   useEffect(() => {
-//     dispatch(actions.loadFacilities());
-//   }, []);
-
-//   return (
-//     <div>
-//       {isLoading ? (
-//         <div> Loading the data!!!</div>
-//       ) : (
-//         <div>GOT THE DATA {JSON.stringify(points[0])}</div>
-//       )}
-//     </div>
-//   );
-// };
 const Loader = () => (
   <div id="hello" className="flex items-center justify-center w-full h-full" style={{ zIndex: 1000, position: 'absolute' }}>
     <div className="ease-linear rounded-full border-4 border-t-4 border-white h-6 w-6 loader-blue" style={{
@@ -71,6 +50,16 @@ const Loader = () => (
 
   </div >
 )
+
+const DataSummary = () => {
+
+  return (
+    <div id="hello" className="flex flex-col bg-white rounded-sm shadow-sm w-1/4 h-1/4 top-4 right-4 p-6" style={{ zIndex: 1000, position: 'absolute' }}>
+      <div className="text-sm font-medium">Data Summary</div>
+      Hello
+    </div>
+  )
+}
 
 const parseAsync = (json: string): Promise<any> => {
   return new Promise((res, rej) => {
@@ -95,6 +84,13 @@ const layers = {
   gj: [],
   settings: {}
 } as any;
+
+type DataSummary = {
+  max15Minute: number | null,
+  mean15Minute: number | null,
+  median15Minute: number | null
+  numFacilities: number | null
+}
 
 export const NationalMap = props => {
   const [state, setState] = useReducer(
@@ -126,6 +122,12 @@ export const NationalMap = props => {
   const u: any = {};
   const [forceUpdateNum, forceUpdate] = useReducer(x => x + 1, 0);
   const [loading, setLoading] = useState(false);
+  const [summary, setSummary] = useState<DataSummary>({
+    max15Minute: null,
+    mean15Minute: null,
+    median15Minute: null,
+    numFacilities: null
+  })
 
   const dispatch = useDispatch();
   const { actions } = useNationalMapSlice();
@@ -232,6 +234,12 @@ export const NationalMap = props => {
     try {
       const str = await JSON.stringify(facilities);
       j = await parseAsync(str);
+
+      // setSummary({
+      //   // mean15Minute
+      //   // max15Minute
+      //   // number
+      // })
     } catch (err) {
       console.error(err);
     }
@@ -337,6 +345,7 @@ export const NationalMap = props => {
               <div dangerouslySetInnerHTML={{ __html: hover.label }}></div>
             </div>
           )}
+          {/* <DataSummary /> */}
           <div className={`${loading && 'opacity-50'}`}>
             <DeckGL
               {...state.settings}
@@ -353,6 +362,7 @@ export const NationalMap = props => {
               initialViewState={INITIAL_VIEW_STATE}
               viewState={viewState}
               controller={controller}
+
             // onViewStateChange={(e) => {
             //   const { oldViewState, viewState } = e;
             //   console.log('viewstate', viewState)
