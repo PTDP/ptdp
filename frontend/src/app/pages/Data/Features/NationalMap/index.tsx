@@ -258,12 +258,7 @@ export const NationalMap = props => {
       }
       return
     };
-
-    if (layer.id !== 'geojson-layer') console.log('<><><><><>', object)
-
     const label = layer.id === 'geojson-layer' ? `${object.properties.name} County` : `${object?.points?.map(p => p?.source?.hifldByHifldid?.name).filter((elt, i, arr) => arr.indexOf(elt) === i).join('</br>')}`;
-
-    console.log('object?.points?', object?.points)
     setState({ hover: { x, y, hoveredObject: object?.points ? object?.points : object, label, hoveredLayer: layer.id } });
   };
 
@@ -320,7 +315,7 @@ export const NationalMap = props => {
   const { hover, hexagonRadius } = state;
   const hoverStyle = {
     ...tooltipStyle,
-    transform: `translate(${hover.x}px, ${hover.y}px)`,
+    transform: `translate(${hover.x + 8}px, ${hover.y + 8}px)`,
   } as React.CSSProperties;
 
   return (
@@ -346,7 +341,7 @@ export const NationalMap = props => {
             <DeckGL
               {...state.settings}
               onClick={_onClick}
-              getCursor={() => hoveredFacility() ? "crosshair" : "move"}
+              getCursor={() => hoveredFacility() ? "pointer" : "move"}
               onWebGLInitialized={_onWebGLInitialize}
               layers={renderLayers({
                 points: layers.points,
