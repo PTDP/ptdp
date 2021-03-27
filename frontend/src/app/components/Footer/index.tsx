@@ -5,7 +5,7 @@ export const Footer = () => {
     return (
         <footer className="bg-gray-800" aria-labelledby="footerHeading">
             <h2 id="footerHeading" className="sr-only">Footer</h2>
-            <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
+            <div className="max-w-7xl mx-auto py-16 sm:py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
 
                 {/* < div className="border-gray-700 pt-8 lg:flex lg:items-center lg:justify-between xl:mt-0" >
                     <div>
@@ -26,7 +26,7 @@ export const Footer = () => {
                         </div>
                     </form>
                 </div > */}
-                <div className="mt-8 border-t border-gray-700 pt-8 md:flex md:items-center md:justify-between">
+                <div className="sm:mt-8 sm:border-t border-gray-700 sm:pt-8 md:flex md:items-center md:justify-between">
                     {/* <div className="flex space-x-6 md:order-2">
                         <a href="#" className="text-gray-400 hover:text-gray-300">
                             <span className="sr-only">Facebook</span>
@@ -63,7 +63,7 @@ export const Footer = () => {
                             </svg>
                         </a>
                     </div> */}
-                    <p className="mt-8 text-base text-gray-400 md:mt-0 md:order-1">
+                    <p className="sm:mt-8 text-base text-gray-400 md:mt-0 md:order-1">
                         &copy; {new Date().getFullYear()} Prison Telecom Data Project
             </p>
                     {/* <p className="w-2/5 mt-8 text-base text-gray-400 md:mt-0 md:order-1">

@@ -162,6 +162,7 @@ const SideBar = () => {
                             },
 
                         ]} />
+
                         <Toggle name="Secure Level" options={[
                             {
                                 id: SecureLVL.CLOSE,

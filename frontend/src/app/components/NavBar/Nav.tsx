@@ -1,22 +1,28 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components/macro';
 import tw from 'twin.macro'
 import { Phone, Avatar } from '../Icons';
 import { useHistory } from 'react-router-dom';
 
-const Logo = () => (
-  <Avatar size={12} bg={'green-500'}>
-    <Phone size={28} fill={'white'} />
-  </Avatar>
+type LogoType = {
+  onClick?: any;
+}
+
+const Logo = ({ onClick }: LogoType) => (
+  <span onClick={onClick}>
+    <Avatar size={12} bg={'green-500'}>
+      <Phone size={28} fill={'white'} />
+    </Avatar>
+  </span>
 )
 
-const LogoFull = () => {
+const LogoFull = ({ onClick }: LogoType) => {
 
   const history = useHistory();
 
   return (
     <div className="flex cursor-pointer" onClick={() => history.push('/')}>
-      <Logo />
+      <Logo onClick={() => history.push("/")} />
       <span className="ml-4 flex items-center font-bold">
         Prison Telecom Data Project
     </span>
@@ -31,10 +37,20 @@ export function Nav() {
     history.push(new URL(e.target.href).pathname)
   }
 
+  const handleMobileClick = (e) => {
+    e.preventDefault();
+    handleClick(e);
+    setTimeout(() => {
+      setMobileMenuOpen(false);
+    }, 200)
+  }
+
   const getNavClass = (activePath) => {
     console.log('activePath', history.location.pathname)
     return history.location.pathname === activePath ? "nav-link-active" : "nav-link-inactive"
   }
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
 
   return (
@@ -44,7 +60,7 @@ export function Nav() {
           <div className="relative flex justify-between h-16">
             <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
               {/* <!-- Mobile menu button --> */}
-              <button className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500" aria-expanded="false">
+              <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500" aria-expanded="false">
                 <span className="sr-only">Open main menu</span>
                 {/* <!-- Icon when menu is closed. -->
                 <!--
@@ -70,16 +86,16 @@ export function Nav() {
               <div className="sm:flex-1 flex items-center justify-center sm:items-stretch sm:justify-start">
                 <div className="flex-shrink-0 flex items-center">
                   <div className="hidden lg:block w-auto" >
-                    <LogoFull />
+                    <LogoFull onClick={() => history.push("/")} />
                   </div>
                   <div className="block lg:hidden w-auto" >
-                    <Logo />
+                    <Logo onClick={() => history.push("/")} />
                   </div>
                   <div>
 
                   </div>
-                  {/* <img className="block lg:hidden h-8 w-auto" src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg" alt="Workflow" /> */}
-                  {/* <img className="hidden lg:block h-8 w-auto" src="https://tailwindui.com/img/logos/workflow-logo-indigo-600-mark-gray-800-text.svg" alt="Workflow" /> */}
+                  {/* <img className="block lg:hidden h-8 w-auto" src="https://tailwindui.com/img/logos/workflow-mark-green-600.svg" alt="Workflow" /> */}
+                  {/* <img className="hidden lg:block h-8 w-auto" src="https://tailwindui.com/img/logos/workflow-logo-green-600-mark-gray-800-text.svg" alt="Workflow" /> */}
                 </div>
                 <div className="flex justify-end w-full">
                   <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
@@ -106,13 +122,18 @@ export function Nav() {
               </div>
             </div>
           </div>
-          <div className="hidden sm:hidden">
-            <div className="pt-2 pb-4 space-y-1">      <a href="#" className="bg-indigo-50 border-indigo-500 text-indigo-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Dashboard</a>
-              <a href="#" className="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Team</a>
-              <a href="#" className="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Projects</a>
-              <a href="#" className="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Calendar</a>
+          {mobileMenuOpen && (
+            <div className="sm:hidden z-100 bg-white shadow-lg rounded-md">
+              <div className="pt-2 pb-4 space-y-1">
+                <a href="/" className="bg-green-50 border-green-500 text-green-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Home</a>
+                <a href="/data" onClick={handleMobileClick} className="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Data</a>
+                <a href="/methods" onClick={handleMobileClick} className="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Methods & FAQ</a>
+                <a href="/resources" onClick={handleMobileClick} className="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Resources</a>
+                <a href="/about" onClick={handleMobileClick} className="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">About Us</a>
+
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </nav>
     </Wrapper>
