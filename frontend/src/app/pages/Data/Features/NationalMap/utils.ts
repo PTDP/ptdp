@@ -17,3 +17,4 @@ export const maxCanonicalFacilityRate = (f: Facility) => {
     
     return max;
 }
+

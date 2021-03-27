@@ -7,6 +7,7 @@ import { scaleThreshold } from 'd3-scale';
 import { maxCanonicalFacilityRate } from './utils';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {CubeGeometry} from '@luma.gl/core'
+import PTDPHexagon from './hexagonLayer';
 
 const COLOR_RANGE_COUNTY = [
   [127, 205, 187],
@@ -167,26 +168,70 @@ export function renderLayers(
     return max;
   }
 
-  // const bs =
-  // new GeoJsonLayer({
-  //   id: 'geojson-layer',
-  //   data: props.boundaries,
-  //   opacity: 0.8,
-  //   stroked: false,
-  //   filled: true,
+  const maxCanFacilitiesPoints = (points: { source: Facility}[]) => {
+    let max = 0;
+    points.forEach((point) => {
+      max = Math.max(maxCanonicalFacilityRate(point.source), max);
+    })
+    return max;
+  }
+  // const column =   settings.geography.includes(Geography.FACILITY) && 
+  // new ColumnLayer({
+  //   onHover,
+  //   data: points,  
+  //   radius: 2500,
+  //   coverage: 1,
+  //   elevationScale: 5000,
+  //   // elevationDomain: [0, 25],
   //   extruded: true,
-  //   wireframe: true,
+  //   filled: true,
+  //   lowerPercentile: 0,
+  //   getElevation: d => {
+  //     try {
+  //       // d.forEach((el) => {
+  //       //   if (el.hifldid === 10003791) {
+  //       //     console.log(maxCanFacilitiesArray(d));
+  //       //     console.log(d)
+  //       //   }
+  //       // })
+  //       // console.log('d', d);
+  //       // console.log('', maxCanFacilitiesArray([d]) )
+  //       return maxCanonicalFacilityRate(d)
+  //       // return maxCanFacilitiesArray([d]) 
+  //     } catch(err) {
+  //       return 0
+  //     }
+  //   },
+  //   getPosition: d => {
+  //   try {
+  //     if (d.hifldid === 10005337) console.log(d);
+  //     const { latitude, longitude } = d.hifldByHifldid;
+  //     return [longitude, latitude];
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // },
+  //   // getColorValue: d => {
+  //   //   try {
+  //   //     return maxCanFacilitiesArray(d);
+  //   //   } catch(err) {
+  //   //     console.error(err);
+  //   //   }
+  //   // },
+  //   wireframe: false,
 
-  //   getElevation: f => 20000,
-  //   getFillColor: f => [100, 255, 255],
-  //   getLineColor: [255, 255, 255],
-  //   getLineWidth: 10000,
-  //   pickable: true
-  // });
+  //   autoHighlight: true,
+  //   // highlightColor: [0, 0, 128, 128],
+  //   opacity: 25,
+  //   pickable: true,
+    // getFillColor: d => {
+    //   return COLOR_SCALE(maxCanFacilitiesArray([d]));
+    // }
+  // })
 
   const column =
     settings.geography.includes(Geography.FACILITY) &&
-    new HexagonLayer({
+    new PTDPHexagon({
       onHover,
       data: points,  
       radius: 2500,
@@ -218,25 +263,14 @@ export function renderLayers(
         console.error(err);
       }
     },
-      getColorValue: d => {
-        try {
-          return maxCanFacilitiesArray(d);
-        } catch(err) {
-          console.error(err);
-        }
-      },
       wireframe: false,
-  
       autoHighlight: true,
-      // highlightColor: [0, 0, 128, 128],
       opacity: 25,
       pickable: true,
-      // lightSettings: LIGHT_SETTINGS,
-      colorRange: COLOR_RANGE_COUNTY,
-      colorDomain: [0,25]
-      // getFillColor: d => COLOR_SCALE(d.properties.fifteenMinute),
+      getFillColor: d => {
+        return COLOR_SCALE(maxCanFacilitiesPoints(d.points))
+      }
     });
 
-  // console.log('bs', bs);
   return [geo, column];
 }
