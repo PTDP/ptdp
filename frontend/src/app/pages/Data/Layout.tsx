@@ -202,6 +202,8 @@ const SideBar = () => {
         </div >
     )
 }
+
+
 export const Layout = () => {
     return (
         <div className="h-screen flex overflow-hidden bg-gray-100">

@@ -1,5 +1,6 @@
 import { Rate, Facility } from 'types/Facility';
 
+
 export const fifteenMinuteRate = (r: Rate) => {
     const tax = r.tax * 15;
    return  r.amountInitial + (r.amountAdditional * 14) + (!Number.isNaN(tax) ? tax : 0)
@@ -18,3 +19,35 @@ export const maxCanonicalFacilityRate = (f: Facility) => {
     return max;
 }
 
+// const latestRates = (f: Facility) => {
+//     const rates = [];
+
+//     try {
+//         f.companyFacilitiesByCanonicalFacilityId.nodes.forEach(el => {
+//             el.ratesByCompanyFacilityId.nodes.forEach((r, i) => {
+//                 max = Math.max(max, fifteenMinuteRate(r));
+//             });
+//         })
+//     } catch(err) {};
+    
+//     return max;
+// }
+
+// const latestInStateRates = (f: Facility) => {
+// }
+
+// const latestOutStateRates = (f: Facility) => {
+// }
+
+
+export const stats = (f: Facility[]) => {
+    const rates = [];// get latest 15 minute rate for every company facility;
+    f.forEach((fac) => {
+        fac.companyFacilitiesByCanonicalFacilityId.nodes.forEach((el) => {
+            el.ratesByCompanyFacilityId.nodes.forEach((r, i) => {
+
+            })
+        });
+    })
+
+}
