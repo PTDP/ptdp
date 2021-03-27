@@ -38,7 +38,7 @@ const INITIAL_VIEW_STATE = {
   zoom: 4,
   minZoom: 1,
   maxZoom: 16,
-  pitch: 50,
+  pitch: 55,
   bearing: 0,
 };
 
@@ -117,6 +117,7 @@ export const NationalMap = props => {
       ),
       selectedFacility: {},
       style: 'mapbox://styles/mapbox/light-v9',
+      hexagonRadius: 2000
     },
 
   );
@@ -133,7 +134,6 @@ export const NationalMap = props => {
   const facilities = useSelector(selectFacilities);
   const filters = useSelector(selectFilters);
   const counties = useSelector(selectCounties);
-  const boundaries = useSelector(selectBoundaries);
 
   const [chartExpanded, setChartExpanded] = useState(false);
 
@@ -361,8 +361,7 @@ export const NationalMap = props => {
   }
 
 
-  const { hover } = state;
-
+  const { hover, hexagonRadius } = state;
   const hoverStyle = {
     ...tooltipStyle,
     transform: `translate(${hover.x}px, ${hover.y}px)`,
@@ -398,11 +397,26 @@ export const NationalMap = props => {
                 geojson: layers.gj,
                 settings: layers.settings,
                 onHover: hover => _onHover(hover),
-                boundaries: boundaries
+                hexagonRadius
               }, forceUpdateNum)}
               initialViewState={INITIAL_VIEW_STATE}
               viewState={viewState}
               controller={controller}
+            // onViewStateChange={(e) => {
+            //   const { oldViewState, viewState } = e;
+            //   console.log('viewstate', viewState)
+            //   if (viewState.zoom > 5 && oldViewState.zoom < 5) {
+            //     setState({
+            //       ...state,
+            //       hexagonRadius: 500
+            //     })
+            //   } else if (viewState.zoom < 5 && oldViewState.zoom > 5) {
+            //     setState({
+            //       ...state,
+            //       hexagonRadius: 2000
+            //     })
+            //   }
+            // }}
             >
               <StaticMap
                 mapStyle={state.style}

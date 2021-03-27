@@ -38,7 +38,7 @@ const COLOR_RANGE = [
   [252, 78, 42],
   [227, 26, 28],
   [189, 0, 38],
-  [168, 0, 38],
+  [200, 0, 38],
 ]
 
 const COLOR_DOMAIN = new Array(14).fill(0).map((_, i) => -1 + (25 / 14) * i + 0);
@@ -46,6 +46,10 @@ const COLOR_DOMAIN = new Array(14).fill(0).map((_, i) => -1 + (25 / 14) * i + 0)
 export const COLOR_SCALE = scaleThreshold()
   .domain(COLOR_DOMAIN)
   .range(COLOR_RANGE_COUNTY);
+
+  export const COLOR_SCALE_FACILITY = scaleThreshold()
+  .domain(COLOR_DOMAIN)
+  .range(COLOR_RANGE);
 
 // TODO Make imports work so this can be removed!
 export enum Company {
@@ -116,7 +120,7 @@ export function renderLayers(
     points: any;
     settings: Filters;
     onHover: any;
-    boundaries: any;
+    hexagonRadius: number;
   },
   forceUpdateNum,
 ) {
@@ -175,68 +179,15 @@ export function renderLayers(
     })
     return max;
   }
-  // const column =   settings.geography.includes(Geography.FACILITY) && 
-  // new ColumnLayer({
-  //   onHover,
-  //   data: points,  
-  //   radius: 2500,
-  //   coverage: 1,
-  //   elevationScale: 5000,
-  //   // elevationDomain: [0, 25],
-  //   extruded: true,
-  //   filled: true,
-  //   lowerPercentile: 0,
-  //   getElevation: d => {
-  //     try {
-  //       // d.forEach((el) => {
-  //       //   if (el.hifldid === 10003791) {
-  //       //     console.log(maxCanFacilitiesArray(d));
-  //       //     console.log(d)
-  //       //   }
-  //       // })
-  //       // console.log('d', d);
-  //       // console.log('', maxCanFacilitiesArray([d]) )
-  //       return maxCanonicalFacilityRate(d)
-  //       // return maxCanFacilitiesArray([d]) 
-  //     } catch(err) {
-  //       return 0
-  //     }
-  //   },
-  //   getPosition: d => {
-  //   try {
-  //     if (d.hifldid === 10005337) console.log(d);
-  //     const { latitude, longitude } = d.hifldByHifldid;
-  //     return [longitude, latitude];
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-  // },
-  //   // getColorValue: d => {
-  //   //   try {
-  //   //     return maxCanFacilitiesArray(d);
-  //   //   } catch(err) {
-  //   //     console.error(err);
-  //   //   }
-  //   // },
-  //   wireframe: false,
-
-  //   autoHighlight: true,
-  //   // highlightColor: [0, 0, 128, 128],
-  //   opacity: 25,
-  //   pickable: true,
-    // getFillColor: d => {
-    //   return COLOR_SCALE(maxCanFacilitiesArray([d]));
-    // }
-  // })
 
   const column =
     settings.geography.includes(Geography.FACILITY) &&
     new PTDPHexagon({
       onHover,
       data: points,  
-      radius: 2500,
+      radius: 1000,
       coverage: 1,
-      elevationScale: 200,
+      elevationScale: 300,
       elevationDomain: [0, 25],
       extruded: true,
       filled: true,
@@ -268,7 +219,7 @@ export function renderLayers(
       opacity: 25,
       pickable: true,
       getFillColor: d => {
-        return COLOR_SCALE(maxCanFacilitiesPoints(d.points))
+        return COLOR_SCALE_FACILITY(maxCanFacilitiesPoints(d.points))
       }
     });
 
