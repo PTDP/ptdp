@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNationalMapSlice } from './Features/NationalMap/slice';
 import { selectFilters } from './Features/NationalMap/slice/selectors';
 import { FilterCompanies, Geography, CallType, FacilityType, SecureLVL } from './Features/NationalMap/slice/types';
+import { RangeSlider } from '../../components/RangeSlider';
 
 const Radio = ({ name, options }) => {
     const filters = useSelector(selectFilters);
@@ -34,6 +35,25 @@ const Radio = ({ name, options }) => {
                         </div>
                     )
                 })}
+            </div>
+        </div>
+    )
+}
+
+const Range = ({ name, property }) => {
+    const { actions } = useNationalMapSlice();
+    const dispatch = useDispatch();
+    const filters = useSelector(selectFilters);
+
+    const setValue = (v: number[]) => {
+        console.log(v);
+        dispatch(actions.updateFilters({ ...filters, [property]: v }));
+    }
+    return (
+        <div className="ml-3">
+            <div className="block text-sm font-medium text-gray-700 pt-2">{name}</div>
+            <div className="pt-2 ml-2 mr-8">
+                <RangeSlider setValue={setValue} />
             </div>
         </div>
     )
@@ -109,7 +129,7 @@ const SideBar = () => {
                                 label: "Out-State Calls"
                             }
                         ]} />
-
+                        <Range name={"15 Minute Rate Percentile"} property={"fifteen_minute_percentiles"} />
                         <Toggle name="Geography" options={[
                             {
                                 id: Geography.FACILITY,
@@ -134,6 +154,16 @@ const SideBar = () => {
                                 label: "Securus"
                             }
                         ]} />
+                        <Toggle name="Population" options={[
+                            {
+                                id: Geography.COUNTY,
+                                name: 'geography',
+                                label: "Include Unknown"
+                            }]}
+                        />
+
+                        <Range name={"Min / Max"} property={"capacity_bounds"} />
+
                         <Toggle name="Facility Type" options={[
                             {
                                 id: FacilityType.LOCAL,
@@ -162,7 +192,6 @@ const SideBar = () => {
                             },
 
                         ]} />
-
                         <Toggle name="Secure Level" options={[
                             {
                                 id: SecureLVL.CLOSE,

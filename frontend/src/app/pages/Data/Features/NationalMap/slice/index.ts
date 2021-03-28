@@ -37,6 +37,8 @@ export const initialState: NationalMapState = {
       SecureLVL.MINIMUM,
       SecureLVL.NOT_AVAILABLE,
     ],
+    fifteen_minute_percentiles: [0, 100],
+    capacity_bounds: [0, 5000]
   },
   loading: false,
   error: null,

@@ -30,7 +30,7 @@ import counties from 'us-atlas/counties-10m.json';
 import * as topojson from 'topojson-client';
 import yj from 'yieldable-json';
 import { from } from '@apollo/client';
-import { fifteenMinuteRate, maxCanonicalFacilityRate } from './utils';
+import { fifteenMinuteRate, maxCanonicalFacilityRate, stats } from './utils';
 
 const INITIAL_VIEW_STATE = {
   longitude: -98.5795,
@@ -200,9 +200,6 @@ export const NationalMap = props => {
     layers.settings = filters;
     const filter = (d: Facility) => {
       // Canonical Facility Filters
-
-      if (d.hifldid === 10005337) console.log('<><><><><><><>', d);
-
       try {
         if (!filters.facility_type.includes(d.hifldByHifldid.type)) return false;
         if (!filters.secure_level.includes(d.hifldByHifldid.securelvl)) return false;
@@ -244,7 +241,13 @@ export const NationalMap = props => {
       console.error(err);
     }
 
-    layers.points = j.filter(filter);
+
+
+    const result: Facility[] = j.filter(filter);
+    const { min, max, fifteenMinuteBins } = stats(result);
+    const { fifteen_minute_percentiles } = filters;
+
+    layers.points = result;
   }
 
   const hoveredFacility = () => {
@@ -353,6 +356,7 @@ export const NationalMap = props => {
               getCursor={() => hoveredFacility() ? "pointer" : "move"}
               onWebGLInitialized={_onWebGLInitialize}
               layers={renderLayers({
+                fifteen_minute_percentiles: filters.fifteen_minute_percentiles,
                 points: layers.points,
                 geojson: layers.gj,
                 settings: layers.settings,

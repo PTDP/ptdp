@@ -1,4 +1,5 @@
 import { Rate, Facility } from 'types/Facility';
+import * as ss from 'simple-statistics'
 
 
 export const fifteenMinuteRate = (r: Rate) => {
@@ -17,6 +18,23 @@ export const maxCanonicalFacilityRate = (f: Facility) => {
     } catch(err) {};
     
     return max;
+}
+
+
+export const stats = (f: Facility[]) => {
+    const rates: number[] = [];// get latest 15 minute rate for every company facility;
+    f.forEach((fac) => {
+        fac.companyFacilitiesByCanonicalFacilityId.nodes.forEach((el) => {
+            el.ratesByCompanyFacilityId.nodes.forEach((r, i) => {
+                rates.push(fifteenMinuteRate(r));
+            })
+        });
+    })
+    const min = ss.min(rates);
+    const max = ss.max(rates);
+    var fifteenMinuteBins : number[] = [0];
+    (new Array(100)).fill(0).forEach((_, i) => fifteenMinuteBins.push((fifteenMinuteBins[i - 1] || 0) + (max - min) / 100));
+    return {min, max, fifteenMinuteBins};
 }
 
 // const latestRates = (f: Facility) => {
@@ -38,16 +56,3 @@ export const maxCanonicalFacilityRate = (f: Facility) => {
 
 // const latestOutStateRates = (f: Facility) => {
 // }
-
-
-export const stats = (f: Facility[]) => {
-    const rates = [];// get latest 15 minute rate for every company facility;
-    f.forEach((fac) => {
-        fac.companyFacilitiesByCanonicalFacilityId.nodes.forEach((el) => {
-            el.ratesByCompanyFacilityId.nodes.forEach((r, i) => {
-
-            })
-        });
-    })
-
-}

@@ -7,6 +7,8 @@ export interface Filters {
   company: FilterCompanies[];
   facility_type: FacilityType[];
   secure_level: SecureLVL[];
+  fifteen_minute_percentiles: number[];
+  capacity_bounds: number[];
 }
 
 export enum Geography {
