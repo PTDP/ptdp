@@ -193,7 +193,7 @@ export function renderLayers(
       radius: 1000,
       coverage: 1,
       elevationScale: 200,
-      // elevationDomain: [0, 25],
+      elevationDomain: [0, 25],
       extruded: true,
       filled: true,
       elevationLowerPercentile: props.fifteen_minute_percentiles[0],
