@@ -1,4 +1,4 @@
-import { ScatterplotLayer, HexagonLayer, GeoJsonLayer,ColumnLayer, H3HexagonLayer } from 'deck.gl';
+import { ScatterplotLayer, HeatmapLayer, HexagonLayer, GeoJsonLayer,ColumnLayer, H3HexagonLayer } from 'deck.gl';
 import { Service } from 'types/Service';
 import { Facility } from 'types/Facility';
 import { GeospatialAppBarChartXDomain } from './examples';
@@ -213,7 +213,6 @@ export function renderLayers(
       },
       getPosition: d => {
       try {
-        if (d.hifldid === 10005337) console.log(d);
         const { latitude, longitude } = d.hifldByHifldid;
         return [longitude, latitude];
       } catch (err) {
@@ -236,5 +235,53 @@ export function renderLayers(
       }
     });
 
-  return [geo, column];
+    const heatmap =  settings.geography.includes(Geography.POPULATION) && new HeatmapLayer({
+      id: 'heatmapLayer',
+      data: points,
+      getPosition: d => {
+        try {
+          const { latitude, longitude } = d.hifldByHifldid;
+          return [longitude, latitude];
+        } catch (err) {
+          console.error(err);
+        } 
+      },
+      getWeight: d => {
+        try {
+          const { population, capacity } = d.hifldByHifldid;
+          return population || capacity;
+        } catch (err) {
+          console.error(err);
+        } 
+      },
+      aggregation: 'SUM'
+    });
+
+    const heatmap2 =  settings.geography.includes(Geography.FIFTEEN_MINUTE_HEATMAP) && new HeatmapLayer({
+      id: 'heatmapLayer',
+      data: points,
+      getPosition: d => {
+        try {
+          const { latitude, longitude } = d.hifldByHifldid;
+          return [longitude, latitude];
+        } catch (err) {
+          console.error(err);
+        } 
+      },
+      threshold:  .5,
+      radiusPixels: 20,
+      getWeight: d => {
+        try {
+          return maxCanFacilitiesArray([d]) 
+        } catch (err) {
+          console.error(err);
+        } 
+      },
+      colorDomain: [0, .2],
+      colorRange: COLOR_RANGE_COUNTY,
+      aggregation: 'MEAN'
+    });
+  
+
+  return [geo, column, heatmap, heatmap2];
 }

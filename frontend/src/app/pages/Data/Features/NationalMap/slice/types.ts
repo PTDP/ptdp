@@ -15,6 +15,8 @@ export enum Geography {
   FACILITY = 1,
   COUNTY = 2,
   STATE = 3,
+  POPULATION = 4,
+  FIFTEEN_MINUTE_HEATMAP = 5
 }
 
 export enum FilterCompanies {

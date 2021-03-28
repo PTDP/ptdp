@@ -130,17 +130,28 @@ const SideBar = () => {
                             }
                         ]} />
                         <Range name={"15 Minute Rate Percentile"} property={"fifteen_minute_percentiles"} />
-                        <Toggle name="Geography" options={[
+                        <Toggle name="Layers" options={[
                             {
                                 id: Geography.FACILITY,
                                 name: 'geography',
                                 label: "Facility"
                             },
                             {
+                                id: Geography.FIFTEEN_MINUTE_HEATMAP,
+                                name: 'geography',
+                                label: "Fifteen Minute Rate Heatmap"
+                            },
+                            {
                                 id: Geography.COUNTY,
                                 name: 'geography',
                                 label: "County"
-                            }]}
+                            },
+                            {
+                                id: Geography.POPULATION,
+                                name: 'geography',
+                                label: "Facility Population Heatmap"
+                            }
+                        ]}
                         />
                         <Toggle name="Company" options={[
                             {
