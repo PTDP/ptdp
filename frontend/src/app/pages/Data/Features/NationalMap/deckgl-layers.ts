@@ -121,6 +121,7 @@ export function renderLayers(
     settings: Filters;
     onHover: any;
     hexagonRadius: number;
+    fifteen_minute_percentiles: number[]
   },
   forceUpdateNum,
 ) {
@@ -180,6 +181,10 @@ export function renderLayers(
     return max;
   }
 
+
+  console.log('props.fifteen_minute_percentiles', props.fifteen_minute_percentiles)
+
+  console.log(' props.fifteen_minute_percentiles',  props.fifteen_minute_percentiles)
   const column =
     settings.geography.includes(Geography.FACILITY) &&
     new PTDPHexagon({
@@ -187,11 +192,12 @@ export function renderLayers(
       data: points,  
       radius: 1000,
       coverage: 1,
-      elevationScale: 300,
-      elevationDomain: [0, 25],
+      elevationScale: 200,
+      // elevationDomain: [0, 25],
       extruded: true,
       filled: true,
-      lowerPercentile: 0,
+      elevationLowerPercentile: props.fifteen_minute_percentiles[0],
+      elevationUpperPercentile: props.fifteen_minute_percentiles[1],
       getElevationValue: d => {
         try {
           d.forEach((el) => {
@@ -218,6 +224,13 @@ export function renderLayers(
       autoHighlight: true,
       opacity: 25,
       pickable: true,
+      getColorValue: d => {
+        try {
+          return maxCanFacilitiesArray(d);
+        } catch(err) {
+          console.error(err);
+        }
+      },
       getFillColor: d => {
         return COLOR_SCALE_FACILITY(maxCanFacilitiesPoints(d.points))
       }
