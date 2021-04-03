@@ -237,6 +237,7 @@ class GTLRequester {
             liveAgentFee: null,
             automatedPaymentFee: null,
             paperBillStatementFee: null,
+            callFacilityLocalTime: `${this._hour}:${this._minute} ${this._amPm}`,
         };
         try {
             const $ = cheerio.load(html);
