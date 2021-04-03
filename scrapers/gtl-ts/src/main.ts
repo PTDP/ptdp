@@ -38,9 +38,48 @@ class SingleStateHandler {
     > {
         return [
             {
-                name: "mine",
-                id: "355",
-                subFacilities: [{ name: "mine 2", id: "JV04" }],
+                name: "Baldwin County AL-Corrections Center",
+                id: "1028",
+                subFacilities: [],
+            },
+            {
+                name: "Federal Bureau of Prisons AL-Aliceville FCC",
+                id: "536",
+                subFacilities: [
+                    {
+                        name: "FBOP_AL-Aliceville FCC",
+                        id: "7472",
+                    },
+                    // {
+                    //     name: "FBOP_IL-AUSP Thomson",
+                    //     id: "7491",
+                    // },
+                    // {
+                    //     name: "FBOP_NH-Berlin FCI",
+                    //     id: "7473",
+                    // },
+                    // {
+                    //     name: "Grant County WA-County Jail (old)",
+                    //     id: "7446",
+                    // },
+                    // {
+                    //     name: "Thurston County WA-Juvenile Facility",
+                    //     id: "7434",
+                    // },
+                    // {
+                    //     name: "USN_VA-USN Chesapeake NAVCONBRIG",
+                    //     id: "7463",
+                    // },
+                    // {
+                    //     name: "Yakima WA-City Jail",
+                    //     id: "7427",
+                    // },
+                ],
+            },
+            {
+                name: "Federal Bureau of Prisons AL-Montgomery FPC",
+                id: "721",
+                subFacilities: [],
             },
         ];
     }
@@ -98,10 +137,10 @@ class SingleStateHandler {
 
         // for each facility
         for (const f of facilities) {
-            await r.updateFacility(f.id);
-            if (f.subFacilities) {
+            await r.updateFacility(f.id, f.name);
+            if (f.subFacilities.length) {
                 for (const sf of f.subFacilities) {
-                    await r.updateSubFacility(sf.id);
+                    await r.updateSubFacility(sf.id, sf.name);
                     const in_state = await this.getInStateRates(r, services);
                     const out_state = await this.getOutStateRates(r, services);
                     rates.push(...in_state, ...out_state);
@@ -112,6 +151,8 @@ class SingleStateHandler {
                 rates.push(...in_state, ...out_state);
             }
         }
+
+        // await new Promise((resolve) => setTimeout(resolve, 10000000));
 
         return rates;
     }
@@ -184,8 +225,8 @@ const getMetaData = async (page): Promise<GTLMetadata> => {
 };
 
 const login = async (page) => {
-    const USERNAME = "xiwilan698@0pppp.com";
-    const PW = "Ae9reoxee";
+    const USERNAME = "***REMOVED***";
+    const PW = "***REMOVED***";
 
     const login_selectors = {
         login_link: 'a[id="cnForm:returnToLogin"]',
@@ -238,7 +279,7 @@ Apify.main(async () => {
             }: GTLMetadata = await getMetaData(page);
 
             const states = Object.values(input.data);
-            for (let i = 0; i < states.length; i++) {
+            for (let i = 0; i < 1; i++) {
                 try {
                     const handler = new SingleStateHandler(
                         states[i],
@@ -262,7 +303,7 @@ Apify.main(async () => {
             }
 
             // await uploadFile(
-            //     `etl/ics/${Date.now()}.json`,
+            //     `etl/gtl/${Date.now()}.json`,
             //     JSON.stringify(output)
             // );
         },
