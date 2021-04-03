@@ -1,6 +1,27 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GTLRequester = void 0;
+const cheerio = __importStar(require("cheerio"));
+const util_1 = require("./util");
 class GTLRequester {
     constructor(headers, viewState, prefix1, prefix2, postBody, page) {
         this.headers = headers;
@@ -247,7 +268,57 @@ class GTLRequester {
         await this.updateFacility();
         if (this.postBody.subFacility)
             await this.updateSubFacility();
-        return await this.submit();
+        const result = await this.submit();
+        return this.parser(result);
+    }
+    clean(currency) {
+        var _a, _b;
+        return parseFloat((_b = parseFloat((_a = currency === null || currency === void 0 ? void 0 : currency.trim()) === null || _a === void 0 ? void 0 : _a.replace("$", ""))) === null || _b === void 0 ? void 0 : _b.toFixed(2));
+    }
+    parser(html) {
+        var _a, _b, _c, _d;
+        const result = {
+            service: this.postBody.service,
+            facility: this.postBody.facility,
+            subFacility: this.postBody.subFacility,
+            phone: this.postBody.phoneNumber,
+            source: this.URL,
+            amountInitial: 0,
+            durationInitial: 0,
+            durationAdditional: 60,
+            amountAdditional: null,
+            liveAgentFee: null,
+            automatedPaymentFee: null,
+            paperBillStatementFee: null,
+        };
+        try {
+            const $ = cheerio.load(html);
+            let node = Array.from($("p strong")).find((node) => $(node).text().includes("The estimated cost of a phone call"));
+            const amountAdditional = (_d = (_c = (_b = (_a = $(node)) === null || _a === void 0 ? void 0 : _a.text()) === null || _b === void 0 ? void 0 : _b.match(/\$.+/)) === null || _c === void 0 ? void 0 : _c.find(Boolean)) === null || _d === void 0 ? void 0 : _d.trim();
+            if (amountAdditional) {
+                const num = parseFloat(amountAdditional.replace("$", ""));
+                const oneMinute = parseFloat((num / parseInt(this.postBody.callDuration)).toFixed(2));
+                result.amountAdditional = oneMinute;
+            }
+            Array.from($("tr")).forEach((elt) => {
+                const first_col_text = $($(elt).children()[0]).text();
+                const second_col_text = $($(elt).children()[1]).text();
+                if (first_col_text.includes("Live Agent Fee")) {
+                    result.liveAgentFee = this.clean(second_col_text);
+                }
+                else if (first_col_text.includes("Automated Payment Fee")) {
+                    result.automatedPaymentFee = this.clean(second_col_text);
+                }
+                else if (first_col_text.includes("Paper Bill/Statement Fee")) {
+                    result.paperBillStatementFee = this.clean(second_col_text);
+                }
+            });
+            return util_1.falseyToNull(result);
+        }
+        catch (err) {
+            console.error(err);
+            return util_1.falseyToNull(result);
+        }
     }
 }
 exports.GTLRequester = GTLRequester;

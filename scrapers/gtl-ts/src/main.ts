@@ -476,7 +476,7 @@ Apify.main(async () => {
                     hour: "3",
                     minute: "00",
                     amPm: "AM",
-                    callDuration: "1",
+                    callDuration: "15",
                 },
                 page
             );
