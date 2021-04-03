@@ -1,3 +1,6 @@
+import * as cheerio from "cheerio";
+import { falseyToNull, sleepInRange } from "./util";
+
 export class GTLRequester {
     constructor(
         private headers,
@@ -271,6 +274,71 @@ export class GTLRequester {
         await this.updateState();
         await this.updateFacility();
         if (this.postBody.subFacility) await this.updateSubFacility();
-        return await this.submit();
+        const result = await this.submit();
+        return this.parser(result);
+    }
+
+    clean(currency: string) {
+        return parseFloat(
+            parseFloat(currency?.trim()?.replace("$", ""))?.toFixed(2)
+        );
+    }
+
+    parser(html) {
+        const result = {
+            service: this.postBody.service,
+            facility: this.postBody.facility,
+            subFacility: this.postBody.subFacility,
+            phone: this.postBody.phoneNumber,
+
+            source: this.URL,
+            amountInitial: 0,
+            durationInitial: 0,
+            durationAdditional: 60,
+            amountAdditional: null,
+            liveAgentFee: null,
+            automatedPaymentFee: null,
+            paperBillStatementFee: null,
+        };
+        try {
+            const $ = cheerio.load(html);
+
+            let node = Array.from($("p strong")).find((node) =>
+                $(node).text().includes("The estimated cost of a phone call")
+            );
+
+            const amountAdditional = $(node)
+                ?.text()
+                ?.match(/\$.+/)
+                ?.find(Boolean)
+                ?.trim();
+
+            if (amountAdditional) {
+                const num = parseFloat(amountAdditional.replace("$", ""));
+                const oneMinute = parseFloat(
+                    (num / parseInt(this.postBody.callDuration)).toFixed(2)
+                );
+                result.amountAdditional = oneMinute;
+            }
+
+            Array.from($("tr")).forEach((elt) => {
+                const first_col_text = $($(elt).children()[0]).text();
+                const second_col_text = $($(elt).children()[1]).text();
+                if (first_col_text.includes("Live Agent Fee")) {
+                    result.liveAgentFee = this.clean(second_col_text);
+                } else if (first_col_text.includes("Automated Payment Fee")) {
+                    result.automatedPaymentFee = this.clean(second_col_text);
+                } else if (
+                    first_col_text.includes("Paper Bill/Statement Fee")
+                ) {
+                    result.paperBillStatementFee = this.clean(second_col_text);
+                }
+            });
+
+            return falseyToNull(result);
+        } catch (err) {
+            console.error(err);
+            return falseyToNull(result);
+        }
     }
 }
