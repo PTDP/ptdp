@@ -23,14 +23,19 @@ exports.GTLRequester = void 0;
 const cheerio = __importStar(require("cheerio"));
 const util_1 = require("./util");
 class GTLRequester {
-    constructor(headers, viewState, prefix1, prefix2, postBody, page) {
-        this.headers = headers;
-        this.viewState = viewState;
-        this.prefix1 = prefix1;
-        this.prefix2 = prefix2;
-        this.postBody = postBody;
+    constructor(metaData, postBody, page, scraperId) {
         this.page = page;
+        this.scraperId = scraperId;
         this.URL = "https://www.connectnetwork.com/webapp/jsps/cn/ratesandfees/landing.cn";
+        this.headers = metaData.headers;
+        this.viewState = metaData.viewState;
+        this.prefix1 = metaData.prefix1;
+        this.prefix2 = metaData.prefix2;
+        this._service = postBody.service;
+        this._facilityState = postBody.facilityState;
+        this._facility = postBody.facility;
+        this._subFacility = postBody.subFacility;
+        this._phoneNumber = this.phoneToGTLPhone(postBody.phoneNumber);
     }
     request(form_data) {
         return this.page.evaluate(async (headers, url, form_data) => {
@@ -56,27 +61,29 @@ class GTLRequester {
             return text;
         }, this.headers, this.URL, form_data);
     }
-    async updateService() {
-        /*
-    Switch Service Request Body
-    javax.faces.partial.ajax: true
-    javax.faces.source: j_idt90:service
-    javax.faces.partial.execute: j_idt90:service
-    javax.faces.partial.render: @none
-    javax.faces.behavior.event: valueChange
-    javax.faces.partial.event: change
-    j_idt90: j_idt90
-    j_idt90:service: Collect
-    j_idt90:facilityState: CA
-    j_idt90:facility: 355
-    j_idt90:subfacility:
-    j_idt90:phoneNumber: (310) 333-3338
-    j_idt90:hour: 3
-    j_idt90:minute: 00
-    j_idt90:amPm: AM
-    j_idt90:callDuration: 1
-    javax.faces.ViewState: -998892681247474967:7022445943653173121
-*/
+    phoneToGTLPhone(phone) {
+        let n = "(";
+        n += phone.slice(1, 4);
+        n += ")";
+        n += "+";
+        n += phone.slice(4, 7);
+        n += "-";
+        n += phone.slice(7, 11);
+        return n;
+    }
+    gtlPhoneToPhone(gtlPhone) {
+        return ("1" +
+            gtlPhone
+                .replace("-", "")
+                .replace("+", "")
+                .replace("(", "")
+                .replace(")", ""));
+    }
+    updateNumber(n) {
+        this._phoneNumber = this.phoneToGTLPhone(n);
+    }
+    async updateService(s) {
+        this._service = s;
         const body = {
             "avax.faces.partial.ajax": true,
             "javax.faces.source": `${this.prefix1}:service`,
@@ -85,38 +92,19 @@ class GTLRequester {
             "javax.faces.behavior.event": "valueChange",
             "javax.faces.partial.event": "change",
             [this.prefix1]: this.prefix1,
-            [`${this.prefix1}:service`]: this.postBody.service,
-            [`${this.prefix1}:facilityState`]: this.postBody.facilityState,
-            [`${this.prefix1}:facility`]: this.postBody.facility,
-            [`${this.prefix1}:phoneNumber`]: this.postBody.phoneNumber,
-            [`${this.prefix1}:hour`]: this.postBody.hour,
-            [`${this.prefix1}:minute`]: this.postBody.minute,
-            [`${this.prefix1}:amPm`]: this.postBody.amPm,
-            [`${this.prefix1}:callDuration`]: this.postBody.callDuration,
+            [`${this.prefix1}:service`]: this._service,
+            [`${this.prefix1}:facilityState`]: this._facilityState,
+            [`${this.prefix1}:facility`]: this._facility,
+            [`${this.prefix1}:phoneNumber`]: this._phoneNumber,
+            [`${this.prefix1}:hour`]: this._hour,
+            [`${this.prefix1}:minute`]: this._minute,
+            [`${this.prefix1}:amPm`]: this._amPm,
+            [`${this.prefix1}:callDuration`]: this._callDuration,
             "javax.faces.ViewState": this.viewState,
         };
         return await this.request(body);
     }
     async updateState() {
-        /*
-    Switch State Request Body
-    javax.faces.partial.ajax: true
-    javax.faces.source: j_idt90:facilityState
-    javax.faces.partial.execute: j_idt90:facilityState
-    javax.faces.partial.render: j_idt90
-    javax.faces.behavior.event: valueChange
-    javax.faces.partial.event: change
-    j_idt90: j_idt90
-    j_idt90:service: AdvancePay
-    j_idt90:facilityState: AR
-    j_idt90:facility: 596
-    j_idt90:phoneNumber: (310) 333-3338
-    j_idt90:hour: 3
-    j_idt90:minute: 00
-    j_idt90:amPm: AM
-    j_idt90:callDuration: 1
-    javax.faces.ViewState: -998892681247474967:7022445943653173121
-*/
         const body = {
             "avax.faces.partial.ajax": true,
             "javax.faces.source": `${this.prefix1}:facilityState`,
@@ -125,38 +113,20 @@ class GTLRequester {
             "javax.faces.behavior.event": "valueChange",
             "javax.faces.partial.event": "change",
             [this.prefix1]: this.prefix1,
-            [`${this.prefix1}:service`]: this.postBody.service,
-            [`${this.prefix1}:facilityState`]: this.postBody.facilityState,
-            [`${this.prefix1}:facility`]: this.postBody.facility,
-            [`${this.prefix1}:phoneNumber`]: this.postBody.phoneNumber,
-            [`${this.prefix1}:hour`]: this.postBody.hour,
-            [`${this.prefix1}:minute`]: this.postBody.minute,
-            [`${this.prefix1}:amPm`]: this.postBody.amPm,
-            [`${this.prefix1}:callDuration`]: this.postBody.callDuration,
+            [`${this.prefix1}:service`]: this._service,
+            [`${this.prefix1}:facilityState`]: this._facilityState,
+            [`${this.prefix1}:facility`]: this._facility,
+            [`${this.prefix1}:phoneNumber`]: this._phoneNumber,
+            [`${this.prefix1}:hour`]: this._hour,
+            [`${this.prefix1}:minute`]: this._minute,
+            [`${this.prefix1}:amPm`]: this._amPm,
+            [`${this.prefix1}:callDuration`]: this._callDuration,
             "javax.faces.ViewState": this.viewState,
         };
         return await this.request(body);
     }
-    async updateFacility() {
-        /*
-        Switch Facility Request Body
-        javax.faces.partial.ajax: true
-        javax.faces.source: j_idt90:facility
-        javax.faces.partial.execute: j_idt90:facility
-        javax.faces.partial.render: j_idt90
-        javax.faces.behavior.event: valueChange
-        javax.faces.partial.event: change
-        j_idt90: j_idt90
-        j_idt90:service: AdvancePay
-        j_idt90:facilityState: CA
-        j_idt90:facility: 355
-        j_idt90:phoneNumber: (310) 333-3338
-        j_idt90:hour: 3
-        j_idt90:minute: 00
-        j_idt90:amPm: AM
-        j_idt90:callDuration: 1
-        javax.faces.ViewState: -998892681247474967:7022445943653173121
-    */
+    async updateFacility(facility) {
+        this._facility = facility;
         const body = {
             "avax.faces.partial.ajax": true,
             "javax.faces.source": `${this.prefix1}:facility`,
@@ -165,40 +135,20 @@ class GTLRequester {
             "javax.faces.behavior.event": "valueChange",
             "javax.faces.partial.event": "change",
             [this.prefix1]: this.prefix1,
-            [`${this.prefix1}:service`]: this.postBody.service,
-            [`${this.prefix1}:facilityState`]: this.postBody.facilityState,
-            [`${this.prefix1}:facility`]: this.postBody.facility,
-            [`${this.prefix1}:phoneNumber`]: this.postBody.phoneNumber,
-            [`${this.prefix1}:hour`]: this.postBody.hour,
-            [`${this.prefix1}:minute`]: this.postBody.minute,
-            [`${this.prefix1}:amPm`]: this.postBody.amPm,
-            [`${this.prefix1}:callDuration`]: this.postBody.callDuration,
+            [`${this.prefix1}:service`]: this._service,
+            [`${this.prefix1}:facilityState`]: this._facilityState,
+            [`${this.prefix1}:facility`]: this._facility,
+            [`${this.prefix1}:phoneNumber`]: this._phoneNumber,
+            [`${this.prefix1}:hour`]: this._hour,
+            [`${this.prefix1}:minute`]: this._minute,
+            [`${this.prefix1}:amPm`]: this._amPm,
+            [`${this.prefix1}:callDuration`]: this._callDuration,
             "javax.faces.ViewState": this.viewState,
         };
         return await this.request(body);
     }
-    async updateSubFacility() {
-        /*
-    Switch Sub Facility Request Body
-
-    javax.faces.partial.ajax: true
-    javax.faces.source: j_idt90:subfacility
-    javax.faces.partial.execute: j_idt90:subfacility
-    javax.faces.partial.render: j_idt90:subfacility j_idt90:subfacilityMessage
-    javax.faces.behavior.event: valueChange
-    javax.faces.partial.event: change
-    j_idt90: j_idt90
-    j_idt90:service: Collect
-    j_idt90:facilityState: CA
-    j_idt90:facility: 355
-    j_idt90:subfacility: JV04
-    j_idt90:phoneNumber: (310) 333-3338
-    j_idt90:hour: 3
-    j_idt90:minute: 00
-    j_idt90:amPm: AM
-    j_idt90:callDuration: 1
-    javax.faces.ViewState: -998892681247474967:7022445943653173121
-*/
+    async updateSubFacility(sf) {
+        this._subFacility = sf;
         const body = {
             "avax.faces.partial.ajax": true,
             "javax.faces.source": `${this.prefix1}:subfacility`,
@@ -207,40 +157,20 @@ class GTLRequester {
             "javax.faces.behavior.event": "valueChange",
             "javax.faces.partial.event": "change",
             [this.prefix1]: this.prefix1,
-            [`${this.prefix1}:service`]: this.postBody.service,
-            [`${this.prefix1}:facilityState`]: this.postBody.facilityState,
-            [`${this.prefix1}:facility`]: this.postBody.facility,
-            [`${this.prefix1}:subFacility`]: this.postBody.subFacility,
-            [`${this.prefix1}:phoneNumber`]: this.postBody.phoneNumber,
-            [`${this.prefix1}:hour`]: this.postBody.hour,
-            [`${this.prefix1}:minute`]: this.postBody.minute,
-            [`${this.prefix1}:amPm`]: this.postBody.amPm,
-            [`${this.prefix1}:callDuration`]: this.postBody.callDuration,
+            [`${this.prefix1}:service`]: this._service,
+            [`${this.prefix1}:facilityState`]: this._facilityState,
+            [`${this.prefix1}:facility`]: this._facility,
+            [`${this.prefix1}:subFacility`]: this._subFacility,
+            [`${this.prefix1}:phoneNumber`]: this._phoneNumber,
+            [`${this.prefix1}:hour`]: this._hour,
+            [`${this.prefix1}:minute`]: this._minute,
+            [`${this.prefix1}:amPm`]: this._amPm,
+            [`${this.prefix1}:callDuration`]: this._callDuration,
             "javax.faces.ViewState": this.viewState,
         };
         return await this.request(body);
     }
     async submit() {
-        /*
-    Submit Request Body
-
-    javax.faces.partial.ajax: true
-    javax.faces.source: j_idt90:j_idt176
-    javax.faces.partial.execute: j_idt90
-    javax.faces.partial.render: j_idt90
-    j_idt90:j_idt176: j_idt90:j_idt176
-    j_idt90: j_idt90
-    j_idt90:service: Collect
-    j_idt90:facilityState: CA
-    j_idt90:facility: 355
-    j_idt90:subfacility: JV04
-    j_idt90:phoneNumber: (310) 333-3338
-    j_idt90:hour: 3
-    j_idt90:minute: 00
-    j_idt90:amPm: AM
-    j_idt90:callDuration: 1
-    javax.faces.ViewState: -998892681247474967:7022445943653173121
-*/
         const body = {
             "avax.faces.partial.ajax": true,
             "javax.faces.source": `${this.prefix1}:${this.prefix2}`,
@@ -248,28 +178,27 @@ class GTLRequester {
             "javax.faces.partial.render": `${this.prefix1}`,
             [`${this.prefix1}:${this.prefix2}`]: `${this.prefix1}:${this.prefix2}`,
             [this.prefix1]: this.prefix1,
-            [`${this.prefix1}:service`]: this.postBody.service,
-            [`${this.prefix1}:facilityState`]: this.postBody.facilityState,
-            [`${this.prefix1}:facility`]: this.postBody.facility,
-            [`${this.prefix1}:phoneNumber`]: this.postBody.phoneNumber,
-            [`${this.prefix1}:hour`]: this.postBody.hour,
-            [`${this.prefix1}:minute`]: this.postBody.minute,
-            [`${this.prefix1}:amPm`]: this.postBody.amPm,
-            [`${this.prefix1}:callDuration`]: this.postBody.callDuration,
+            [`${this.prefix1}:service`]: this._service,
+            [`${this.prefix1}:facilityState`]: this._facilityState,
+            [`${this.prefix1}:facility`]: this._facility,
+            [`${this.prefix1}:phoneNumber`]: this._phoneNumber,
+            [`${this.prefix1}:hour`]: this._hour,
+            [`${this.prefix1}:minute`]: this._minute,
+            [`${this.prefix1}:amPm`]: this._amPm,
+            [`${this.prefix1}:callDuration`]: this._callDuration,
             "javax.faces.ViewState": this.viewState,
         };
-        if (this.postBody.subFacility)
-            body[`${this.prefix1}:subFacility`] = this.postBody.subFacility;
-        return await this.request(body);
+        if (this._subFacility)
+            body[`${this.prefix1}:subFacility`] = this._subFacility;
+        const result = await this.request(body);
+        return this.parser(result);
     }
     async updateAll() {
-        await this.updateService();
+        await this.updateService(this._service);
         await this.updateState();
-        await this.updateFacility();
-        if (this.postBody.subFacility)
-            await this.updateSubFacility();
-        const result = await this.submit();
-        return this.parser(result);
+        await this.updateFacility(this._facility);
+        if (this._subFacility)
+            await this.updateSubFacility(this._subFacility);
     }
     clean(currency) {
         var _a, _b;
@@ -278,10 +207,13 @@ class GTLRequester {
     parser(html) {
         var _a, _b, _c, _d;
         const result = {
-            service: this.postBody.service,
-            facility: this.postBody.facility,
-            subFacility: this.postBody.subFacility,
-            phone: this.postBody.phoneNumber,
+            service: this._service,
+            facility: this._facility,
+            subFacility: this._subFacility,
+            phone: this.gtlPhoneToPhone(this._phoneNumber),
+            scraper: this.scraperId,
+            createdAt: Date.now(),
+            state: this._facilityState,
             source: this.URL,
             amountInitial: 0,
             durationInitial: 0,
@@ -297,7 +229,7 @@ class GTLRequester {
             const amountAdditional = (_d = (_c = (_b = (_a = $(node)) === null || _a === void 0 ? void 0 : _a.text()) === null || _b === void 0 ? void 0 : _b.match(/\$.+/)) === null || _c === void 0 ? void 0 : _c.find(Boolean)) === null || _d === void 0 ? void 0 : _d.trim();
             if (amountAdditional) {
                 const num = parseFloat(amountAdditional.replace("$", ""));
-                const oneMinute = parseFloat((num / parseInt(this.postBody.callDuration)).toFixed(2));
+                const oneMinute = parseFloat((num / parseInt(this._callDuration)).toFixed(2));
                 result.amountAdditional = oneMinute;
             }
             Array.from($("tr")).forEach((elt) => {

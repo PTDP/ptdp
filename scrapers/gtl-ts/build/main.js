@@ -1,250 +1,81 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const storage_1 = require("@google-cloud/storage");
-const states = __importStar(require("us-state-codes"));
 const pendingXHR_1 = __importDefault(require("./pendingXHR"));
-const util_1 = require("./util");
 const gtlRequester_1 = require("./gtlRequester");
 const { GOOGLE_APPLICATION_CREDENTIALS_BASE64, CLOUD_STORAGE_BUCKET, } = process.env;
-const BASE_URL = "https://icsonline.icsolutions.com";
 const Apify = require("apify");
-/*
-EXAMPLE REQUEST
-
-https://www.connectnetwork.com/webapp/jsps/cn/ratesandfees/landing.cn, {
-  "headers": {
-    "accept-language": "en-US,en;q=0.9",
-    "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
-    "faces-request": "partial/ajax",
-    "sec-ch-ua": "\"Google Chrome\";v=\"89\", \"Chromium\";v=\"89\", \";Not A Brand\";v=\"99\"",
-    "sec-ch-ua-mobile": "?0",
-    "sec-fetch-dest": "empty",
-    "sec-fetch-mode": "cors",
-    "sec-fetch-site": "same-origin",
-    "x-requested-with": "XMLHttpRequest"
-  },
-  "referrer": "https://www.connectnetwork.com/webapp/jsps/cn/ratesandfees/landing.cn",
-  "referrerPolicy": "strict-origin-when-cross-origin",
-  "body": "javax.faces.partial.ajax=true&javax.faces.source=j_idt90%3Aj_idt176&javax.faces.partial.execute=j_idt90&javax.faces.partial.render=j_idt90&j_idt90%3Aj_idt176=j_idt90%3Aj_idt176&j_idt90=j_idt90&j_idt90%3Aservice=AdvancePay&j_idt90%3AfacilityState=IN&j_idt90%3Afacility=1023&j_idt90%3Asubfacility=4H01&j_idt90%3AphoneNumber=(208)+354-4311&j_idt90%3Ahour=12&j_idt90%3Aminute=00&j_idt90%3AamPm=PM&j_idt90%3AcallDuration=1&javax.faces.ViewState=4591427920265658729%3A108192668930020655",
-  "method": "POST",
-  "mode": "cors",
-  "credentials": "include"
-
-
-  form data
-
-    No sub facility
-    javax.faces.partial.ajax: true
-    javax.faces.source: j_idt90:j_idt176
-    javax.faces.partial.execute: j_idt90
-    javax.faces.partial.render: j_idt90
-    j_idt90:j_idt176: j_idt90:j_idt176
-    j_idt90: j_idt90
-    j_idt90:service: AdvancePay | Collect // dynamic field
-    j_idt90:facilityState: IN // dynamic field
-    j_idt90:facility: 1023 // dynamic field
-    j_idt90:phoneNumber: (208) 354-4311 // dynamic field
-    j_idt90:hour: 8 // dynamic field
-    j_idt90:minute: 00 // dynamic field
-    j_idt90:amPm: PM // dynamic field
-    j_idt90:callDuration: 1 // dynamic field
-    javax.faces.ViewState: 4591427920265658729:108192668930020655 // dynamic field
-
-    dynamic
-
-    Sub Facility
-    javax.faces.partial.ajax: true
-    javax.faces.source: j_idt90:j_idt176
-    javax.faces.partial.execute: j_idt90
-    javax.faces.partial.render: j_idt90
-    j_idt90:j_idt176: j_idt90:j_idt176
-    j_idt90: j_idt90
-    j_idt90:service: AdvancePay | Collect
-    j_idt90:facilityState: IN
-    j_idt90:facility: 808
-    j_idt90:subfacility: 7220
-    j_idt90:phoneNumber: (208) 354-4311
-    j_idt90:hour: 8
-    j_idt90:minute: 00
-    j_idt90:amPm: PM
-    j_idt90:callDuration: 1
-    javax.faces.ViewState: 4591427920265658729:108192668930020655
-
-
-    Field with call amount:
-    The estimated cost of a phone call from Federal Bureau of Prisons AR-Forrest City FCC to the phone number you provided, conducted today at 8:00 PM and lasting 1 minute(s) is: $0.21
-
-    Live Agent Fee
-    Automated Payment Fee
-    Paper Bill/Statement Fee
-
-
-*/
-// const selectAgency = async (page) => {
-//     await new Promise((res, err) => {
-//         let agencySelectInterval = setInterval(async () => {
-//             try {
-//                 const agencyName = await page.evaluate((sel) => {
-//                     return document.querySelector(sel);
-//                 }, selectors.agency_name_dropdown);
-//                 if (agencyName) {
-//                     clearInterval(agencySelectInterval);
-//                     await page.click(selectors.agency_name_dropdown);
-//                     res(agencyName);
-//                 }
-//                 if (!agencyName) {
-//                     // Retype and backspace to trigger results
-//                     await page.focus(selectors.agency_name_input);
-//                     await page.type(" ");
-//                     await page.keyboard.press("Backspace");
-//                 }
-//             } catch (err) {
-//                 console.error(err.toString());
-//                 err(err.toString());
-//             }
-//         }, 100);
-//     });
-// };
 const { utils: { log }, } = Apify;
-const icsRequest = (page, url, headers) => page.evaluate(async (headers, url, BASE_URL) => {
-    const response = await fetch(url, {
-        headers,
-        referrer: BASE_URL + "/rates",
-        referrerPolicy: "strict-origin-when-cross-origin",
-        body: null,
-        method: "GET",
-        mode: "cors",
-        credentials: "include",
-    });
-    const json = await response.json();
-    return json;
-}, headers, url, BASE_URL);
-const getMultiStateProducts = (products) => products.filter((p) => products.find((pr) => pr.agency_id === p.agency_id && pr.state_cd !== p.state_cd));
 class SingleStateHandler {
-    constructor(state, uid, page, headers, products) {
+    constructor(state, uid, page, metaData) {
         this.state = state;
         this.uid = uid;
         this.page = page;
-        this.headers = headers;
-        this.products = products;
-        this.singleStateProducts = this.addPublicAgencies(this.stateProducts(this.getSingleStateProducts(this.products))).filter((v, i, a) => a.findIndex((t) => t.agency_id === v.agency_id) === i);
-        this.multiStateProducts = this.addPublicAgencies(this.stateProducts(getMultiStateProducts(this.products)));
+        this.metaData = metaData;
     }
-    addPublicAgencies(products) {
-        return products.map((p, _, a) => {
-            return {
-                ...p,
-                publicAgencies: a
-                    .filter((el) => el.agency_id === p.agency_id)
-                    .map((prod) => prod.full_nm)
-                    .join(","),
-            };
-        });
+    async getFacilities() {
+        return [
+            {
+                name: "mine",
+                id: "355",
+                subFacilities: [{ name: "mine 2", id: "JV04" }],
+            },
+        ];
     }
-    async getFaciliites(product) {
-        const facilities = await icsRequest(this.page, BASE_URL + `/public-api/products/${product.agency_id}/facilities`, this.headers);
-        return facilities;
+    async getInStateRates(requester, services) {
+        const rates = [];
+        requester.updateNumber(this.state.in_state_phone);
+        for (const service of services) {
+            await requester.updateService(service);
+            const result = await requester.submit();
+            rates.push(result);
+        }
+        return rates;
     }
-    async getInStateRate(product, facility) {
-        const in_state_rate = await icsRequest(this.page, BASE_URL +
-            `/public-api/products/${product.agency_id}/rates/${this.state.in_state_phone.slice(1)}?duration=900&site_id=${facility.site_id}`, this.headers);
-        return in_state_rate;
-    }
-    async getOutStateRate(product, facility) {
-        const out_state_rate = await icsRequest(this.page, BASE_URL +
-            `/public-api/products/${product.agency_id}/rates/${this.state.out_state_phone.slice(1)}?duration=900&site_id=${facility.site_id}`, this.headers);
-        return out_state_rate;
-    }
-    rawRateToICSRate(rawRate, facility, product, number) {
-        const { summary } = rawRate || {};
-        return util_1.falseyToNull({
-            tariffBand: summary === null || summary === void 0 ? void 0 : summary.tariffBand,
-            initialDuration: summary === null || summary === void 0 ? void 0 : summary.initialDuration,
-            initialCost: summary === null || summary === void 0 ? void 0 : summary.initialCost,
-            overDuration: summary === null || summary === void 0 ? void 0 : summary.overDuration,
-            overCost: summary === null || summary === void 0 ? void 0 : summary.overCost,
-            tax: summary === null || summary === void 0 ? void 0 : summary.tax,
-            finalCost: summary === null || summary === void 0 ? void 0 : summary.finalCost,
-            number: number,
-            createdAt: Date.now(),
-            scraper: this.uid,
-            internalAgency: product.agency_id,
-            internalAgencyFullName: product.agency_nm,
-            publicAgencies: product.publicAgencies,
-            facility: facility.facility_nm,
-            seconds: rawRate.duration,
-        });
+    async getOutStateRates(requester, services) {
+        const rates = [];
+        requester.updateNumber(this.state.out_state_phone);
+        for (const service of services) {
+            await requester.updateService(service);
+            const result = await requester.submit();
+            rates.push(result);
+        }
+        return rates;
     }
     async run() {
         const rates = [];
-        const rate_calls = [];
-        for (const product of this.singleStateProducts) {
-            const facilities = await this.getFaciliites(product);
-            await util_1.sleepInRange(400, 700);
-            rate_calls.push({ facilities, product });
-        }
-        for (const product of this.multiStateProducts) {
-            const facilities = [
-                {
-                    site_id: product.site_id,
-                    // "Arizona - Central Arizona - Florence Correctional Complex" => "Central Arizona - Florence Correctional Complex""
-                    facility_nm: product.full_nm
-                        .split("-")
-                        .slice(1)
-                        .join("-")
-                        .trim(),
-                },
-            ];
-            rate_calls.push({ facilities, product });
-        }
-        for (const { facilities, product } of rate_calls) {
-            for (const facility of facilities) {
-                await util_1.sleepInRange(400, 700);
-                const in_state_rate = await this.getInStateRate(product, facility);
-                const in_state_ics = this.rawRateToICSRate(in_state_rate, facility, product, this.state.in_state_phone);
-                const out_state_rate = await this.getOutStateRate(product, facility);
-                const out_state_ics = this.rawRateToICSRate(out_state_rate, facility, product, this.state.out_state_phone);
-                rates.push(in_state_ics, out_state_ics);
+        const facilities = await this.getFacilities();
+        const services = ["AdvancePay", "Collect"];
+        const r = new gtlRequester_1.GTLRequester(this.metaData, {
+            service: services[0],
+            facilityState: this.state.stusab,
+            facility: facilities[0].id,
+            phoneNumber: this.state.in_state_phone,
+        }, this.page, this.uid);
+        await r.updateAll();
+        // for each facility
+        for (const f of facilities) {
+            await r.updateFacility(f.id);
+            if (f.subFacilities) {
+                for (const sf of f.subFacilities) {
+                    await r.updateSubFacility(sf.id);
+                    const in_state = await this.getInStateRates(r, services);
+                    const out_state = await this.getOutStateRates(r, services);
+                    rates.push(...in_state, ...out_state);
+                }
+            }
+            else {
+                const in_state = await this.getInStateRates(r, services);
+                const out_state = await this.getOutStateRates(r, services);
+                rates.push(...in_state, ...out_state);
             }
         }
         return rates;
     }
-    getSingleStateProducts(products) {
-        const multistateP = getMultiStateProducts(products).map((p) => JSON.stringify(p));
-        return products.filter((p) => !multistateP.find((elt) => elt === JSON.stringify(p)));
-    }
-    productBelongsToState(product, state) {
-        return (product.state_cd.toUpperCase() === state.stusab.toUpperCase() ||
-            states.getStateCodeByStateName(product.state_nm) ===
-                state.stusab.toUpperCase());
-    }
-    stateProducts(products) {
-        return products.filter((p) => this.productBelongsToState(p, this.state));
-    }
 }
-const getProducts = (page, headers) => icsRequest(page, BASE_URL + "/public-api/products", headers);
 async function uploadFile(destination, content) {
     let credentials = JSON.parse(Buffer.from(GOOGLE_APPLICATION_CREDENTIALS_BASE64, "base64").toString("ascii"));
     const storage = new storage_1.Storage({
@@ -272,7 +103,7 @@ const splitPostData = (postData) => {
     });
     return postDataKv;
 };
-const getHeaders = async (page) => {
+const getMetaData = async (page) => {
     await page.waitForSelector(selectors.state);
     await page.select(selectors.state, "AL");
     await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -335,40 +166,26 @@ Apify.main(async () => {
         },
         handlePageFunction: async ({ page }) => {
             await login(page);
-            const { headers, viewState, prefix1, prefix2, } = await getHeaders(page);
-            const requester = new gtlRequester_1.GTLRequester(headers, viewState, prefix1, prefix2, {
-                service: "AdvancePay",
-                facilityState: "AL",
-                facility: "1028",
-                phoneNumber: "(310)+333-3338",
-                hour: "3",
-                minute: "00",
-                amPm: "AM",
-                callDuration: "15",
-            }, page);
-            const result = await requester.updateAll();
-            console.log("RESULT", result);
-            await new Promise((resolve) => setTimeout(resolve, 2000000));
-            // const states = Object.values(input.data);
-            // const products: ICSProduct[] = await getProducts(page, headers);
-            // for (let i = 0; i < states.length; i++) {
-            //     try {
-            //         const handler = new SingleStateHandler(
-            //             states[i],
-            //             input.uuid,
-            //             page,
-            //             headers,
-            //             products
-            //         );
-            //         const results = await handler.run();
-            //         output[states[i].stusab] = [...results];
-            //         await Apify.setValue("OUTPUT", { ...output });
-            //     } catch (err) {
-            //         console.error(err);
-            //         output.errors.push(err.toString());
-            //         await Apify.setValue("OUTPUT", { ...output });
-            //     }
-            // }
+            const { headers, viewState, prefix1, prefix2, } = await getMetaData(page);
+            const states = Object.values(input.data);
+            for (let i = 0; i < states.length; i++) {
+                try {
+                    const handler = new SingleStateHandler(states[i], input.uuid, page, {
+                        headers,
+                        viewState,
+                        prefix1,
+                        prefix2,
+                    });
+                    const results = await handler.run();
+                    output[states[i].stusab] = [...results];
+                    await Apify.setValue("OUTPUT", { ...output });
+                }
+                catch (err) {
+                    console.error(err);
+                    output.errors.push(err.toString());
+                    await Apify.setValue("OUTPUT", { ...output });
+                }
+            }
             // await uploadFile(
             //     `etl/ics/${Date.now()}.json`,
             //     JSON.stringify(output)
