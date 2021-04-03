@@ -26,6 +26,10 @@ class GTLRequester {
     constructor(metaData, postBody, page, scraperId) {
         this.page = page;
         this.scraperId = scraperId;
+        this._hour = "12";
+        this._minute = "00";
+        this._amPm = "PM";
+        this._callDuration = "15";
         this.URL = "https://www.connectnetwork.com/webapp/jsps/cn/ratesandfees/landing.cn";
         this.headers = metaData.headers;
         this.viewState = metaData.viewState;
@@ -95,6 +99,7 @@ class GTLRequester {
             [`${this.prefix1}:service`]: this._service,
             [`${this.prefix1}:facilityState`]: this._facilityState,
             [`${this.prefix1}:facility`]: this._facility,
+            [`${this.prefix1}:subfacility`]: this._subFacility,
             [`${this.prefix1}:phoneNumber`]: this._phoneNumber,
             [`${this.prefix1}:hour`]: this._hour,
             [`${this.prefix1}:minute`]: this._minute,
@@ -102,6 +107,8 @@ class GTLRequester {
             [`${this.prefix1}:callDuration`]: this._callDuration,
             "javax.faces.ViewState": this.viewState,
         };
+        if (!this._subFacility)
+            delete body[`${this.prefix1}:subfacility`];
         return await this.request(body);
     }
     async updateState() {
@@ -116,6 +123,7 @@ class GTLRequester {
             [`${this.prefix1}:service`]: this._service,
             [`${this.prefix1}:facilityState`]: this._facilityState,
             [`${this.prefix1}:facility`]: this._facility,
+            [`${this.prefix1}:subfacility`]: this._subFacility,
             [`${this.prefix1}:phoneNumber`]: this._phoneNumber,
             [`${this.prefix1}:hour`]: this._hour,
             [`${this.prefix1}:minute`]: this._minute,
@@ -123,10 +131,15 @@ class GTLRequester {
             [`${this.prefix1}:callDuration`]: this._callDuration,
             "javax.faces.ViewState": this.viewState,
         };
+        if (!this._subFacility)
+            delete body[`${this.prefix1}:subfacility`];
         return await this.request(body);
     }
-    async updateFacility(facility) {
+    async updateFacility(facility, facilityName) {
         this._facility = facility;
+        this._facilityName = facilityName;
+        this._subFacility = null;
+        this._subFacilityName = null;
         const body = {
             "avax.faces.partial.ajax": true,
             "javax.faces.source": `${this.prefix1}:facility`,
@@ -147,8 +160,9 @@ class GTLRequester {
         };
         return await this.request(body);
     }
-    async updateSubFacility(sf) {
+    async updateSubFacility(sf, sf_name) {
         this._subFacility = sf;
+        this._subFacilityName = sf_name;
         const body = {
             "avax.faces.partial.ajax": true,
             "javax.faces.source": `${this.prefix1}:subfacility`,
@@ -160,7 +174,7 @@ class GTLRequester {
             [`${this.prefix1}:service`]: this._service,
             [`${this.prefix1}:facilityState`]: this._facilityState,
             [`${this.prefix1}:facility`]: this._facility,
-            [`${this.prefix1}:subFacility`]: this._subFacility,
+            [`${this.prefix1}:subfacility`]: this._subFacility,
             [`${this.prefix1}:phoneNumber`]: this._phoneNumber,
             [`${this.prefix1}:hour`]: this._hour,
             [`${this.prefix1}:minute`]: this._minute,
@@ -181,6 +195,7 @@ class GTLRequester {
             [`${this.prefix1}:service`]: this._service,
             [`${this.prefix1}:facilityState`]: this._facilityState,
             [`${this.prefix1}:facility`]: this._facility,
+            [`${this.prefix1}:subfacility`]: this._subFacility,
             [`${this.prefix1}:phoneNumber`]: this._phoneNumber,
             [`${this.prefix1}:hour`]: this._hour,
             [`${this.prefix1}:minute`]: this._minute,
@@ -188,17 +203,17 @@ class GTLRequester {
             [`${this.prefix1}:callDuration`]: this._callDuration,
             "javax.faces.ViewState": this.viewState,
         };
-        if (this._subFacility)
-            body[`${this.prefix1}:subFacility`] = this._subFacility;
+        if (!this._subFacility)
+            delete body[`${this.prefix1}:subFacility`];
         const result = await this.request(body);
         return this.parser(result);
     }
     async updateAll() {
         await this.updateService(this._service);
         await this.updateState();
-        await this.updateFacility(this._facility);
+        await this.updateFacility(this._facility, this._facilityName);
         if (this._subFacility)
-            await this.updateSubFacility(this._subFacility);
+            await this.updateSubFacility(this._subFacility, this._subFacilityName);
     }
     clean(currency) {
         var _a, _b;
@@ -208,16 +223,16 @@ class GTLRequester {
         var _a, _b, _c, _d;
         const result = {
             service: this._service,
-            facility: this._facility,
-            subFacility: this._subFacility,
+            facility: this._facilityName,
+            subFacility: this._subFacilityName || null,
             phone: this.gtlPhoneToPhone(this._phoneNumber),
             scraper: this.scraperId,
             createdAt: Date.now(),
             state: this._facilityState,
             source: this.URL,
-            amountInitial: 0,
-            durationInitial: 0,
-            durationAdditional: 60,
+            amountInitial: null,
+            durationInitial: null,
+            durationAdditional: null,
             amountAdditional: null,
             liveAgentFee: null,
             automatedPaymentFee: null,

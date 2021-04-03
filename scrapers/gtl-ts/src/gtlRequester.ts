@@ -1,6 +1,7 @@
 import * as cheerio from "cheerio";
 import { falseyToNull, sleepInRange } from "./util";
 import { GTLRate, GTLMetadata } from "./types";
+import fs from "fs";
 
 export class GTLRequester {
     headers: any;
@@ -11,13 +12,15 @@ export class GTLRequester {
     _service: string;
     _facilityState: string;
     _facility: string;
+    _facilityName: string;
     _subFacility: string;
+    _subFacilityName: string;
     _phoneNumber: string;
 
-    _hour: "12";
-    _minute: "00";
-    _amPm: "PM";
-    _callDuration: "15";
+    _hour = "12";
+    _minute = "00";
+    _amPm = "PM";
+    _callDuration = "15";
 
     constructor(
         metaData: GTLMetadata,
@@ -114,6 +117,7 @@ export class GTLRequester {
             [`${this.prefix1}:service`]: this._service,
             [`${this.prefix1}:facilityState`]: this._facilityState,
             [`${this.prefix1}:facility`]: this._facility,
+            [`${this.prefix1}:subfacility`]: this._subFacility,
             [`${this.prefix1}:phoneNumber`]: this._phoneNumber,
             [`${this.prefix1}:hour`]: this._hour,
             [`${this.prefix1}:minute`]: this._minute,
@@ -121,6 +125,8 @@ export class GTLRequester {
             [`${this.prefix1}:callDuration`]: this._callDuration,
             "javax.faces.ViewState": this.viewState,
         };
+
+        if (!this._subFacility) delete body[`${this.prefix1}:subfacility`];
 
         return await this.request(body);
     }
@@ -137,6 +143,7 @@ export class GTLRequester {
             [`${this.prefix1}:service`]: this._service,
             [`${this.prefix1}:facilityState`]: this._facilityState,
             [`${this.prefix1}:facility`]: this._facility,
+            [`${this.prefix1}:subfacility`]: this._subFacility,
             [`${this.prefix1}:phoneNumber`]: this._phoneNumber,
             [`${this.prefix1}:hour`]: this._hour,
             [`${this.prefix1}:minute`]: this._minute,
@@ -145,11 +152,16 @@ export class GTLRequester {
             "javax.faces.ViewState": this.viewState,
         };
 
+        if (!this._subFacility) delete body[`${this.prefix1}:subfacility`];
+
         return await this.request(body);
     }
 
-    async updateFacility(facility: string) {
+    async updateFacility(facility: string, facilityName: string) {
         this._facility = facility;
+        this._facilityName = facilityName;
+        this._subFacility = null;
+        this._subFacilityName = null;
 
         const body = {
             "avax.faces.partial.ajax": true,
@@ -173,8 +185,9 @@ export class GTLRequester {
         return await this.request(body);
     }
 
-    async updateSubFacility(sf) {
+    async updateSubFacility(sf, sf_name) {
         this._subFacility = sf;
+        this._subFacilityName = sf_name;
 
         const body = {
             "avax.faces.partial.ajax": true,
@@ -187,7 +200,7 @@ export class GTLRequester {
             [`${this.prefix1}:service`]: this._service,
             [`${this.prefix1}:facilityState`]: this._facilityState,
             [`${this.prefix1}:facility`]: this._facility,
-            [`${this.prefix1}:subFacility`]: this._subFacility,
+            [`${this.prefix1}:subfacility`]: this._subFacility,
             [`${this.prefix1}:phoneNumber`]: this._phoneNumber,
             [`${this.prefix1}:hour`]: this._hour,
             [`${this.prefix1}:minute`]: this._minute,
@@ -210,6 +223,7 @@ export class GTLRequester {
             [`${this.prefix1}:service`]: this._service,
             [`${this.prefix1}:facilityState`]: this._facilityState,
             [`${this.prefix1}:facility`]: this._facility,
+            [`${this.prefix1}:subfacility`]: this._subFacility,
             [`${this.prefix1}:phoneNumber`]: this._phoneNumber,
             [`${this.prefix1}:hour`]: this._hour,
             [`${this.prefix1}:minute`]: this._minute,
@@ -218,8 +232,7 @@ export class GTLRequester {
             "javax.faces.ViewState": this.viewState,
         };
 
-        if (this._subFacility)
-            body[`${this.prefix1}:subFacility`] = this._subFacility;
+        if (!this._subFacility) delete body[`${this.prefix1}:subFacility`];
 
         const result = await this.request(body);
         return this.parser(result);
@@ -228,8 +241,12 @@ export class GTLRequester {
     async updateAll() {
         await this.updateService(this._service);
         await this.updateState();
-        await this.updateFacility(this._facility);
-        if (this._subFacility) await this.updateSubFacility(this._subFacility);
+        await this.updateFacility(this._facility, this._facilityName);
+        if (this._subFacility)
+            await this.updateSubFacility(
+                this._subFacility,
+                this._subFacilityName
+            );
     }
 
     clean(currency: string) {
@@ -241,17 +258,17 @@ export class GTLRequester {
     parser(html): GTLRate {
         const result: GTLRate = {
             service: this._service,
-            facility: this._facility,
-            subFacility: this._subFacility,
+            facility: this._facilityName,
+            subFacility: this._subFacilityName || null,
             phone: this.gtlPhoneToPhone(this._phoneNumber),
             scraper: this.scraperId,
             createdAt: Date.now(),
             state: this._facilityState,
 
             source: this.URL,
-            amountInitial: 0,
-            durationInitial: 0,
-            durationAdditional: 60,
+            amountInitial: null,
+            durationInitial: null,
+            durationAdditional: null,
             amountAdditional: null,
             liveAgentFee: null,
             automatedPaymentFee: null,
