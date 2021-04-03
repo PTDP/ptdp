@@ -94,5 +94,5 @@ export type GTLRate = {
     liveAgentFee: number | null;
     automatedPaymentFee: number | null;
     paperBillStatementFee: number | null;
-    callFacilityLocalTime: string;
+    localCallTimeFacility: string;
 };
