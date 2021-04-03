@@ -246,6 +246,7 @@ class GTLRequester {
                 const num = parseFloat(amountAdditional.replace("$", ""));
                 const oneMinute = parseFloat((num / parseInt(this._callDuration)).toFixed(2));
                 result.amountAdditional = oneMinute;
+                result.durationAdditional = 60;
             }
             Array.from($("tr")).forEach((elt) => {
                 const first_col_text = $($(elt).children()[0]).text();
