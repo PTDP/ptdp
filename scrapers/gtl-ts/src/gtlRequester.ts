@@ -293,6 +293,7 @@ export class GTLRequester {
                     (num / parseInt(this._callDuration)).toFixed(2)
                 );
                 result.amountAdditional = oneMinute;
+                result.durationAdditional = 60;
             }
 
             Array.from($("tr")).forEach((elt) => {
