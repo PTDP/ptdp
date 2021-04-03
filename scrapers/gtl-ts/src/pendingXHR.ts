@@ -15,7 +15,14 @@ class PendingXHR {
     requestListener: any;
     responseListener: any;
 
-    constructor(page: any, oncomplete: any, requestUrl: any, onRequest: any) {
+    constructor(
+        page: any,
+        oncomplete: any,
+        requestUrl: any,
+        onRequest: any,
+        postDataFilter?: any,
+        postDataNotFilter?: any
+    ) {
         this.oncomplete = oncomplete;
         this.promisees = [];
         this.page = page;
@@ -24,26 +31,36 @@ class PendingXHR {
         this.finishedWithSuccessXhrs = new Set();
         this.finishedWithErrorsXhrs = new Set();
         this.requestListener = (request) => {
-            if (
-                request.resourceType() === this.resourceType &&
-                request.url() === requestUrl
-            ) {
-                if (onRequest)
-                    console.log(
-                        "<><><><",
-                        request._request.HTTPRequest._headers
+            try {
+                if (
+                    request.resourceType() === this.resourceType &&
+                    request.url() === requestUrl
+                ) {
+                    if (onRequest) this.pendingXhrs.add(request);
+                    this.promisees.push(
+                        new Promise((resolve) => {
+                            request.pendingXhrResolver = resolve;
+                        })
                     );
-                this.pendingXhrs.add(request);
-                this.promisees.push(
-                    new Promise((resolve) => {
-                        request.pendingXhrResolver = resolve;
-                    })
-                );
+                }
+            } catch (err) {
+                console.log("CAUGHT ERR", err.toString());
             }
         };
         this.responseListener = async (response) => {
             const request = response.request();
-            if (request.resourceType() === this.resourceType) {
+
+            let correctPostData = false;
+            if (request.postData()) {
+                correctPostData =
+                    request.postData().includes(postDataFilter) &&
+                    !request.postData().includes(postDataNotFilter);
+            }
+
+            if (
+                request.resourceType() === this.resourceType &&
+                correctPostData
+            ) {
                 await this.oncomplete(response);
                 this.pendingXhrs.delete(request);
                 this.finishedWithSuccessXhrs.add(request);

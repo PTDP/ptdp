@@ -20,18 +20,6 @@ const {
 const BASE_URL = "https://icsonline.icsolutions.com";
 
 const Apify = require("apify");
-const selectors = {
-    agency_name_input: '[ng-model="asyncSelected"]',
-    agency_name_dropdown: 'ul[class^="dropdown-menu"] li[id^="typeahead"]',
-    rates: 'div[ng-show="rates"]',
-    facilities_option: '[ng-model="selectedFacility"] option',
-    facilities_dropdown: '[ng-model="selectedFacility"]',
-    phone_input: 'input[name="phone"]',
-    calculate_button: 'button[class*="btn-primary"]',
-    final_cost:
-        '[ng-show="rates"] table tr:last-child span[class="pull-right"]',
-    rate: '[ng-show="rates"] table tr:last-child span[class="pull-right"]',
-};
 
 /*
 EXAMPLE REQUEST
@@ -106,33 +94,33 @@ https://www.connectnetwork.com/webapp/jsps/cn/ratesandfees/landing.cn, {
 
 */
 
-const selectAgency = async (page) => {
-    await new Promise((res, err) => {
-        let agencySelectInterval = setInterval(async () => {
-            try {
-                const agencyName = await page.evaluate((sel) => {
-                    return document.querySelector(sel);
-                }, selectors.agency_name_dropdown);
+// const selectAgency = async (page) => {
+//     await new Promise((res, err) => {
+//         let agencySelectInterval = setInterval(async () => {
+//             try {
+//                 const agencyName = await page.evaluate((sel) => {
+//                     return document.querySelector(sel);
+//                 }, selectors.agency_name_dropdown);
 
-                if (agencyName) {
-                    clearInterval(agencySelectInterval);
-                    await page.click(selectors.agency_name_dropdown);
-                    res(agencyName);
-                }
+//                 if (agencyName) {
+//                     clearInterval(agencySelectInterval);
+//                     await page.click(selectors.agency_name_dropdown);
+//                     res(agencyName);
+//                 }
 
-                if (!agencyName) {
-                    // Retype and backspace to trigger results
-                    await page.focus(selectors.agency_name_input);
-                    await page.type(" ");
-                    await page.keyboard.press("Backspace");
-                }
-            } catch (err) {
-                console.error(err.toString());
-                err(err.toString());
-            }
-        }, 100);
-    });
-};
+//                 if (!agencyName) {
+//                     // Retype and backspace to trigger results
+//                     await page.focus(selectors.agency_name_input);
+//                     await page.type(" ");
+//                     await page.keyboard.press("Backspace");
+//                 }
+//             } catch (err) {
+//                 console.error(err.toString());
+//                 err(err.toString());
+//             }
+//         }, 100);
+//     });
+// };
 
 const {
     utils: { log },
@@ -157,25 +145,6 @@ const icsRequest = (page, url, headers) =>
         url,
         BASE_URL
     );
-
-const getHeaders = async (page) => {
-    await page.waitForTimeout(selectors.agency_name_input);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    await page.focus(selectors.agency_name_input);
-    await page.type(selectors.agency_name_input, "Alabama".toLowerCase());
-    selectAgency(page);
-
-    return new Promise((res, err) => {
-        new PendingXHR(
-            page,
-            (response) => {
-                res(response._request._headers);
-            },
-            BASE_URL + "/public-api/facilities",
-            true
-        );
-    });
-};
 
 const getMultiStateProducts = (products: ICSProduct[]) =>
     products.filter((p) =>
@@ -386,6 +355,102 @@ async function uploadFile(destination, content) {
     await file.save(content);
 }
 
+const selectors = {
+    state: 'select[id$=":facilityState"]',
+    first_state: 'ul[class^="dropdown-menu"] li[id^="typeahead"]',
+    submit: "//a[contains(., 'Submit')]",
+};
+
+const splitPostData = (postData: string) => {
+    const postDataKv = {};
+    if (!postData) return;
+    postData.split("&").forEach((d) => {
+        if (!d) return;
+        const split = d.split("=");
+        if (!Array.isArray(split)) return;
+        postDataKv[decodeURIComponent(split[0])] = decodeURIComponent(split[1]);
+    });
+
+    return postDataKv;
+};
+
+const getHeaders = async (page) => {
+    await page.waitForSelector(selectors.state);
+    await page.select(selectors.state, "AL");
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+    await page.waitForXPath(selectors.submit);
+    const [elt] = await page.$x(selectors.submit);
+
+    const pending = new Promise((res, err) => {
+        new PendingXHR(
+            page,
+            (response) => {
+                res({
+                    headers: response._request._headers,
+                    postData: splitPostData(response._request._postData),
+                });
+            },
+            "https://www.connectnetwork.com/webapp/jsps/cn/ratesandfees/landing.cn",
+            true,
+            "phoneNumber",
+            "javax.faces.partial.event"
+        );
+    });
+    await elt.click();
+
+    return pending;
+};
+
+/*
+
+javax.faces.partial.ajax: true
+javax.faces.source: j_idt91:phoneNumber
+javax.faces.partial.execute: j_idt91:phoneNumber
+javax.faces.partial.render: j_idt91:phoneNumberUsaMessage
+javax.faces.behavior.event: blur
+javax.faces.partial.event: blur
+j_idt91: j_idt91
+j_idt91:service: AdvancePay
+j_idt91:facilityState: AZ
+j_idt91:facility: 727
+j_idt91:phoneNumber: (323) 211-1111
+j_idt91:hour: 2
+j_idt91:minute: 00
+j_idt91:amPm: AM
+j_idt91:callDuration: 1
+javax.faces.ViewState: 1385569115857674200:-7620499110560584746
+
+*/
+
+const gtlRequest = (page, url, headers, form_data) =>
+    page.evaluate(
+        async (headers, url, form_data) => {
+            let formBody = [];
+            for (var property in form_data) {
+                var encodedKey = encodeURIComponent(property);
+                var encodedValue = encodeURIComponent(form_data[property]);
+                formBody.push(encodedKey + "=" + encodedValue);
+            }
+            const formBodyStr = formBody.join("&");
+
+            const response = await fetch(url, {
+                headers,
+                referrer:
+                    "https://www.connectnetwork.com/webapp/jsps/cn/ratesandfees/landing.cn",
+                referrerPolicy: "strict-origin-when-cross-origin",
+                body: formBodyStr,
+                method: "POST",
+                mode: "cors",
+                credentials: "include",
+            });
+            const text = await response.text();
+            return text;
+        },
+        headers,
+        url,
+        form_data
+    );
+
 const login = async (page) => {
     const USERNAME = "xiwilan698@0pppp.com";
     const PW = "Ae9reoxee";
@@ -413,6 +478,73 @@ const login = async (page) => {
     await elt.click();
 };
 
+/*
+javax.faces.partial.ajax: true
+javax.faces.source: j_idt91:facilityState
+javax.faces.partial.execute: j_idt91:facilityState
+javax.faces.partial.render: j_idt91
+javax.faces.behavior.event: valueChange
+javax.faces.partial.event: change
+j_idt91: j_idt91
+j_idt91:service: AdvancePay
+j_idt91:facilityState: FL
+j_idt91:phoneNumber: (310) 333-3338
+j_idt91:hour: 3
+j_idt91:minute: 00
+j_idt91:amPm: AM
+j_idt91:callDuration: 1
+javax.faces.ViewState: 7375367589559483721:113025909388038209
+j_idt91:facility: 1010
+
+*/
+
+const createRequestBody = (
+    postData,
+    {
+        service = "AdvancePay",
+        facilityState = "FL",
+        facility = "1010",
+        phoneNumber = "(310) 333-3338",
+        hour = "3",
+        minute = "00",
+        amPm = "AM",
+        callDuration = "1",
+    }
+) => {
+    const keys = Object.keys(postData);
+    const prefix = keys.find((k) => k.includes("facilityState")).split(":")[0];
+
+    const body = {
+        ...postData,
+        "javax.faces.source": `${prefix}:j_idt177`,
+        "javax.faces.partial.execute": prefix,
+    };
+
+    const serviceK = keys.find((k) => k.includes("service"));
+    const facilityStateK = keys.find((k) => k.includes("facilityState"));
+    const facilityK = keys.find(
+        (k) => k.includes("facility") && !k.includes("State")
+    );
+    const phoneNumberK = keys.find((k) => k.includes("phoneNumber"));
+    const hourK = keys.find((k) => k.includes("hour"));
+    const minuteK = keys.find((k) => k.includes("minute"));
+    const amPmK = keys.find((k) => k.includes("amPm"));
+    const callDurationK = keys.find((k) => k.includes("callDuration"));
+
+    body[prefix + ":" + "service"] = service;
+    body[prefix + ":" + "facilityState"] = facilityState;
+    body[prefix + ":" + "facility"] = facility;
+    body[prefix + ":" + "phoneNumber"] = phoneNumber;
+    body[prefix + ":" + "hour"] = hour;
+    body[prefix + ":" + "minute"] = minute;
+    body[prefix + ":" + "amPm"] = amPm;
+    body[prefix + ":" + "callDuration"] = callDuration;
+
+    console.log("BODY", body);
+
+    return body;
+};
+
 Apify.main(async () => {
     const requestList = await Apify.openRequestList("start-urls", [
         "https://www.connectnetwork.com/webapp/jsps/cn/ratesandfees/landing.cn",
@@ -432,8 +564,33 @@ Apify.main(async () => {
 
         handlePageFunction: async ({ page }) => {
             await login(page);
+            const { headers, postData }: any = await getHeaders(page);
 
-            await new Promise((resolve) => setTimeout(resolve, 50000));
+            console.log("HEADERS", headers);
+            console.log("postData", postData);
+            const result = await gtlRequest(
+                page,
+                "https://www.connectnetwork.com/webapp/jsps/cn/ratesandfees/landing.cn",
+                {
+                    ...headers,
+                    "Content-Type":
+                        "application/x-www-form-urlencoded; charset=UTF-8",
+                },
+                createRequestBody(postData, {
+                    service: "AdvancePay",
+                    facilityState: "FL",
+                    facility: "1010",
+                    phoneNumber: "(310) 333-3338",
+                    hour: "3",
+                    minute: "00",
+                    amPm: "AM",
+                    callDuration: "1",
+                })
+            );
+
+            console.log("RESULT", result);
+
+            await new Promise((resolve) => setTimeout(resolve, 2000000));
             // const states = Object.values(input.data);
             // const products: ICSProduct[] = await getProducts(page, headers);
 
