@@ -65,73 +65,33 @@ export type StateInput = {
     stusab: string;
 };
 
-export type ICSProduct = {
-    agency_id: string; //"CULAL",
-    site_id: 0; //0,
-    state_cd: string; //"AL",
-    state_nm: string; //"Alabama",
-    lead_ani: string; //"2562977100",
-    agency_nm: string; //"Cullman County Sheriffs Office",
-    video_partner: number; //0,
-    enable_video_visitation_scheduling: number; //1,
-    enable_family_prepaid: number; //0,
-    enable_phone_validation: number; //0,
-    require_phone_validation: number; //0,
-    full_nm: string; //"Alabama - Cullman County Sheriffs Office",
-    idc: boolean; //false,
-    ppd: boolean; //true,
-    vid: boolean; //true,
-    hasaccount: number; //0
-    register_link: string; //null
-};
-
-export type ICSProductAppended = ICSProduct & {
-    publicAgencies: string;
-};
-
 export type ICSFacility = {
     facility_nm: string; // "Morgan County Jail"
     site_id: number; // 5261
 };
 
-export type MultiStateICSProduct = ICSProduct & {
-    site_id: number; //0,
+export type GTLMetadata = {
+    headers: any;
+    viewState: string;
+    prefix1: string;
+    prefix2: string;
 };
 
-export type ICSRawRate = {
-    startTime: string; // "2021-03-05T15:35:56-05:00",
-    duration: number; // 900
-    callType: string; //prepaid_collect
-    icos: string; //
-    initDur: number; // 60
-    overDur: number; // 60
-    minimumCost: number; // 0
-    from: {
-        placeName: string; // "mainland"
-        rateCenter: string; // DECATUR
-        state: string; // AL
-        nxxType: string; // POTS
-    };
-    to: {
-        placeName: string; // "mainland"
-        rateCenter: string; // DRIGGS
-        state: string; // ID
-        nxxType: string; // POT
-        canonicalNumber: string; //12083544311
-    };
-    fees: [];
-    taxes: {
-        rrtCallTypes: number; // 0,
-        bundledCallTypes: number; // 0,
-        callTaxMicros: number; //0
-    };
-    summary: {
-        tariffBand: string; // "Interstate";
-        initialDuration: string; // "1 minute";
-        initialCost: number; // 0.21;
-        overDuration: string; // "1 minute";
-        overCost: number; // 0.21;
-        tax: number; // 0;
-        finalCost: number; // 3.15;
-    };
+export type GTLRate = {
+    service: string;
+    facility: string;
+    subFacility: string | null;
+    phone: string;
+    state: string;
+    createdAt: number;
+    scraper: string;
+
+    source: string;
+    amountInitial: number | null;
+    durationInitial: number | null;
+    durationAdditional: number | null;
+    amountAdditional: number | null;
+    liveAgentFee: number | null;
+    automatedPaymentFee: number | null;
+    paperBillStatementFee: number | null;
 };
