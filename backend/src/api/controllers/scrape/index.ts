@@ -54,9 +54,10 @@ const createRequestChunks = (
 
 router.post("/all", async (req: express.Request, res: express.Response) => {
   const errors: any[] = [];
-  const chunks = createRequestChunks(scraper_input, 5);
+  const chunks = createRequestChunks(scraper_input, 50);
 
   let count = 0;
+  // console.log(chunks.length);
   for (const scraper_endpoint of functions.config().scraper_endpoints) {
     for (const chunk of chunks) {
       try {
