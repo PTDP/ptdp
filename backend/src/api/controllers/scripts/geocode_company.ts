@@ -88,93 +88,142 @@ const serialize = (data: any, path: string) => {
 };
 
 // One off script (3/7/2021) to merge geocoded elts (already paid for) w/ newly scraped elements
-export const merge_geocodings = async () => {
+// Made some edits during GTL ingestion (4/4/2021)
+// export const merge_geocodings = async () => {
+//   const latest_company_facilities = await readCSV(
+//     "https://storage.googleapis.com/ptdp-staging.appspot.com/exports/company_facilities_1617551298692.csv"
+//   );
+
+// const previously_geocoded = await readCSV(
+//   "https://raw.githubusercontent.com/PTDP/data/main/intermediate_data/geocoded_company_facilities.csv"
+// );
+
+//   let missing: any[] = [];
+// const geocoded = latest_company_facilities.map((e) => {
+//   const prev: any = previously_geocoded.find((elt) => {
+//     return (
+//       elt.company === e.company &&
+//       elt.facilityInternal === e.facilityInternal &&
+//       // elt.agencyInternal === e.agencyInternal &&
+//       elt.stateInternal === e.stateInternal
+//     );
+//   });
+
+//   if (!prev) {
+//     missing.push(e);
+//     return;
+//   }
+
+//   return {
+//     ...e,
+//     googlePlaceName: prev.googlePlaceName,
+//     address: prev.address,
+//     longitude: prev.longitude,
+//     latitude: prev.latitude,
+//     county: prev.county,
+//     googlePlaceId: prev.googlePlaceId,
+//     state: prev.state,
+//   };
+// });
+
+//   geocoded.push(...missing);
+//   geocoded.sort((a: any, b: any) => a.id - b.id);
+
+//   await serialize(geocoded, "./geocoded.csv");
+// };
+
+export const geocode_latest_company_facilities = async () => {
   const latest_company_facilities = await readCSV(
-    "https://storage.googleapis.com/ptdp-staging.appspot.com/exports/company_facilities_1615248404962.csv"
+    "https://storage.googleapis.com/ptdp-staging.appspot.com/exports/company_facilities_1617551298692.csv"
   );
 
   const previously_geocoded = await readCSV(
     "https://raw.githubusercontent.com/PTDP/data/main/intermediate_data/geocoded_company_facilities.csv"
   );
 
-  let missing: any[] = [];
-  const geocoded = latest_company_facilities.map((e) => {
-    const prev: any = previously_geocoded.find((elt) => {
-      return (
-        elt.company === e.company &&
-        elt.facilityInternal === e.facilityInternal &&
-        // elt.agencyInternal === e.agencyInternal &&
-        elt.stateInternal === e.stateInternal
-      );
-    });
+  const needsGeocoding: any[] = [];
 
-    if (!prev) {
-      missing.push(e);
-      return;
-    }
-
-    return {
-      ...e,
-      googlePlaceName: prev.googlePlaceName,
-      address: prev.address,
-      longitude: prev.longitude,
-      latitude: prev.latitude,
-      county: prev.county,
-      googlePlaceId: prev.googlePlaceId,
-      state: prev.state,
-    };
-  });
-
-  const fixed = missing.map((elt) => {
-    let updated = { ...elt };
-    if (elt.facilityInternal === "Benton County Jail") {
-      updated = {
-        ...updated,
-        googlePlaceName: "Benton County Jail",
-        address: "190 NW 4th St. Corvallis, OR 97330",
-        longitude: -123.2645137,
-        latitude: 44.5656091,
-        county: "Benton County",
-        googlePlaceId: null,
-        state: "OR",
-      };
-    } else if (elt.facilityInternal === "Sumter County Detention Center") {
-      updated = {
-        ...updated,
-        googlePlaceName: "Sumter-Lee Regional Detention Center",
-        address: "1250 Winkles Rd, Sumter, SC 29153, United States",
-        longitude: -80.3261587,
-        latitude: 33.9589824,
-        county: "Sumter County",
-        googlePlaceId: "ChIJvx7PsXll_4gRP_eD9aq3HC4",
-        state: "SC",
-      };
-    } else if (
-      elt.facilityInternal ===
-      'OK DOC - CHARLES E "BILL" JOHNSON CORRECTIONAL CENTER'
-    ) {
-      const et: any = previously_geocoded.find((geo_elt: any) => {
-        return geo_elt.googlePlaceId === "ChIJYeQI-QVwr4cRuRsTLE4xCS4";
+  const alreadyGeocoded: any[] = latest_company_facilities
+    .map((e) => {
+      const prev: any = previously_geocoded.find((elt) => {
+        return (
+          elt.company === e.company &&
+          elt.facilityInternal === e.facilityInternal &&
+          // elt.agencyInternal === e.agencyInternal &&
+          elt.stateInternal === e.stateInternal
+        );
       });
 
-      updated = {
-        ...updated,
-        googlePlaceName: et!.googlePlaceName,
-        address: et!.address,
-        longitude: et!.longitude,
-        latitude: et!.latitude,
-        county: et!.county,
-        googlePlaceId: et!.googlePlaceId,
-        state: et!.state,
+      if (!prev) {
+        needsGeocoding.push(e);
+        return null;
+      }
+
+      return {
+        ...e,
+        googlePlaceName: prev.googlePlaceName,
+        address: prev.address,
+        longitude: prev.longitude,
+        latitude: prev.latitude,
+        county: prev.county,
+        googlePlaceId: prev.googlePlaceId,
+        state: prev.state,
       };
-    }
-    return updated;
-  });
+    })
+    .filter(Boolean);
 
-  geocoded.push(...fixed);
-  geocoded.sort((a: any, b: any) => a.id - b.id);
+  console.log(needsGeocoding.length);
+  console.log(alreadyGeocoded.length);
 
-  await serialize(geocoded, "./geocoded.csv");
+  const newlyGeocoded: any[] = [];
+
+  for (let i = 0; i < needsGeocoding.length; i++) {
+    console.log(`${i + 1}/${needsGeocoding.length}}`);
+    const props = await getGeoCodedProps(needsGeocoding[i]);
+    newlyGeocoded.push({
+      ...needsGeocoding[i],
+      ...props,
+      state: needsGeocoding[i].stateInternal,
+    });
+  }
+
+  const output = [...alreadyGeocoded, ...newlyGeocoded];
+
+  output.sort((a: any, b: any) => a.id - b.id);
+
+  await serialize(output, "./geocoded.csv");
+};
+
+const getGeoCodedProps = async (companyFacility: any) => {
+  let formatted_address = "";
+  let lat = "";
+  let lng = "";
+  let place_id = "";
+  let name = "";
+  let county = "";
+
+  try {
+    // if company is ICS, we cannot trust the reported state for each facility
+    ({ formatted_address, lat, lng, name, place_id } =
+      (await geocodeFacility(companyFacility)) || {});
+  } catch (err) {
+    console.error(err);
+  }
+
+  try {
+    county = await reverseGeocodeFacilityGoogle(lat, lng);
+  } catch (err) {
+    console.error(err);
+  }
+
+  return {
+    googlePlaceName: name,
+    address: formatted_address,
+    longitude: lng,
+    latitude: lat,
+    county,
+    googlePlaceId: place_id,
+  };
 };
 
 export const geocode_company = async () => {
@@ -266,8 +315,6 @@ const geocodeFacility = async (facility: ICompanyFacility) => {
       `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${query}&key=${PLACES_KEY}`
     )
   ).data;
-
-  console.log(results);
   if (results.length) {
     const {
       formatted_address,

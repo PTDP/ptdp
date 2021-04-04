@@ -114,7 +114,7 @@ router.post(
 
 router.post("/query", async (req: express.Request, res: express.Response) => {
   try {
-    await scripts.centroid();
+    await scripts.geocode_latest_company_facilities();
     // const r = await db.Facility.query();
     // console.log(r);
     // await db.Contract.insert([]);
