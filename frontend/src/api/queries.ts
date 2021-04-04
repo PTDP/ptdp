@@ -27,6 +27,8 @@ export const FACILITIES_QUERY = gql`
           address
           type
           securelvl
+          longitude
+          latitude
         }
         companyFacilitiesByCanonicalFacilityId {
           nodes {

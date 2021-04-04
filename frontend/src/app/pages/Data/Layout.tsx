@@ -79,6 +79,8 @@ const Toggle = ({ name, options }) => {
             n = n.filter(e => e !== id);
         }
 
+        if (n.length === 0) return;
+
         dispatch(actions.updateFilters({ ...filters, [name]: n }));
     }
     return (
@@ -129,7 +131,7 @@ const SideBar = () => {
                                 label: "Out-State Calls"
                             }
                         ]} />
-                        <Range name={"15 Minute Rate Percentile"} property={"fifteen_minute_percentiles"} />
+                        {/* <Range name={"15 Minute Rate Percentile"} property={"fifteen_minute_percentiles"} /> */}
                         <Toggle name="Layers" options={[
                             {
                                 id: Geography.FACILITY,
@@ -137,14 +139,14 @@ const SideBar = () => {
                                 label: "Facility"
                             },
                             {
-                                id: Geography.FIFTEEN_MINUTE_HEATMAP,
-                                name: 'geography',
-                                label: "Fifteen Minute Rate Heatmap"
-                            },
-                            {
                                 id: Geography.COUNTY,
                                 name: 'geography',
                                 label: "County"
+                            },
+                            {
+                                id: Geography.FIFTEEN_MINUTE_HEATMAP,
+                                name: 'geography',
+                                label: "Fifteen Minute Rate Heatmap"
                             },
                             {
                                 id: Geography.POPULATION,
@@ -157,23 +159,28 @@ const SideBar = () => {
                             {
                                 id: FilterCompanies.ICS,
                                 name: 'company',
-                                label: "ICS"
+                                label: "IC Solutions"
                             },
                             {
                                 id: FilterCompanies.SECURUS,
                                 name: 'company',
                                 label: "Securus"
+                            },
+                            {
+                                id: FilterCompanies.GTL,
+                                name: 'company',
+                                label: "Global Tel Link"
                             }
                         ]} />
-                        <Toggle name="Population" options={[
+                        {/* <Toggle name="Population" options={[
                             {
                                 id: Geography.COUNTY,
                                 name: 'geography',
                                 label: "Include Unknown"
                             }]}
-                        />
+                        /> */}
 
-                        <Range name={"Min / Max"} property={"capacity_bounds"} />
+                        {/* <Range name={"Min / Max"} property={"capacity_bounds"} /> */}
 
                         <Toggle name="Facility Type" options={[
                             {

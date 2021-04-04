@@ -22,7 +22,8 @@ export enum Geography {
 export enum FilterCompanies {
   ICS = 1,
   SECURUS = 2,
-  ALL = 3,
+  GTL = 3,
+  ALL = 4,
 }
 
 export enum CallType {
