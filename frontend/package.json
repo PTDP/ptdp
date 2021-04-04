@@ -40,6 +40,7 @@
     "jest-styled-components": "7.0.3",
     "lint-staged": "10.3.0",
     "luma.gl": "7.3.2",
+    "mobile-device-detect": "0.4.3",
     "node-plop": "0.26.2",
     "plop": "2.7.4",
     "prettier": "2.1.1",
