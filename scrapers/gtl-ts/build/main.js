@@ -17,55 +17,6 @@ class SingleStateHandler {
         this.page = page;
         this.metaData = metaData;
     }
-    async getFacilities() {
-        //
-        return [
-            {
-                name: "Baldwin County AL-Corrections Center",
-                id: "1028",
-                subFacilities: [],
-            },
-            {
-                name: "Federal Bureau of Prisons AL-Aliceville FCC",
-                id: "536",
-                subFacilities: [
-                    {
-                        name: "FBOP_AL-Aliceville FCC",
-                        id: "7472",
-                    },
-                    // {
-                    //     name: "FBOP_IL-AUSP Thomson",
-                    //     id: "7491",
-                    // },
-                    // {
-                    //     name: "FBOP_NH-Berlin FCI",
-                    //     id: "7473",
-                    // },
-                    // {
-                    //     name: "Grant County WA-County Jail (old)",
-                    //     id: "7446",
-                    // },
-                    // {
-                    //     name: "Thurston County WA-Juvenile Facility",
-                    //     id: "7434",
-                    // },
-                    // {
-                    //     name: "USN_VA-USN Chesapeake NAVCONBRIG",
-                    //     id: "7463",
-                    // },
-                    // {
-                    //     name: "Yakima WA-City Jail",
-                    //     id: "7427",
-                    // },
-                ],
-            },
-            {
-                name: "Federal Bureau of Prisons AL-Montgomery FPC",
-                id: "721",
-                subFacilities: [],
-            },
-        ];
-    }
     async getInStateRates(requester, services) {
         const rates = [];
         requester.updateNumber(this.state.in_state_phone);
@@ -86,13 +37,8 @@ class SingleStateHandler {
         }
         return rates;
     }
-    async selectState() {
-        // this.selectState
-    }
     async run() {
         const rates = [];
-        // seelct current state
-        // const facilities = await this.getFacilities();
         const services = ["AdvancePay", "Collect"];
         const r = new gtlRequester_1.GTLRequester(this.metaData, {
             service: services[0],
@@ -101,10 +47,8 @@ class SingleStateHandler {
             phoneNumber: this.state.in_state_phone,
         }, this.page, this.uid);
         const facilities = await r.updateState();
-        // for each facility
         for (const f of facilities) {
             const subFacilities = await r.updateFacility(f.id, f.name);
-            // we could set sub facilities here
             if (subFacilities.length) {
                 for (const sf of subFacilities) {
                     await r.updateSubFacility(sf.id, sf.name);
@@ -121,7 +65,6 @@ class SingleStateHandler {
             }
             await util_1.sleepInRange(400, 700);
         }
-        // await new Promise((resolve) => setTimeout(resolve, 10000000));
         return rates;
     }
 }
@@ -235,10 +178,7 @@ Apify.main(async () => {
                     await Apify.setValue("OUTPUT", { ...output });
                 }
             }
-            // await uploadFile(
-            //     `etl/gtl/${Date.now()}.json`,
-            //     JSON.stringify(output)
-            // );
+            await uploadFile(`etl/gtl/${Date.now()}.json`, JSON.stringify(output));
         },
     });
     log.info("Starting the crawl.");
