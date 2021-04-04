@@ -1,10 +1,8 @@
-import { ICSRate } from "@ptdp/lib";
 import { Storage } from "@google-cloud/storage";
-import * as states from "us-state-codes";
 
 import { ScraperInput, StateInput, GTLMetadata, GTLRate } from "./types";
 import PendingXHR from "./pendingXHR";
-import { falseyToNull, sleepInRange } from "./util";
+import { sleepInRange } from "./util";
 import { GTLRequester } from "./gtlRequester";
 
 const {
@@ -25,66 +23,6 @@ class SingleStateHandler {
         private page: any,
         private metaData: GTLMetadata
     ) {}
-
-    async getFacilities(): Promise<
-        {
-            name: string;
-            id: string;
-            subFacilities: {
-                name: string;
-                id: string;
-            }[];
-        }[]
-    > {
-        //
-        return [
-            {
-                name: "Baldwin County AL-Corrections Center",
-                id: "1028",
-                subFacilities: [],
-            },
-            {
-                name: "Federal Bureau of Prisons AL-Aliceville FCC",
-                id: "536",
-                subFacilities: [
-                    {
-                        name: "FBOP_AL-Aliceville FCC",
-                        id: "7472",
-                    },
-                    // {
-                    //     name: "FBOP_IL-AUSP Thomson",
-                    //     id: "7491",
-                    // },
-                    // {
-                    //     name: "FBOP_NH-Berlin FCI",
-                    //     id: "7473",
-                    // },
-                    // {
-                    //     name: "Grant County WA-County Jail (old)",
-                    //     id: "7446",
-                    // },
-                    // {
-                    //     name: "Thurston County WA-Juvenile Facility",
-                    //     id: "7434",
-                    // },
-                    // {
-                    //     name: "USN_VA-USN Chesapeake NAVCONBRIG",
-                    //     id: "7463",
-                    // },
-                    // {
-                    //     name: "Yakima WA-City Jail",
-                    //     id: "7427",
-                    // },
-                ],
-            },
-            {
-                name: "Federal Bureau of Prisons AL-Montgomery FPC",
-                id: "721",
-                subFacilities: [],
-            },
-        ];
-    }
-
     async getInStateRates(
         requester: GTLRequester,
         services
@@ -117,17 +55,9 @@ class SingleStateHandler {
         return rates;
     }
 
-    async selectState() {
-        // this.selectState
-    }
-
     async run() {
         const rates: GTLRate[] = [];
-
-        // seelct current state
-        // const facilities = await this.getFacilities();
         const services = ["AdvancePay", "Collect"];
-
         const r = new GTLRequester(
             this.metaData,
             {
@@ -142,10 +72,8 @@ class SingleStateHandler {
 
         const facilities = await r.updateState();
 
-        // for each facility
         for (const f of facilities) {
             const subFacilities = await r.updateFacility(f.id, f.name);
-            // we could set sub facilities here
             if (subFacilities.length) {
                 for (const sf of subFacilities) {
                     await r.updateSubFacility(sf.id, sf.name);
@@ -162,8 +90,6 @@ class SingleStateHandler {
 
             await sleepInRange(400, 700);
         }
-
-        // await new Promise((resolve) => setTimeout(resolve, 10000000));
 
         return rates;
     }
@@ -313,10 +239,10 @@ Apify.main(async () => {
                 }
             }
 
-            // await uploadFile(
-            //     `etl/gtl/${Date.now()}.json`,
-            //     JSON.stringify(output)
-            // );
+            await uploadFile(
+                `etl/gtl/${Date.now()}.json`,
+                JSON.stringify(output)
+            );
         },
     });
 
