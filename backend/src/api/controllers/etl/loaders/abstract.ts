@@ -1,4 +1,4 @@
-import { ScrapeResult, ICSRate, SecurusRate } from "@ptdp/lib";
+import { ScrapeResult, ICSRate, SecurusRate, GTLRate } from "@ptdp/lib";
 import { sha1 } from "./util";
 import { ICompanyFacility, IRate } from "../../../../types";
 import * as db from "../../../../db/models";
@@ -26,7 +26,7 @@ const removeDuplicates = <T>(
 };
 
 export default abstract class ETL {
-  constructor(private result: ScrapeResult<ICSRate | SecurusRate>) {}
+  constructor(private result: ScrapeResult<ICSRate | SecurusRate | GTLRate>) {}
 
   async run(): Promise<void> {
     try {
@@ -105,11 +105,11 @@ export default abstract class ETL {
   }
 
   abstract transformRates(
-    result: ScrapeResult<ICSRate | SecurusRate>
+    result: ScrapeResult<ICSRate | SecurusRate | GTLRate>
   ): Promise<IRate[]>;
 
   abstract transformCompanyFacilities(
-    result: ScrapeResult<ICSRate | SecurusRate>
+    result: ScrapeResult<ICSRate | SecurusRate | GTLRate>
   ): ICompanyFacility[];
 
   async loadRates(transformed: IRate[]) {
@@ -123,6 +123,7 @@ export default abstract class ETL {
     );
 
     const filtered = deduped.filter(this.validRate);
+
     console.warn("Removed", deduped.length - filtered.length, " invalid rates");
 
     let patched = 0;
@@ -165,7 +166,7 @@ export default abstract class ETL {
   strToInt = (str: string): number =>
     parseInt(str.match(new RegExp(/\d+/))?.[0] || "0");
 
-  isInState = (rate: ICSRate | SecurusRate, stusab: string): boolean => {
+  isInState = (rate: ICSRate | SecurusRate | any, stusab: string): boolean => {
     const scraper = scrapeInputs.find((si) => si.uuid === rate.scraper);
     if (!scraper)
       throw new Error(`Scraper not found for ` + JSON.stringify(rate));
