@@ -172,7 +172,7 @@ Apify.main(async () => {
             const { headers, viewState, prefix1, prefix2, } = await getMetaData(page);
             const gtlStates = await getGTLStates(page);
             const states = Object.values(input.data).filter((elt) => gtlStates.includes(elt.stusab));
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < states.length; i++) {
                 try {
                     const handler = new SingleStateHandler(states[i], input.uuid, page, {
                         headers,
