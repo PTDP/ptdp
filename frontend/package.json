@@ -22,6 +22,7 @@
     "@types/testing-library__jest-dom": "5.9.2",
     "@types/webpack": "4.41.22",
     "@types/webpack-env": "1.15.2",
+    "axios": "0.21.1",
     "chalk": "4.1.0",
     "cross-env": "7.0.2",
     "d3-shape": "2.1.0",
