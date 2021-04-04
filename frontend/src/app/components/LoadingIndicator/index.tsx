@@ -1,7 +1,7 @@
 import * as React from 'react';
 import styled, { keyframes } from 'styled-components/macro';
 
-interface Props extends SvgProps {}
+interface Props extends SvgProps { }
 
 export const LoadingIndicator = (props: Props) => (
   <Svg viewBox="-24 -24 48 48" small={props.small}>
@@ -19,14 +19,17 @@ const rotate = keyframes`
 
 const dash = keyframes`
   0% {
+    stroke: rgb(19,185,129);
     stroke-dasharray: 0, 150;
     stroke-dashoffset: 0;
   }
   50% {
+    stroke: rgb(19,185,129);
     stroke-dasharray: 100, 150;
     stroke-dashoffset: -24;
   }
   100% {
+    stroke: rgb(19,185,129);
     stroke-dasharray: 0, 150;
     stroke-dashoffset: -124;
   }
@@ -41,6 +44,7 @@ const Svg = styled.svg<SvgProps>`
   height: ${p => (p.small ? '1.25rem' : '3rem')};
   width: ${p => (p.small ? '1.25rem' : '3rem')};
   transform-origin: center;
+  fill: rgb(19,185,129);
 `;
 
 const Circle = styled.circle`
