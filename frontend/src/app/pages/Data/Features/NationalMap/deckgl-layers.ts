@@ -181,31 +181,20 @@ export function renderLayers(
     return max;
   }
 
+  console.log('settings.geography.includes(Geography.FACILITY)', settings.geography.includes(Geography.FACILITY))
 
-  console.log('props.fifteen_minute_percentiles', props.fifteen_minute_percentiles)
-
-  console.log(' props.fifteen_minute_percentiles',  props.fifteen_minute_percentiles)
   const column =
     settings.geography.includes(Geography.FACILITY) &&
     new PTDPHexagon({
       onHover,
       data: points,  
       radius: 1000,
-      coverage: 1,
       elevationScale: 200,
       elevationDomain: [0, 25],
       extruded: true,
       filled: true,
-      elevationLowerPercentile: props.fifteen_minute_percentiles[0],
-      elevationUpperPercentile: props.fifteen_minute_percentiles[1],
       getElevationValue: d => {
         try {
-          d.forEach((el) => {
-            if (el.hifldid === 10003791) {
-              console.log(maxCanFacilitiesArray(d));
-              console.log(d)
-            }
-          })
           return maxCanFacilitiesArray(d) 
         } catch(err) {
           return 0
@@ -232,12 +221,54 @@ export function renderLayers(
       },
       getFillColor: d => {
         return COLOR_SCALE_FACILITY(maxCanFacilitiesPoints(d.points))
-      }
+      },
+      colorRange: COLOR_RANGE
     });
+
+  // const column =
+  // settings.geography.includes(Geography.FACILITY) &&
+  // new HexagonLayer({
+  //   onHover,
+  //   data: points,  
+  //   radius: 5000,
+  //   elevationScale: 125,
+  //   elevationDomain: [0, 25],
+  //   extruded: true,
+  //   filled: true,
+    // getElevationValue: d => {
+    //   try {
+    //     return maxCanFacilitiesArray(d) 
+    //   } catch(err) {
+    //     return 0
+    //   }
+    // },
+  //   getPosition: d => {
+  //   try {
+  //     const { latitude, longitude } = d;
+  //     return [longitude, latitude];
+  //   } catch (err) {}
+  // },
+  //   getColorValue: d => {
+  //     try {
+  //       return maxCanFacilitiesArray(d);
+  //     } catch(err) {
+  //       console.error(err);
+  //     }
+  //   },
+  //   wireframe: false,
+
+  //   autoHighlight: true,
+  //   // highlightColor: [0, 0, 128, 128],
+  //   opacity: 25,
+  //   pickable: true,
+  //   // lightSettings: LIGHT_SETTINGS,
+  //   colorRange: COLOR_RANGE
+  // });
 
     const heatmap =  settings.geography.includes(Geography.POPULATION) && new HeatmapLayer({
       id: 'heatmapLayer',
       data: points,
+      radiusPixels: 10,
       getPosition: d => {
         try {
           const { latitude, longitude } = d.hifldByHifldid;
@@ -269,7 +300,7 @@ export function renderLayers(
         } 
       },
       threshold:  .5,
-      radiusPixels: 20,
+      radiusPixels: 10,
       getWeight: d => {
         try {
           return maxCanFacilitiesArray([d]) 
