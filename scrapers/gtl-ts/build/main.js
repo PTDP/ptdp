@@ -7,7 +7,7 @@ const storage_1 = require("@google-cloud/storage");
 const pendingXHR_1 = __importDefault(require("./pendingXHR"));
 const util_1 = require("./util");
 const gtlRequester_1 = require("./gtlRequester");
-const { GOOGLE_APPLICATION_CREDENTIALS_BASE64, CLOUD_STORAGE_BUCKET, } = process.env;
+const { GOOGLE_APPLICATION_CREDENTIALS_BASE64, CLOUD_STORAGE_BUCKET, USERNAME, PW, } = process.env;
 const Apify = require("apify");
 const { utils: { log }, } = Apify;
 class SingleStateHandler {
@@ -125,8 +125,6 @@ const getMetaData = async (page) => {
     return ps;
 };
 const login = async (page) => {
-    const USERNAME = "o6f8oe+49gbu1on2p76c@sharklasers.com";
-    const PW = "ohM6phaotah";
     const login_selectors = {
         login_link: 'a[id="cnForm:returnToLogin"]',
         email: "#user_email",

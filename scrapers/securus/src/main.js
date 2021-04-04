@@ -6,12 +6,10 @@ const Apify = require("apify");
 const PendingXHR = require("./pendingXHR");
 
 const env = {
-  USERNAME: "linopo6273@cocyo.com",
-  PASSWORD: "7EQ}P4aGA]2+@>$s",
   BASE_URL: "https://securustech.online",
 };
 
-const COMPANY = 'securus';
+const COMPANY = "securus";
 
 const login = (page) => {};
 
@@ -43,39 +41,47 @@ const clearFocused = async (page) => {
 };
 
 const getRandomInt = (min, max) => {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  };
-  
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
 const sleepInRange = async (min, max) =>
-    await new Promise((resolve) => setTimeout(resolve, getRandomInt(min, max)));
+  await new Promise((resolve) => setTimeout(resolve, getRandomInt(min, max)));
 
 const falseyToNull = (obj) => {
-    const transformed = { ...obj };
-    Object.entries(transformed).forEach((k, v) => {
-      if (typeof v !== "number" && !v) transformed[k] = null;
-    });
-    return transformed;
-  };
+  const transformed = { ...obj };
+  Object.entries(transformed).forEach((k, v) => {
+    if (typeof v !== "number" && !v) transformed[k] = null;
+  });
+  return transformed;
+};
 
 const process = async (page, input, output) => {
   await page.waitForTimeout(rate_selectors.states);
   const pendingXHR = new PendingXHR(page, () => {});
   await pendingXHR.waitForAllXhrFinished();
-  await page.waitForFunction((sel) => document.querySelectorAll(sel).length > 5, {}, rate_selectors.states);
+  await page.waitForFunction(
+    (sel) => document.querySelectorAll(sel).length > 5,
+    {},
+    rate_selectors.states
+  );
 
   const states_raw = await page.$$eval(rate_selectors.states, (nodes) => {
-    return nodes.map((node) => ({
-      value: node.value,
-      label: node.innerText.trim(),
-    })).filter(s => s.label !== "Select");
+    return nodes
+      .map((node) => ({
+        value: node.value,
+        label: node.innerText.trim(),
+      }))
+      .filter((s) => s.label !== "Select");
   });
 
-  const states = Object.values(input.data).map((s) => {
+  const states = Object.values(input.data)
+    .map((s) => {
       const raw = states_raw.find((r_s) => r_s.value === s.stusab);
-      return raw ? { ...s, ...raw} : null;
-  }).filter(Boolean);
+      return raw ? { ...s, ...raw } : null;
+    })
+    .filter(Boolean);
 
   for (const state of states) {
     try {
@@ -108,8 +114,16 @@ const processState = async (state, page, input, output) => {
 
   for (const facility of facilities) {
     try {
-      const results = await processFacility(facility, state, page, input, output);
-      output[state.stusab] ? output[state.stusab].push(...results) :  output[state.stusab] = [...results];
+      const results = await processFacility(
+        facility,
+        state,
+        page,
+        input,
+        output
+      );
+      output[state.stusab]
+        ? output[state.stusab].push(...results)
+        : (output[state.stusab] = [...results]);
       await Apify.setValue("OUTPUT", { ...output });
       await sleepInRange(500, 1500);
     } catch (err) {
@@ -133,8 +147,7 @@ const oncomplete = async (
   const resp = await response.json();
   const isSuccessResp = resp && resp.result && resp.result.surCharge;
   const isFailureResp = resp && resp.errorMsg !== "Success";
-  const duplicate =
-    isSuccessResp && results.find((r) => r.number === phone);
+  const duplicate = isSuccessResp && results.find((r) => r.number === phone);
 
   if (isXhr && isSuccessResp && !duplicate) {
     const {
@@ -162,7 +175,7 @@ const oncomplete = async (
         scraper,
         facility: facility.label,
         seconds: 60,
-        company: COMPANY
+        company: COMPANY,
       })
     );
   } else if (isFailureResp) {
@@ -181,7 +194,7 @@ const oncomplete = async (
         facility: facility.label,
         seconds: 60,
         error: resp.errorMsg,
-        company: COMPANY
+        company: COMPANY,
       })
     );
   }
@@ -244,8 +257,8 @@ Apify.main(async () => {
     // proxyConfiguration,
     handlePageTimeoutSecs: 36000,
     launchPuppeteerOptions: {
-        useChrome: true,
-        stealth: true,
+      useChrome: true,
+      stealth: true,
     },
     handlePageFunction: async ({ page, request, proxyInfo }) => {
       await process(page, input, output);
