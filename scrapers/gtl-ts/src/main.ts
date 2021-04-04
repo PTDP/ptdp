@@ -36,6 +36,7 @@ class SingleStateHandler {
             }[];
         }[]
     > {
+        //
         return [
             {
                 name: "Baldwin County AL-Corrections Center",
@@ -116,9 +117,15 @@ class SingleStateHandler {
         return rates;
     }
 
+    async selectState() {
+        // this.selectState
+    }
+
     async run() {
         const rates: GTLRate[] = [];
-        const facilities = await this.getFacilities();
+
+        // seelct current state
+        // const facilities = await this.getFacilities();
         const services = ["AdvancePay", "Collect"];
 
         const r = new GTLRequester(
@@ -126,30 +133,34 @@ class SingleStateHandler {
             {
                 service: services[0],
                 facilityState: this.state.stusab,
-                facility: facilities[0].id,
+                facility: null,
                 phoneNumber: this.state.in_state_phone,
             },
             this.page,
             this.uid
         );
 
-        await r.updateAll();
+        const facilities = await r.updateState();
 
         // for each facility
         for (const f of facilities) {
-            await r.updateFacility(f.id, f.name);
-            if (f.subFacilities.length) {
-                for (const sf of f.subFacilities) {
+            const subFacilities = await r.updateFacility(f.id, f.name);
+            // we could set sub facilities here
+            if (subFacilities.length) {
+                for (const sf of subFacilities) {
                     await r.updateSubFacility(sf.id, sf.name);
                     const in_state = await this.getInStateRates(r, services);
                     const out_state = await this.getOutStateRates(r, services);
                     rates.push(...in_state, ...out_state);
+                    await sleepInRange(400, 700);
                 }
             } else {
                 const in_state = await this.getInStateRates(r, services);
                 const out_state = await this.getOutStateRates(r, services);
                 rates.push(...in_state, ...out_state);
             }
+
+            await sleepInRange(400, 700);
         }
 
         // await new Promise((resolve) => setTimeout(resolve, 10000000));

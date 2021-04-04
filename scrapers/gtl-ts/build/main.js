@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const storage_1 = require("@google-cloud/storage");
 const pendingXHR_1 = __importDefault(require("./pendingXHR"));
+const util_1 = require("./util");
 const gtlRequester_1 = require("./gtlRequester");
 const { GOOGLE_APPLICATION_CREDENTIALS_BASE64, CLOUD_STORAGE_BUCKET, } = process.env;
 const Apify = require("apify");
@@ -17,6 +18,7 @@ class SingleStateHandler {
         this.metaData = metaData;
     }
     async getFacilities() {
+        //
         return [
             {
                 name: "Baldwin County AL-Corrections Center",
@@ -84,26 +86,32 @@ class SingleStateHandler {
         }
         return rates;
     }
+    async selectState() {
+        // this.selectState
+    }
     async run() {
         const rates = [];
-        const facilities = await this.getFacilities();
+        // seelct current state
+        // const facilities = await this.getFacilities();
         const services = ["AdvancePay", "Collect"];
         const r = new gtlRequester_1.GTLRequester(this.metaData, {
             service: services[0],
             facilityState: this.state.stusab,
-            facility: facilities[0].id,
+            facility: null,
             phoneNumber: this.state.in_state_phone,
         }, this.page, this.uid);
-        await r.updateAll();
+        const facilities = await r.updateState();
         // for each facility
         for (const f of facilities) {
-            await r.updateFacility(f.id, f.name);
-            if (f.subFacilities.length) {
-                for (const sf of f.subFacilities) {
+            const subFacilities = await r.updateFacility(f.id, f.name);
+            // we could set sub facilities here
+            if (subFacilities.length) {
+                for (const sf of subFacilities) {
                     await r.updateSubFacility(sf.id, sf.name);
                     const in_state = await this.getInStateRates(r, services);
                     const out_state = await this.getOutStateRates(r, services);
                     rates.push(...in_state, ...out_state);
+                    await util_1.sleepInRange(400, 700);
                 }
             }
             else {
@@ -111,6 +119,7 @@ class SingleStateHandler {
                 const out_state = await this.getOutStateRates(r, services);
                 rates.push(...in_state, ...out_state);
             }
+            await util_1.sleepInRange(400, 700);
         }
         // await new Promise((resolve) => setTimeout(resolve, 10000000));
         return rates;
