@@ -32,7 +32,7 @@ const CicularButton = ({ children, className, onClick, style }) => {
 export const Layout = () => {
 
     return (
-        <div className="bg-white mb-16">
+        <div className="bg-white mb-16" style={{ minHeight: '70vh' }}>
             <div className="mx-auto py-12 px-4 max-w-4xl sm:px-6 lg:px-8 lg:py-12">
                 <div className="grid grid-cols-1 gap-12 lg:gap-8 about-container">
                     <div></div>
