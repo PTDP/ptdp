@@ -6,7 +6,7 @@ import * as git from "./git";
 import path from "path";
 import axios from "axios";
 
-import { ScrapeResult, ICSRate, SecurusRate } from "@ptdp/lib";
+import { ScrapeResult, ICSRate, SecurusRate, GTLRate } from "@ptdp/lib";
 
 const router = express.Router();
 
@@ -31,6 +31,9 @@ router.post(
             break;
           case "securus":
             await loaders.securus(data as ScrapeResult<SecurusRate>);
+            break;
+          case "gtl":
+            await loaders.gtl(data as ScrapeResult<GTLRate>);
             break;
           default:
             throw new Error(`ETL for ${company} not found.`);
@@ -66,6 +69,9 @@ router.post("/", async (req: express.Request, res: express.Response) => {
         break;
       case "securus":
         await loaders.securus(data);
+        break;
+      case "gtl":
+        await loaders.gtl(data);
         break;
       default:
         throw new Error(`ETL for ${company} not found.`);

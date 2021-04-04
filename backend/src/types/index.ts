@@ -93,6 +93,7 @@ export enum Jurisdiction {
 export enum Company {
   "ICS" = 1,
   "SECURUS" = 2,
+  "GTL" = 3,
 }
 
 export enum Service {
@@ -102,6 +103,8 @@ export enum Service {
   "Inmate Debit" = 4,
   "Traditional Collect" = 5,
   "Voicemail" = 6,
+  "GTL Collect" = 7,
+  "GTL AdvancePay" = 8,
 }
 
 export enum State {
