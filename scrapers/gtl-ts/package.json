@@ -4,7 +4,7 @@
 	"description": "This is a boilerplate of an Apify actor.",
 	"dependencies": {
 		"@google-cloud/storage": "^5.8.1",
-		"@ptdp/lib": "^1.0.36",
+		"@ptdp/lib": "^1.0.44",
 		"@types/puppeteer": "^5.4.3",
 		"apify": "^1.0.1",
 		"cheerio": "^1.0.0-rc.5",

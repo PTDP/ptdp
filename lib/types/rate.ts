@@ -1,4 +1,4 @@
-import { SecurusServices } from "./service";
+import { Service } from "./service";
 import { Stringified } from "./json";
 
 export type ICSRate = {
@@ -28,11 +28,31 @@ export type SecurusRate = {
   surCharge?: number;
   totalAmount?: string;
   number?: string;
-  service: SecurusServices;
+  service: Service;
   createdAt: number;
   scraper: string;
   facility: string;
   seconds: number;
+};
+
+export type GTLRate = {
+  service: string;
+  facility: string;
+  subFacility: string | null;
+  phone: string;
+  state: string;
+  createdAt: number;
+  scraper: string;
+
+  source: string;
+  amountInitial: number | null;
+  durationInitial: number | null;
+  durationAdditional: number | null;
+  amountAdditional: number | null;
+  liveAgentFee: number | null;
+  automatedPaymentFee: number | null;
+  paperBillStatementFee: number | null;
+  localCallTimeFacility: string;
 };
 
 export type Stusab =

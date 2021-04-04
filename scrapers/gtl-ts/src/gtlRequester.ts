@@ -1,7 +1,7 @@
 import * as cheerio from "cheerio";
-import { falseyToNull, sleepInRange } from "./util";
-import { GTLRate, GTLMetadata } from "./types";
-import fs from "fs";
+import { falseyToNull } from "./util";
+import { GTLRate } from "@ptdp/lib";
+import { GTLMetadata } from "./types";
 
 export class GTLRequester {
     headers: any;
