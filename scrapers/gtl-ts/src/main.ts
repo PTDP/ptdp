@@ -4,7 +4,6 @@ import { ScraperInput, StateInput, GTLMetadata, GTLRate } from "./types";
 import PendingXHR from "./pendingXHR";
 import { sleepInRange } from "./util";
 import { GTLRequester } from "./gtlRequester";
-import { stat } from "node:fs";
 
 const {
     GOOGLE_APPLICATION_CREDENTIALS_BASE64,
