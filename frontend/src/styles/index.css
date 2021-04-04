@@ -1,0 +1,123 @@
+@import "tailwindcss/base";
+
+@import "tailwindcss/components";
+
+/* Nav */
+header {
+    z-index: 50;
+}
+
+.fieldset {
+    border: 0;
+}
+
+nav {
+    @apply 
+    bg-white 
+    w-full;
+}
+
+main {
+    @apply
+    mt-10 
+    mx-auto 
+    max-w-7xl 
+    px-4 
+    sm:mt-12 
+    sm:px-6 
+    md:mt-16 
+    lg:mt-20 
+    lg:px-8
+    xl:mt-20
+}
+
+.nav-container {
+    @apply
+    mx-auto 
+    sm:px-6 
+    lg:px-8;
+}
+
+.nav-btn {
+    @apply text-xl bg-blue-400;
+} 
+
+.nav-link-active {
+    @apply 
+    border-green-500 
+    text-gray-900 
+    inline-flex 
+    items-center 
+    px-1 
+    pt-1 
+    border-b-2 
+    text-sm 
+    font-medium
+}
+
+.nav-link-inactive {
+    @apply 
+    border-transparent 
+    text-gray-500 
+    hover:border-gray-300 
+    hover:text-gray-700 
+    inline-flex 
+    items-center 
+    px-1 
+    pt-1 
+    border-b-2 
+    text-sm 
+    font-medium
+}
+
+.charts {
+  @apply
+  bg-white
+  rounded-md
+  shadow-md
+  text-msm
+  h-60
+  p-20
+  w-60
+  absolute
+  /* z:
+  height: 300,
+  padding: '10px',
+  position: 'absolute',
+  left: 20,
+  bottom: 20,
+  width: 500,
+  zIndex: 45, */
+}
+
+.loader,
+.loader-blue {
+  border-top-color: #2f80ed;
+  -webkit-animation: spinner 1.2s linear infinite;
+  animation: spinner 1.2s linear infinite;
+}
+
+body {
+  overflow: hidden;
+}
+
+
+@-webkit-keyframes spinner {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@keyframes spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@import "tailwindcss/utilities";

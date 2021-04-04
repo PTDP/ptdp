@@ -1,0 +1,24 @@
+{
+  "name": "@ptdp/lib",
+  "version": "1.0.44",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "prettier": "prettier --write \"**/*.{ts,tsx,json}\"",
+    "test": "dtslint ."
+  },
+  "author": "prison.telcom.data.project@gmail.com",
+  "license": "ISC",
+  "devDependencies": {
+    "@firebase/firestore-types": "^2.1.0",
+    "dtslint": "github:Microsoft/dtslint#production",
+    "prettier": "^1.14.3",
+    "typescript": "^3.3.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
+  },
+  "dependencies": {}
+}

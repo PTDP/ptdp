@@ -1,6 +1,7 @@
 {
-	"name": "actor-quick-start",
+	"name": "ics",
 	"version": "0.0",
 	"buildTag": "latest",
-	"env": null
+	"env": null,
+	"template": "project_puppeteer_crawler"
 }
