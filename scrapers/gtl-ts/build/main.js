@@ -40,6 +40,12 @@ class SingleStateHandler {
     async run() {
         const rates = [];
         const services = ["AdvancePay", "Collect"];
+        // console.log("<><><><><><><>", {
+        //     service: services[0],
+        //     facilityState: this.state.stusab,
+        //     facility: null,
+        //     phoneNumber: this.state.in_state_phone,
+        // });
         const r = new gtlRequester_1.GTLRequester(this.metaData, {
             service: services[0],
             facilityState: this.state.stusab,
@@ -47,6 +53,7 @@ class SingleStateHandler {
             phoneNumber: this.state.in_state_phone,
         }, this.page, this.uid);
         const facilities = await r.updateState();
+        // console.log("Facilities", facilities);
         for (const f of facilities) {
             const subFacilities = await r.updateFacility(f.id, f.name);
             if (subFacilities.length) {
@@ -141,6 +148,10 @@ const login = async (page) => {
     const [elt] = await page.$x(login_selectors.rates_fees);
     await elt.click();
 };
+const getGTLStates = async (page) => {
+    const states = await page.evaluate(() => Array.from(document.querySelectorAll('select[id$="facilityState"] option'), (elt) => elt.getAttribute("value")).filter(Boolean));
+    return states;
+};
 Apify.main(async () => {
     const requestList = await Apify.openRequestList("start-urls", [
         "https://www.connectnetwork.com/webapp/jsps/cn/ratesandfees/landing.cn",
@@ -159,8 +170,9 @@ Apify.main(async () => {
         handlePageFunction: async ({ page }) => {
             await login(page);
             const { headers, viewState, prefix1, prefix2, } = await getMetaData(page);
-            const states = Object.values(input.data);
-            for (let i = 0; i < 1; i++) {
+            const gtlStates = await getGTLStates(page);
+            const states = Object.values(input.data).filter((elt) => gtlStates.includes(elt.stusab));
+            for (let i = 0; i < 10; i++) {
                 try {
                     const handler = new SingleStateHandler(states[i], input.uuid, page, {
                         headers,
