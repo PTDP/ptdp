@@ -9,6 +9,8 @@ import { GTLRequester } from "./gtlRequester";
 const {
     GOOGLE_APPLICATION_CREDENTIALS_BASE64,
     CLOUD_STORAGE_BUCKET,
+    USERNAME,
+    PW,
 } = process.env;
 
 const Apify = require("apify");
@@ -173,9 +175,6 @@ const getMetaData = async (page): Promise<GTLMetadata> => {
 };
 
 const login = async (page) => {
-    const USERNAME = "***REMOVED***";
-    const PW = "***REMOVED***";
-
     const login_selectors = {
         login_link: 'a[id="cnForm:returnToLogin"]',
         email: "#user_email",
