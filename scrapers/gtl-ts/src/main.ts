@@ -242,7 +242,7 @@ Apify.main(async () => {
                 gtlStates.includes(elt.stusab)
             );
 
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < states.length; i++) {
                 try {
                     const handler = new SingleStateHandler(
                         states[i],
