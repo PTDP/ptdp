@@ -76,23 +76,3 @@ export type GTLMetadata = {
     prefix1: string;
     prefix2: string;
 };
-
-export type GTLRate = {
-    service: string;
-    facility: string;
-    subFacility: string | null;
-    phone: string;
-    state: string;
-    createdAt: number;
-    scraper: string;
-
-    source: string;
-    amountInitial: number | null;
-    durationInitial: number | null;
-    durationAdditional: number | null;
-    amountAdditional: number | null;
-    liveAgentFee: number | null;
-    automatedPaymentFee: number | null;
-    paperBillStatementFee: number | null;
-    localCallTimeFacility: string;
-};

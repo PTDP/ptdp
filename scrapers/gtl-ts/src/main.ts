@@ -1,6 +1,7 @@
 import { Storage } from "@google-cloud/storage";
 
-import { ScraperInput, StateInput, GTLMetadata, GTLRate } from "./types";
+import { GTLRate } from "@ptdp/lib";
+import { ScraperInput, StateInput, GTLMetadata } from "./types";
 import PendingXHR from "./pendingXHR";
 import { sleepInRange } from "./util";
 import { GTLRequester } from "./gtlRequester";
