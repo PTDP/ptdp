@@ -4,6 +4,7 @@ import { ScraperInput, StateInput, GTLMetadata, GTLRate } from "./types";
 import PendingXHR from "./pendingXHR";
 import { sleepInRange } from "./util";
 import { GTLRequester } from "./gtlRequester";
+import { stat } from "node:fs";
 
 const {
     GOOGLE_APPLICATION_CREDENTIALS_BASE64,
@@ -58,6 +59,14 @@ class SingleStateHandler {
     async run() {
         const rates: GTLRate[] = [];
         const services = ["AdvancePay", "Collect"];
+
+        // console.log("<><><><><><><>", {
+        //     service: services[0],
+        //     facilityState: this.state.stusab,
+        //     facility: null,
+        //     phoneNumber: this.state.in_state_phone,
+        // });
+
         const r = new GTLRequester(
             this.metaData,
             {
@@ -71,6 +80,8 @@ class SingleStateHandler {
         );
 
         const facilities = await r.updateState();
+
+        // console.log("Facilities", facilities);
 
         for (const f of facilities) {
             const subFacilities = await r.updateFacility(f.id, f.name);
@@ -188,6 +199,17 @@ const login = async (page) => {
     await elt.click();
 };
 
+const getGTLStates = async (page) => {
+    const states = await page.evaluate(() =>
+        Array.from(
+            document.querySelectorAll('select[id$="facilityState"] option'),
+            (elt) => elt.getAttribute("value")
+        ).filter(Boolean)
+    );
+
+    return states;
+};
+
 Apify.main(async () => {
     const requestList = await Apify.openRequestList("start-urls", [
         "https://www.connectnetwork.com/webapp/jsps/cn/ratesandfees/landing.cn",
@@ -215,8 +237,12 @@ Apify.main(async () => {
                 prefix2,
             }: GTLMetadata = await getMetaData(page);
 
-            const states = Object.values(input.data);
-            for (let i = 0; i < 1; i++) {
+            const gtlStates = await getGTLStates(page);
+            const states = Object.values(input.data).filter((elt) =>
+                gtlStates.includes(elt.stusab)
+            );
+
+            for (let i = 0; i < 10; i++) {
                 try {
                     const handler = new SingleStateHandler(
                         states[i],
