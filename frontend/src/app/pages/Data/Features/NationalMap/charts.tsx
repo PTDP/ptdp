@@ -225,7 +225,6 @@ export default function Charts({
 
   const get = async () => {
     try {
-      const res = await axios.get('https://www.googleapis.com/civicinfo/v2/representatives?key=AIzaSyDN4is9An7DygIQ0QW47ZONCMLQQjis4Zw&address=550+1st+Avenue%2C+New+York%2C+NY%2C+USA')
     } catch (err) {
       console.error(err.toString())
     }
