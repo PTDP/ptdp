@@ -133,7 +133,25 @@ class GTLRequester {
         };
         if (!this._subFacility)
             delete body[`${this.prefix1}:subfacility`];
-        return await this.request(body);
+        const result = await this.request(body);
+        return this.parseUpdateStateResult(result);
+    }
+    parseUpdateStateResult(updateStateResult) {
+        const $ = cheerio.load(updateStateResult);
+        let options = Array.from($('select[id$="facility"] option'));
+        return options
+            .map((o) => {
+            const id = $(o).val();
+            const name = $(o).text();
+            if (id && name) {
+                return {
+                    id,
+                    name,
+                };
+            }
+            return null;
+        })
+            .filter(Boolean);
     }
     async updateFacility(facility, facilityName) {
         this._facility = facility;
@@ -158,7 +176,25 @@ class GTLRequester {
             [`${this.prefix1}:callDuration`]: this._callDuration,
             "javax.faces.ViewState": this.viewState,
         };
-        return await this.request(body);
+        const result = await this.request(body);
+        return this.parseUpdateFacilityResult(result);
+    }
+    parseUpdateFacilityResult(updateFacilityResult) {
+        const $ = cheerio.load(updateFacilityResult);
+        let options = Array.from($('select[id$="subfacility"] option'));
+        return options
+            .map((o) => {
+            const id = $(o).val();
+            const name = $(o).text();
+            if (id && name) {
+                return {
+                    id,
+                    name,
+                };
+            }
+            return null;
+        })
+            .filter(Boolean);
     }
     async updateSubFacility(sf, sf_name) {
         this._subFacility = sf;
