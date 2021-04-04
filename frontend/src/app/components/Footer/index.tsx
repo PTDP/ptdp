@@ -3,9 +3,7 @@ import React from 'react';
 export const Footer = () => {
 
     return (
-        <footer className="bg-gray-800" aria-labelledby="footerHeading" style={{
-            height: 250
-        }}>
+        <footer className="bg-gray-800" aria-labelledby="footerHeading">
             <h2 id="footerHeading" className="sr-only">Footer</h2>
             <div className="max-w-7xl mx-auto py-16 sm:py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
 
@@ -28,7 +26,7 @@ export const Footer = () => {
                         </div>
                     </form>
                 </div > */}
-                <div className="sm:mt-20 sm:border-t border-gray-700 sm:pt-8 md:flex md:items-center md:justify-between">
+                <div className="sm:mt-12 sm:border-t border-gray-700 sm:pt-8 md:flex md:items-center md:justify-between">
                     {/* <div className="flex space-x-6 md:order-2">
                         <a href="#" className="text-gray-400 hover:text-gray-300">
                             <span className="sr-only">Facebook</span>
