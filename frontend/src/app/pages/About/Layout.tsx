@@ -60,8 +60,8 @@ export const Layout = () => {
                             <div>
                                 <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl mt-8">Team</h2>
                                 <ul className="space-y-12 sm:grid sm:grid-cols-2 sm:gap-12 sm:space-y-0 lg:gap-x-8 mt-4">
-                                    <Bio name={"Hayden Betts"} role={"Project Lead"} bio={"Hayden is an activist and software engineer."} image={Hayden} twitter={"https://twitter.com/haydenbetts"} />
-                                    <Bio name={"Kevin O'Donnell"} role={"Organizer"} bio={"Kevin is a field organizer for SURJ Ohio."} image={Kevin} linkedin={'https://www.linkedin.com/in/kevin-o-donnell-85772b57/'} />
+                                    <Bio name={"Hayden Betts"} role={""} bio={"Hayden is an activist and software engineer."} image={Hayden} twitter={"https://twitter.com/haydenbetts"} />
+                                    <Bio name={"Kevin O'Donnell"} role={""} bio={"Kevin is a field organizer for SURJ Ohio."} image={Kevin} linkedin={'https://www.linkedin.com/in/kevin-o-donnell-85772b57/'} />
 
                                 </ul>
                             </div>
