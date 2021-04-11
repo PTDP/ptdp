@@ -183,8 +183,6 @@ export function renderLayers(
     return max;
   }
 
-  console.log('settings.geography.includes(Geography.FACILITY)', settings.geography.includes(Geography.FACILITY))
-
   const column =
     settings.geography.includes(Geography.FACILITY) &&
     new PTDPHexagon({

@@ -255,7 +255,19 @@ export const NationalMap = props => {
   }
 
   const _onHover = props => {
-    const { x, y, object, hoveredObject, layer } = props;
+    const { x, y, object, hoveredObject, layer, picked } = props;
+    if (!picked) {
+      return setState(
+        {
+          hover: {
+            x: 0,
+            y: 0,
+            hoveredObject: null,
+            label: '',
+            hoveredLayer: null
+          }
+        })
+    }
     if (layer.id === 'geojson-layer' && (!object || object?.properties?.fifteenMinute === 0)) {
       if (state.hover.hoveredObject !== null) {
         setState({
