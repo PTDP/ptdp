@@ -75,12 +75,34 @@ export interface IRate {
 
 // For export to git
 export interface IRatePublic
-  extends Omit<IRate, "service" | "company" | "updated" | "notes"> {
-  // id: string;
+  extends Omit<IRate, "uid" | "service" | "company" | "notes"> {
+  facilityUID: string;
+  HIFLDID: number | null;
+
+  facility: string;
+
+  facilityInternal: string;
+  agencyInternal: string;
+  agencyFullNameInternal: string;
+
+  address: string;
+  city: string;
+  state: string;
+  zip: number;
+  countyfips: number;
+  longitude: number | null;
+  latitude: number | null;
+
+  type: string;
+  population: number;
+  capacity: number;
+  securelvl: string;
+
   service: string;
   company: string;
-  updated: string;
-  notes: string | null;
+  createdAt: string;
+
+  hidden: boolean;
 }
 
 export enum Jurisdiction {
@@ -192,7 +214,7 @@ export interface HIFLD {
   TELEPHONE: string;
   TYPE: string;
   STATUS: string;
-  POPULATION: string;
+  POPULATION: number;
   COUNTY: string;
   COUNTYFIPS: number;
   COUNTRY: string;

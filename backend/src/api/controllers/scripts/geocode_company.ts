@@ -19,7 +19,7 @@ export class GeocodedCompanyFExporter extends Exporter<
   PATH = "intermediate_data/intermediate_company_f.md";
   CLOUD_STORAGE_PATH = `exports/intermediate_company_f${Date.now()}.csv`;
 
-  transform(fs: GeocodedCompanyF[]) {
+  async transform(fs: GeocodedCompanyF[]) {
     return fs.map((r) => ({
       ...r,
       state: r.stateInternal ? State[r.stateInternal] : null,
