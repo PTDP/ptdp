@@ -21,8 +21,8 @@ export function App() {
   return (
     <BrowserRouter>
       <Helmet
-        titleTemplate="%s - React Boilerplate"
-        defaultTitle="React Boilerplate"
+        titleTemplate="%s - Prison Telecom Data Project"
+        defaultTitle="Prison Telecom Data Project"
         htmlAttributes={{ lang: i18n.language }}
       >
         <meta name="description" content="Prison Telecom Data Project" />
