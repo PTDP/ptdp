@@ -78,6 +78,9 @@ export const Layout = () => {
                       time. For example, we will always use the Maryland
                       governor's number to check out-of-state rates in Alabama.
                     </div>
+                    <div className="mt-2">
+                    Note: Because our data is scraped from private entities, it is updated and ammended on a schedule we do not control. Furthur, our data represents telecom rates as those entities report them publicly, rather than what rates are in practice.
+                    </div>
                   </div>
 
                   <div className="mt-2 font-bold">Scraping</div>
