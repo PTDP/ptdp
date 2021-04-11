@@ -19,6 +19,7 @@ import { Resources } from './pages/Resources/Loadable';
 import { Data } from './pages/Data/Loadable';
 import { About } from './pages/About/Loadable';
 import { NotFoundPage } from './pages/NotFoundPage/Loadable';
+import { Methods } from './pages/Methods/Loadable';
 import { useTranslation } from 'react-i18next';
 import '../styles/tailwind.css';
 
@@ -38,6 +39,7 @@ export function App() {
         <Route exact path={process.env.PUBLIC_URL + '/data'} component={Data} />
         <Route exact path={process.env.PUBLIC_URL + '/'} component={HomePage} />
         <Route exact path={process.env.PUBLIC_URL + '/resources'} component={Resources} />
+        <Route exact path={process.env.PUBLIC_URL + '/methods'} component={Methods} />
         <Route component={NotFoundPage} />
       </Switch>
       <GlobalStyle />

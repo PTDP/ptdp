@@ -43,7 +43,7 @@ export abstract class Exporter<I, O> {
   async sync() {
     try {
       const update: I[] = await this.dbModel.query();
-      const transformed = this.transform(this.deleteDBMeta(update));
+      const transformed = await this.transform(this.deleteDBMeta(update));
       const serialized = await this.serialize(transformed);
 
       const { data } = await this.client.request(
@@ -93,7 +93,7 @@ export abstract class Exporter<I, O> {
     });
   }
 
-  abstract transform(data: I[]): O[];
+  abstract transform(data: I[]): Promise<O[]>;
 }
 
 export class CompanyFacilityModel extends Exporter<
@@ -103,7 +103,7 @@ export class CompanyFacilityModel extends Exporter<
   PATH = "data/company_facilities.md";
   CLOUD_STORAGE_PATH = `exports/company_facilities_${Date.now()}.csv`;
 
-  transform(fs: ICompanyFacility[]) {
+  async transform(fs: ICompanyFacility[]) {
     return fs.map((r: ICompanyFacility) => {
       return {
         ...r,
@@ -119,16 +119,89 @@ export class RateModel extends Exporter<IRate, IRatePublic> {
   PATH = "data/rates.md";
   CLOUD_STORAGE_PATH = `exports/rates_${Date.now()}.csv`;
 
-  transform(rates: IRate[]) {
-    return rates.map((r) => {
-      return {
-        ...r,
-        service: Service[r.service],
-        company: Company[r.company],
-        updated: JSON.stringify(r.updated),
-        notes: r.notes.length ? JSON.stringify(r.notes) : null,
-      };
-    });
+  async transform(rates: IRate[]): Promise<IRatePublic[]> {
+    const transformed: IRatePublic[] = [];
+    for (let i = 0; i < rates.length; i++) {
+      console.log(`${i}/${rates.length}`);
+      const r = rates[i];
+      const flattened = [];
+
+      const cf = await db.CompanyFacility.query().findOne(
+        "id",
+        "=",
+        r.companyFacilityId
+      );
+
+      const canon = await db.CanonicalFacility.query().findOne(
+        "id",
+        "=",
+        cf.canonicalFacilityId
+      );
+
+      let hifld = null;
+
+      if (canon) {
+        hifld = await db.HIFLD.query().findOne(
+          "FACILITYID",
+          "=",
+          canon.HIFLDID
+        );
+      }
+
+      for (let i = 0; i < r.updated.length; i++) {
+        if (!canon) continue;
+
+        const publicRate = {
+          facilityUID: canon?.uid,
+          HIFLDID: canon?.HIFLDID,
+
+          facility: hifld?.NAME,
+
+          facilityInternal: cf?.facilityInternal?.toUpperCase() || "",
+          agencyInternal: cf?.agencyInternal?.toUpperCase() || "",
+          agencyFullNameInternal:
+            cf?.agencyFullNameInternal?.toUpperCase() || "",
+
+          address: hifld?.ADDRESS,
+          city: hifld?.CITY,
+          state: hifld?.STATE,
+          zip: hifld?.ZIP,
+          countyfips: hifld?.COUNTYFIPS,
+
+          longitude: canon?.longitude || "",
+          latitude: canon?.latitude || "",
+
+          type: hifld?.TYPE,
+          population: hifld?.POPULATION === -999 ? "" : hifld?.POPULATION,
+          capacity: hifld?.CAPACITY === -999 ? "" : hifld?.CAPACITY,
+          securelvl:
+            hifld?.SECURELVL === "NOT AVAILABLE" ? "" : hifld?.SECURELVL,
+
+          ...r,
+          inState: r.inState,
+          company: Company[r.company],
+          service: Service[r.service].toUpperCase(),
+
+          hidden: canon?.hidden,
+
+          createdAt: new Date(r.updated[i]).toISOString(),
+        };
+
+        if (!publicRate.pctTax) publicRate.pctTax = 0;
+
+        delete (publicRate as any).uid;
+        delete (publicRate as any).updated;
+        delete (publicRate as any).notes;
+        delete (publicRate as any).hidden_override;
+        delete (publicRate as any).companyFacilityId;
+        delete (publicRate as any).companyFacilityId;
+
+        flattened.push(publicRate as any);
+      }
+
+      transformed.push(...flattened);
+    }
+    return transformed;
   }
 }
 
@@ -139,7 +212,7 @@ export class CanonicalFacilityModel extends Exporter<
   PATH = "data/canonical_facilities.md";
   CLOUD_STORAGE_PATH = `exports/canonical_facilities_${Date.now()}.csv`;
 
-  transform(fs: ICanonicalFacility[]) {
+  async transform(fs: ICanonicalFacility[]) {
     return fs.map((r) => {
       return {
         ...r,

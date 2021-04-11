@@ -1,9 +1,9 @@
 import React from 'react';
 import Hayden from './hayden.jpeg';
 import Kevin from './kevin.jpeg';
-import { Mail } from '../../components/Icons/index';
+import { Mail, Twitter, Linkedin } from '../../components/Icons/index';
 
-const Bio = ({ name, role, bio, image }) => {
+const Bio = ({ name, role, bio, image, twitter, linkedin }: { name: string, role: string, bio: string, image: string, twitter?: string, linkedin?: string }) => {
 
     return (
         <li>
@@ -13,7 +13,7 @@ const Bio = ({ name, role, bio, image }) => {
                     <h3>{name}</h3>
 
                     <p className="text-gray-600 text-sm">{role}</p>
-                    <p className="text-gray-600 text-sm">{bio}</p>
+                    <p className="text-gray-600 text-sm">{bio}<span> {twitter && <Twitter _style={{ height: 20, width: 20, marginTop: 2, cursor: 'pointer' }} onClick={() => window.open(twitter)} />} {linkedin && <Linkedin _style={{ height: 16, width: 16, marginTop: 2, cursor: 'pointer' }} onClick={() => window.open(linkedin)} />} </span></p>
 
                 </div>
             </div>
@@ -32,7 +32,7 @@ const CicularButton = ({ children, className, onClick, style }) => {
 export const Layout = () => {
 
     return (
-        <div className="bg-white mb-16">
+        <div className="bg-white mb-16" style={{ minHeight: '70vh' }}>
             <div className="mx-auto py-12 px-4 max-w-4xl sm:px-6 lg:px-8 lg:py-12">
                 <div className="grid grid-cols-1 gap-12 lg:gap-8 about-container">
                     <div></div>
@@ -60,8 +60,8 @@ export const Layout = () => {
                             <div>
                                 <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl mt-8">Team</h2>
                                 <ul className="space-y-12 sm:grid sm:grid-cols-2 sm:gap-12 sm:space-y-0 lg:gap-x-8 mt-4">
-                                    <Bio name={"Hayden Betts"} role={"Project Lead"} bio={"Hayden is an activist and software engineer at Spotify."} image={Hayden} />
-                                    <Bio name={"Kevin O'Donnell"} role={"Organizer"} bio={"Kevin is a field organizer for SURJ Ohio."} image={Kevin} />
+                                    <Bio name={"Hayden Betts"} role={""} bio={"Hayden is an activist and software engineer."} image={Hayden} twitter={"https://twitter.com/haydenbetts"} />
+                                    <Bio name={"Kevin O'Donnell"} role={""} bio={"Kevin is a field organizer for SURJ Ohio."} image={Kevin} linkedin={'https://www.linkedin.com/in/kevin-o-donnell-85772b57/'} />
 
                                 </ul>
                             </div>

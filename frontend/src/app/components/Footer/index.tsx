@@ -26,7 +26,7 @@ export const Footer = () => {
                         </div>
                     </form>
                 </div > */}
-                <div className="sm:mt-8 sm:border-t border-gray-700 sm:pt-8 md:flex md:items-center md:justify-between">
+                <div className="sm:mt-12 sm:border-t border-gray-700 sm:pt-8 md:flex md:items-center md:justify-between">
                     {/* <div className="flex space-x-6 md:order-2">
                         <a href="#" className="text-gray-400 hover:text-gray-300">
                             <span className="sr-only">Facebook</span>

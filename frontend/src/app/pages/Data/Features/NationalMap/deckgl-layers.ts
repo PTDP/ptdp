@@ -22,11 +22,11 @@ const COLOR_RANGE_COUNTY = [
   [252, 78, 42],
   [227, 26, 28],
   [189, 0, 38],
-  [168, 0, 38],
+  [200, 0, 38],
 ]
 
 const COLOR_RANGE = [
-  [127, 205, 187],
+  [127, 205, 187,],
   [199, 233, 180],
   [237, 248, 177],
   // zero
@@ -150,15 +150,17 @@ export function renderLayers(
       id: 'geojson-layer',
       data: geojson,
       pickable: true,
-      stroked: true,
-      filled: true,
+      // stroked: true,
+      // filled: true,
       extruded: true,
+      wireframe: true,
+      
 
-      lineWidthScale: 20,
-      lineWidthMinPixels: 2,
+      lineWidthScale: .5,
+      // lineWidthMinPixels: 1,
       getFillColor: d => COLOR_SCALE(d.properties.fifteenMinute),
-      // getElevation: d => d.properties.fifteenMinute,
-      getLineColor: [255, 255, 255],
+      getElevation: 0,
+      getLineColor: [0, 0, 0],
       getRadius: 100,
       // elevationScale: 5000,
       getLineWidth: 200,
@@ -180,8 +182,6 @@ export function renderLayers(
     })
     return max;
   }
-
-  console.log('settings.geography.includes(Geography.FACILITY)', settings.geography.includes(Geography.FACILITY))
 
   const column =
     settings.geography.includes(Geography.FACILITY) &&

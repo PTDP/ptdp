@@ -23,7 +23,7 @@ export const Data = () => {
         (document as any).querySelector('body').style.overflow = 'hidden'
 
         return function cleanUp() {
-            (document as any).querySelector('body').style.overflow = ''
+            (document as any).querySelector('body').style.overflow = 'scroll'
         }
     }, [])
 

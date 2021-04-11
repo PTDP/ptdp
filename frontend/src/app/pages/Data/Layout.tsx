@@ -6,6 +6,20 @@ import { selectFilters } from './Features/NationalMap/slice/selectors';
 import { FilterCompanies, Geography, CallType, FacilityType, SecureLVL } from './Features/NationalMap/slice/types';
 import { RangeSlider } from '../../components/RangeSlider';
 
+const Link = ({ link, text }) => {
+    return (
+        <a
+            className="cursor-pointer underline"
+            onClick={e => {
+                e.preventDefault();
+                window.open(link);
+            }}
+        >
+            {text}
+        </a>
+    );
+};
+
 const Radio = ({ name, options }) => {
     const filters = useSelector(selectFilters);
     const dispatch = useDispatch();
@@ -116,8 +130,19 @@ const SideBar = () => {
                         <svg className="text-gray-400 group-hover:text-gray-500 mr-3 h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
-              Select Data
+              Instructions
             </a>
+                    <div className="text-xs pl-2 pr-2" style={{ marginTop: '1rem' }}>
+                        <div>
+                            Hover facilities or counties to get basic information about them.
+                        </div>
+                        <div className="mt-2">
+                            Click highlighted facilities to view all rate data since January 2021.
+                        </div>
+                        <div className="mt-2">
+                            For more information, about where our data comes from, read about our <Link link="/methods" text="methods" />.
+                        </div>
+                    </div>
                     <div className="flex-col">
                         <Radio name="Data" options={[
                             {

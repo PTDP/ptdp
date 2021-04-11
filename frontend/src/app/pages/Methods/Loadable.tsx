@@ -8,16 +8,16 @@ import { LoadingIndicator } from 'app/components/LoadingIndicator';
 import styled from 'styled-components/macro';
 
 const LoadingWrapper = styled.div`
-    width: 100%;
-    height: 80vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  `;
+     width: 100%;
+     height: 100vh;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+   `;
 
-export const Resources = lazyLoad(
+export const Methods = lazyLoad(
     () => import('./index'),
-    module => module.Resources,
+    module => module.Methods,
     {
         fallback: (
             <LoadingWrapper>
