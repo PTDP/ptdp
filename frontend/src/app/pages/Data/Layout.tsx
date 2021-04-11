@@ -6,6 +6,20 @@ import { selectFilters } from './Features/NationalMap/slice/selectors';
 import { FilterCompanies, Geography, CallType, FacilityType, SecureLVL } from './Features/NationalMap/slice/types';
 import { RangeSlider } from '../../components/RangeSlider';
 
+const Link = ({ link, text }) => {
+    return (
+        <a
+            className="cursor-pointer underline"
+            onClick={e => {
+                e.preventDefault();
+                window.open(link);
+            }}
+        >
+            {text}
+        </a>
+    );
+};
+
 const Radio = ({ name, options }) => {
     const filters = useSelector(selectFilters);
     const dispatch = useDispatch();
@@ -124,6 +138,9 @@ const SideBar = () => {
                         </div>
                         <div className="mt-2">
                             Click highlighted facilities to view all rate data since January 2021.
+                        </div>
+                        <div className="mt-2">
+                            For more information, about where our data comes from, read about our <Link link="/methods" text="methods" />.
                         </div>
                     </div>
                     <div className="flex-col">

@@ -106,7 +106,7 @@ export function Nav() {
                       Data
                   </a>
                     <a href="/methods" onClick={handleClick} className={getNavClass("/methods")}>
-                      Methods & FAQ
+                      Methods
                   </a>
                     <a href="/resources" onClick={handleClick} className={getNavClass("/resources")}>
                       Resources
@@ -127,7 +127,7 @@ export function Nav() {
               <div className="pt-2 pb-4 space-y-1">
                 <a href="/" className="bg-green-50 border-green-500 text-green-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Home</a>
                 <a href="/data" onClick={handleMobileClick} className="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Data</a>
-                <a href="/methods" onClick={handleMobileClick} className="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Methods & FAQ</a>
+                <a href="/methods" onClick={handleMobileClick} className="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Methods</a>
                 <a href="/resources" onClick={handleMobileClick} className="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Resources</a>
                 <a href="/about" onClick={handleMobileClick} className="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">About Us</a>
 
