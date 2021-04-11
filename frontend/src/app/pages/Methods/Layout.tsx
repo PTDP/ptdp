@@ -157,22 +157,22 @@ export const Layout = () => {
                       text="checking whether the token set ratio is > 75"
                       link="https://github.com/seatgeek/fuzzywuzzy/tree/9a4bc22c7483198fcb96afacc42f5f700fb803ed#token-set-ratio"
                     />
-                    ){' '}
+                    ).{' '}
                     <b>
                       By default, we hide any rate data that we are unable to confidently
                       tie to a canonical facility in the Department of Homeland Security's Prison Boundary Dataset. We
                       only reintroduce such rates after manual review.
                     </b>{' '}
-                    You can view the details of our approach in this{' '}
+                    You can view the details of our approach to reconciling facilities{' '}
                     <Link
                       link="https://github.com/PTDP/ptdp/blob/master/utils/notebooks/reconcile_facilities.ipynb"
-                      text="jupyter notebook."
+                      text="Jupyter notebook."
                     ></Link>
                   </div>
                   <div className="mt-2 font-bold">Manual Correction</div>
                   <div className="mt-2">
                     The above approach to joining vendor reported data to external data is by its nature imprecise. We rely on volunteers
-                    to audit our final results, and provide manual corrections to fields to compensate for the imprecision of the auotmated approach.
+                    to audit our final results, and provide manual corrections to fields to compensate for the imprecision of the automated approach.
                   </div>
                 </span>
                 <span style={{ position: 'relative' }}></span>
