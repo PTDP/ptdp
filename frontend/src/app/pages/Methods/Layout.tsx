@@ -136,7 +136,7 @@ export const Layout = () => {
                   <div className="mt-2">
                     A core goal of PTDP is to make it possible for researchers
                     to contextualize the rates reported by telecom providers.
-                    By, for example, providing the metadata about the population
+                    By, for example, providing information about the population
                     of facilities paying a particular rate. The challenge here
                     is that the facility names reported by telecom providers may
                     vary in subtle and significant ways from the facility names
