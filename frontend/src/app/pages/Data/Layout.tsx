@@ -140,7 +140,7 @@ const SideBar = () => {
                             Click highlighted facilities to view all rate data since January 2021.
                         </div>
                         <div className="mt-2">
-                            For more information, about where our data comes from, read about our <Link link="/methods" text="methods" />.
+                            For more information about where our data comes from, read about our <Link link="/methods" text="methods" />.
                         </div>
                     </div>
                     <div className="flex-col">
