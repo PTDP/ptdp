@@ -31,8 +31,8 @@ export const Layout = () => {
                 <Link link={'https://github.com/PTDP/data'} text="here" />, and
                 view the code used to collect and display it{' '}
                 <Link link={'https://github.com/PTDP/ptdp'} text="here" />. Our
-                methology borrows heavily from that used by Pete Wagner and
-                Alexi Jones of the Prison Policy Institute in{' '}
+                methology borrows heavily from that used by Peter Wagner and
+                Alexi Jones of the Prison Policy Initiative in{' '}
                 <Link
                   link={
                     'https://www.prisonpolicy.org/phones/state_of_phone_justice.html'
