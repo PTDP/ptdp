@@ -65,7 +65,7 @@ export const Layout = () => {
                                     <Bio name={"Hayden Betts"} role={""} bio={"Hayden is an activist and software engineer."} image={Hayden} twitter={"https://twitter.com/haydenbetts"} />
                                     <Bio name={"Kevin O'Donnell"} role={""} bio={"Kevin is a field organizer for SURJ Ohio."} image={Kevin} linkedin={'https://www.linkedin.com/in/kevin-o-donnell-85772b57/'} />
                                     <Bio name={"Sahil Shah"} role={""} bio={"Sahil is a data engineer, and technical advisor to PTDP."} image={Sahil} linkedin={'https://www.linkedin.com/in/sahil-shah-83b64429/'} />
-                                    <Bio name={"Darien Bryant"} role={""} bio={"Darien is an activist and software engineer."} image={Darien} twitter={"https://twitter.https://www.linkedin.com/in/darien-bryant-m-s//haydenbetts"} />
+                                    <Bio name={"Darien Bryant"} role={""} bio={"Darien is an activist and software engineer."} image={Darien} linkedin={"https://www.linkedin.com/in/darien-bryant-m-s/"} />
                                 </ul>
                             </div>
                         </div>
