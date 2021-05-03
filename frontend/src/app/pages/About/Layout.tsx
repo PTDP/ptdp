@@ -1,7 +1,6 @@
 import React from 'react';
 import Hayden from './hayden.jpeg';
 import Kevin from './kevin.jpeg';
-import JoLynne from './jolynne.jpeg';
 import { Mail, Twitter, Linkedin } from '../../components/Icons/index';
 
 const Bio = ({ name, role, bio, image, twitter, linkedin }: { name: string, role: string, bio: string, image: string, twitter?: string, linkedin?: string }) => {
