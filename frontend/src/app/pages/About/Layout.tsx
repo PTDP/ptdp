@@ -1,6 +1,7 @@
 import React from 'react';
 import Hayden from './hayden.jpeg';
 import Kevin from './kevin.jpeg';
+import JoLynne from './jolynne.jpeg';
 import { Mail, Twitter, Linkedin } from '../../components/Icons/index';
 
 const Bio = ({ name, role, bio, image, twitter, linkedin }: { name: string, role: string, bio: string, image: string, twitter?: string, linkedin?: string }) => {
@@ -62,7 +63,7 @@ export const Layout = () => {
                                 <ul className="space-y-12 sm:grid sm:grid-cols-2 sm:gap-12 sm:space-y-0 lg:gap-x-8 mt-4">
                                     <Bio name={"Hayden Betts"} role={""} bio={"Hayden is an activist and software engineer."} image={Hayden} twitter={"https://twitter.com/haydenbetts"} />
                                     <Bio name={"Kevin O'Donnell"} role={""} bio={"Kevin is a field organizer for SURJ Ohio."} image={Kevin} linkedin={'https://www.linkedin.com/in/kevin-o-donnell-85772b57/'} />
-
+                                    <Bio name={"JoLynne Martinez"} role={""} bio={"JoLynne is an accessibility consultant"} image={JoLynne} linkedin={'https://www.linkedin.com/in/jolynne-martinez-b0b40411/'} />
                                 </ul>
                             </div>
                         </div>
