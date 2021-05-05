@@ -31,6 +31,7 @@ import * as topojson from 'topojson-client';
 import yj from 'yieldable-json';
 import { from } from '@apollo/client';
 import { fifteenMinuteRate, maxCanonicalFacilityRate, stats } from './utils';
+import stateNormalizer from 'us-state-codes';
 
 const INITIAL_VIEW_STATE = {
   longitude: -98.5795,
@@ -149,9 +150,50 @@ export const NationalMap = props => {
     onFilterUpdate();
   }, [filters, facilities])
 
+  const sortByState = () => {
+    const stateFacilitiesByState = {};
+    layers.points.forEach((f) => {
+      if (f.hifldByHifldid.type == "STATE") {
+        const state = stateNormalizer.getStateNameByStateCode(f.hifldByHifldid.state).toUpperCase()
+        if (stateFacilitiesByState[state]) {
+          stateFacilitiesByState[state].push(f)
+        } else {
+          stateFacilitiesByState[state] = [f]
+        }
+      }
+    });
+    console.log(stateFacilitiesByState)
+    let filteredStateGeoJSON = { ...states };
+
+    filteredStateGeoJSON = (filteredStateGeoJSON.features as any).map((g) => {
+      let max = 0;
+      console.log(g.properties)
+      // console.log(`${g.id}-${g.properties.name}`);
+      if (stateFacilitiesByState[g.properties.name.toUpperCase()]) {
+        try {
+          // console.log('here')
+          stateFacilitiesByState[g.properties.name.toUpperCase()].forEach((f) => {
+            max = Math.max(max, maxCanonicalFacilityRate(f));
+          });
+        } catch (err) { }
+      }
+
+      if (max === 0) return null;
+      else {
+        return {
+          ...g,
+          properties: {
+            ...g.properties,
+            fifteenMinute: max
+          }
+        }
+      }
+    }).filter((el) => !!el);
+
+    layers.states = filteredStateGeoJSON;
+  }
   const sortByCounty = () => {
     const facilitiesByFips = {};
-
     layers.points.forEach((f) => {
       const paddedFips = ("00000" + f.hifldByHifldid.countyfips).slice(-5)
 
@@ -160,7 +202,8 @@ export const NationalMap = props => {
       } else {
         facilitiesByFips[`${paddedFips}-${f.hifldByHifldid.county}`] = [f];
       }
-    })
+    });
+
     let filteredGeoJSON = { ...counties };
     filteredGeoJSON = (filteredGeoJSON.features as any).map((g) => {
       let max = 0;
@@ -187,41 +230,13 @@ export const NationalMap = props => {
     }).filter((el) => !!el);
 
     layers.gj = filteredGeoJSON;
-
-    let filteredStateGeoJSON = { ...states };
-
-    filteredStateGeoJSON = (filteredStateGeoJSON.features as any).map((g) => {
-      let max = 0;
-      console.log(`${g.id}-${g.properties.name}`);
-      if (facilitiesByFips[`${g.id}-${g.properties.name.toUpperCase()}`]) {
-        try {
-          // console.log('here')
-          facilitiesByFips[`${g.id}-${g.properties.name.toUpperCase()}`].forEach((f) => {
-            max = Math.max(max, maxCanonicalFacilityRate(f));
-          });
-        } catch (err) { }
-      }
-
-      if (max === 0) return null;
-      else {
-        return {
-          ...g,
-          properties: {
-            ...g.properties,
-            fifteenMinute: max
-          }
-        }
-      }
-    }).filter((el) => !!el);
-
-    layers.states = filteredStateGeoJSON;
-
   }
 
   async function onFilterUpdate() {
     setLoading(true);
     await setFilters(filters)
     await sortByCounty();
+    await sortByState();
     forceUpdate();
     setLoading(false);
   }
