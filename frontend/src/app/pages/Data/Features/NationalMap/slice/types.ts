@@ -55,6 +55,7 @@ export interface NationalMapState {
   facilities: Facility[];
   counties: { features: any[] };
   boundaries: { features: any[] };
+  states: { features: any[] };
   filters: Filters;
   loading: boolean;
   error?: RepoErrorType | null;

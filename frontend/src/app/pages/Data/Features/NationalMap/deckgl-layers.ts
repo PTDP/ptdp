@@ -117,6 +117,7 @@ const elevationRange = [0, 100];
 export function renderLayers(
   props: {
     geojson: any;
+    states: any,
     points: any;
     settings: Filters;
     onHover: any;
@@ -125,7 +126,7 @@ export function renderLayers(
   },
   forceUpdateNum,
 ) {
-  const { geojson, points, settings, onHover } = props;
+  const { geojson, points, settings, onHover, states } = props;
   (window as any).lastForceUpdateNum = forceUpdateNum;
 
   const fifteenMinute = d => {
@@ -166,6 +167,23 @@ export function renderLayers(
       getLineWidth: 200,
       onHover,
     });
+
+  const stateGeojson =
+      true &&
+      new GeoJsonLayer({
+        id: 'states-geojson-layer',
+        data: states,
+        pickable: true,
+        extruded: true,
+        wireframe: true,
+        lineWidthScale: .5,
+        getFillColor: d => COLOR_SCALE(d.properties.fifteenMinute),
+        getElevation: 0,
+        getLineColor: [0,0,0],
+        getRadius: 100,
+        getLineWidth: 200,
+        onHover
+      });
 
   const maxCanFacilitiesArray = (arr: Facility[]) => {
     let max = 0;
@@ -314,5 +332,5 @@ export function renderLayers(
     });
   
 
-  return [geo, column, heatmap, heatmap2];
+  return [stateGeojson, geo, column, heatmap, heatmap2];
 }

@@ -22,7 +22,7 @@ import Charts from './charts';
 /* Data Fetching */
 import { useSelector, useDispatch } from 'react-redux';
 import { useNationalMapSlice } from './slice';
-import { selectFacilities, selectLoading, selectError, selectFilters, selectCounties, selectBoundaries } from './slice/selectors';
+import { selectFacilities, selectLoading, selectError, selectFilters, selectCounties, selectBoundaries, selectStates } from './slice/selectors';
 import { Filters, FilterCompanies, Geography, CallType, FacilityType, SecureLVL } from './slice/types';
 import { Facility } from 'types/Facility'
 import { createImmutableStateInvariantMiddleware } from '@reduxjs/toolkit';
@@ -136,6 +136,7 @@ export const NationalMap = props => {
   const facilities = useSelector(selectFacilities);
   const filters = useSelector(selectFilters);
   const counties = useSelector(selectCounties);
+  const states = useSelector(selectStates);
 
   const [chartExpanded, setChartExpanded] = useState(false);
 
@@ -186,6 +187,35 @@ export const NationalMap = props => {
     }).filter((el) => !!el);
 
     layers.gj = filteredGeoJSON;
+
+    let filteredStateGeoJSON = { ...states };
+
+    filteredStateGeoJSON = (filteredStateGeoJSON.features as any).map((g) => {
+      let max = 0;
+      console.log(`${g.id}-${g.properties.name}`);
+      if (facilitiesByFips[`${g.id}-${g.properties.name.toUpperCase()}`]) {
+        try {
+          // console.log('here')
+          facilitiesByFips[`${g.id}-${g.properties.name.toUpperCase()}`].forEach((f) => {
+            max = Math.max(max, maxCanonicalFacilityRate(f));
+          });
+        } catch (err) { }
+      }
+
+      if (max === 0) return null;
+      else {
+        return {
+          ...g,
+          properties: {
+            ...g.properties,
+            fifteenMinute: max
+          }
+        }
+      }
+    }).filter((el) => !!el);
+
+    layers.states = filteredStateGeoJSON;
+
   }
 
   async function onFilterUpdate() {
@@ -371,6 +401,7 @@ export const NationalMap = props => {
                 fifteen_minute_percentiles: filters.fifteen_minute_percentiles,
                 points: layers.points,
                 geojson: layers.gj,
+                states: layers.states,
                 settings: layers.settings,
                 onHover: hover => _onHover(hover),
                 hexagonRadius
