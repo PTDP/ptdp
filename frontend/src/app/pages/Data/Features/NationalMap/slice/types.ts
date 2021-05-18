@@ -3,7 +3,7 @@ import { Facility } from 'types/Facility';
 
 export interface Filters {
   call_type: CallType;
-  geography: Geography[];
+  geography: Geography;
   company: FilterCompanies[];
   facility_type: FacilityType[];
   secure_level: SecureLVL[];

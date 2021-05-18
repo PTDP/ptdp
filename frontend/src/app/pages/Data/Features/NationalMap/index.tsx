@@ -9,6 +9,7 @@ import {
 } from './controls';
 import { tooltipStyle } from './style';
 import DeckGL from 'deck.gl';
+import StateData from "./state_data";
 // import taxiData from './taxi.js';
 import {
   renderLayers,
@@ -25,11 +26,7 @@ import { useNationalMapSlice } from './slice';
 import { selectFacilities, selectLoading, selectError, selectFilters, selectCounties, selectBoundaries, selectStates } from './slice/selectors';
 import { Filters, FilterCompanies, Geography, CallType, FacilityType, SecureLVL } from './slice/types';
 import { Facility } from 'types/Facility'
-import { createImmutableStateInvariantMiddleware } from '@reduxjs/toolkit';
-import counties from 'us-atlas/counties-10m.json';
-import * as topojson from 'topojson-client';
 import yj from 'yieldable-json';
-import { from } from '@apollo/client';
 import { fifteenMinuteRate, maxCanonicalFacilityRate, stats } from './utils';
 import stateNormalizer from 'us-state-codes';
 
@@ -140,6 +137,8 @@ export const NationalMap = props => {
   const states = useSelector(selectStates);
 
   const [chartExpanded, setChartExpanded] = useState(false);
+  const [stateExpanded, setStateExpanded] = useState(false);
+  const [selectedState, setSelectedState] = useState(null);
 
   useEffect(() => {
     dispatch(actions.loadFacilities());
@@ -162,16 +161,12 @@ export const NationalMap = props => {
         }
       }
     });
-    console.log(stateFacilitiesByState)
     let filteredStateGeoJSON = { ...states };
 
     filteredStateGeoJSON = (filteredStateGeoJSON.features as any).map((g) => {
       let max = 0;
-      console.log(g.properties)
-      // console.log(`${g.id}-${g.properties.name}`);
       if (stateFacilitiesByState[g.properties.name.toUpperCase()]) {
         try {
-          // console.log('here')
           stateFacilitiesByState[g.properties.name.toUpperCase()].forEach((f) => {
             max = Math.max(max, maxCanonicalFacilityRate(f));
           });
@@ -326,7 +321,14 @@ export const NationalMap = props => {
       }
       return
     };
-    const label = layer.id === 'geojson-layer' ? `${object.properties.name} County` : `${object?.points?.map(p => p?.source?.hifldByHifldid?.name).filter((elt, i, arr) => arr.indexOf(elt) === i).join('</br>')}`;
+    let label = "";
+    if (layer.id == "states-layer") {
+      label = object.properties.name
+    } else if (layer.id == "geojson-layer") {
+      label = `${object.properties.name} County`
+    } else {
+      label = `${object?.points?.map(p => p?.source?.hifldByHifldid?.name).filter((elt, i, arr) => arr.indexOf(elt) === i).join('</br>')}`
+    }
     setState({ hover: { x, y, hoveredObject: object?.points ? object?.points : object, label, hoveredLayer: layer.id } });
   };
 
@@ -351,6 +353,16 @@ export const NationalMap = props => {
 
   const _onClick = (e) => {
     const { hoveredObject, hoveredLayer } = state?.hover;
+    if (hoveredLayer == "states-layer") {
+      const source = hoveredObject;
+      if (!source) {
+        console.error('No source for hoveredObject found');
+        return;
+      }
+      const stateName = source.properties.name;
+      setSelectedState(stateName);
+      return setStateExpanded(true);
+    }
     if (hoveredLayer !== 'geojson-layer') {
       const source = hoveredObject;
       if (!source) {
@@ -424,22 +436,6 @@ export const NationalMap = props => {
               initialViewState={INITIAL_VIEW_STATE}
               viewState={viewState}
               controller={controller}
-
-            // onViewStateChange={(e) => {
-            //   const { oldViewState, viewState } = e;
-            //   console.log('viewstate', viewState)
-            //   if (viewState.zoom > 5 && oldViewState.zoom < 5) {
-            //     setState({
-            //       ...state,
-            //       hexagonRadius: 500
-            //     })
-            //   } else if (viewState.zoom < 5 && oldViewState.zoom > 5) {
-            //     setState({
-            //       ...state,
-            //       hexagonRadius: 2000
-            //     })
-            //   }
-            // }}
             >
               <StaticMap
                 mapStyle={state.style}
@@ -451,14 +447,16 @@ export const NationalMap = props => {
           </div>
           {loading && <Loader />}
           <Charts
-            // {...state}
             highlight={() => { }}
             select={() => { }}
             selectedFacilities={state.selectedFacilities}
             chartExpanded={chartExpanded}
             setChartExpanded={setChartExpanded}
-          // highlight={hour => _onHighlight(hour)}
-          // select={hour => _onSelect(hour)}
+          />
+          <StateData
+            selectedState={selectedState}
+            expanded={stateExpanded}
+            setExpanded={setStateExpanded}
           />
         </div>
       </div >

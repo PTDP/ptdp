@@ -26,14 +26,14 @@ const Radio = ({ name, options }) => {
     const { actions } = useNationalMapSlice();
 
     const handleClick = (e) => {
-        let { id, name } = e.target;
-
+        let { name } = e.target;
+        let id = e.target.getAttribute("data-object-id")
         if (!Number.isNaN(parseInt(id))) id = parseInt(id);
         dispatch(actions.updateFilters({ ...filters, [name]: id }));
     }
 
     return (
-        <div id="fieldset" className="p-2">
+        <div id="fieldset" className={`p-2 ${name}`}>
             <div>
                 <legend className="text-base font-medium text-gray-900">{name}</legend>
                 {/* <p className="text-sm text-gray-500">These are delivered via SMS to your mobile phone.</p> */}
@@ -42,8 +42,8 @@ const Radio = ({ name, options }) => {
                 {options.map((o) => {
                     return (
                         <div className="flex items-center">
-                            <input onClick={handleClick} checked={o.id === filters[o.name]} id={o.id} name={o.name} type="radio" className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300" />
-                            <label htmlFor={o.id} className="ml-3 block text-sm font-medium text-gray-700">
+                            <input onClick={handleClick} data-object-id={o.id} checked={o.id === filters[o.name]} id={`${o.name}-${o.id}`} name={o.name} type="radio" className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300" />
+                            <label htmlFor={`${o.name}-${o.id}`} className="ml-3 block text-sm font-medium text-gray-700">
                                 {o.label}
                             </label>
                         </div>
@@ -157,26 +157,21 @@ const SideBar = () => {
                             }
                         ]} />
                         {/* <Range name={"15 Minute Rate Percentile"} property={"fifteen_minute_percentiles"} /> */}
-                        <Toggle name="Layers" options={[
+                        <Radio name="Layers" options={[
                             {
                                 id: Geography.FACILITY,
                                 name: 'geography',
-                                label: "Facility"
+                                label: "All Facilities"
                             },
                             {
                                 id: Geography.COUNTY,
                                 name: 'geography',
-                                label: "County"
+                                label: "County Facilities"
                             },
                             {
-                                id: Geography.FIFTEEN_MINUTE_HEATMAP,
+                                id: Geography.STATE,
                                 name: 'geography',
-                                label: "Fifteen Minute Rate Heatmap"
-                            },
-                            {
-                                id: Geography.POPULATION,
-                                name: 'geography',
-                                label: "Facility Population Heatmap"
+                                label: "State Facilities"
                             }
                         ]}
                         />

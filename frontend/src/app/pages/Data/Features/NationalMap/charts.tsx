@@ -434,18 +434,6 @@ export default function Charts({
   return (
     <div className={charts} style={chartExpanded ? chartsStyleExpanded : chartsStyleNotExpanded} >
       <div>
-        {/* <div className="sm:hidden">
-          <label htmlFor="tabs" className="sr-only">Select a tab</label>
-          <select id="tabs" name="tabs" className="block w-full focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md">
-            <option>My Account</option>
-
-            <option>Company</option>
-
-            <option selected>Team Members</option>
-
-            <option>Billing</option>
-          </select>
-        </div> */}
         <div className="hidden sm:block">
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex" aria-label="Tabs">
@@ -464,8 +452,6 @@ export default function Charts({
           </div>
         </div>
       </div>
-
-
 
       <CicularButton className="absolute top-2 right-2 " onClick={handleClick}>
         <Minimize _style={{ height: 20, width: 20 }} />

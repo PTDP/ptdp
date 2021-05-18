@@ -146,7 +146,7 @@ export function renderLayers(
   if (!settings) return;
 
   const geo =
-    settings.geography.includes(Geography.COUNTY) &&
+    settings.geography == Geography.COUNTY &&
     new GeoJsonLayer({
       id: 'geojson-layer',
       data: geojson,
@@ -169,9 +169,9 @@ export function renderLayers(
     });
 
   const stateGeojson =
-      true &&
+      settings.geography == Geography.STATE &&
       new GeoJsonLayer({
-        id: 'states-geojson-layer',
+        id: 'states-layer',
         data: states,
         pickable: true,
         extruded: true,
@@ -202,7 +202,7 @@ export function renderLayers(
   }
 
   const column =
-    settings.geography.includes(Geography.FACILITY) &&
+    settings.geography == Geography.FACILITY &&
     new PTDPHexagon({
       onHover,
       data: points,  
@@ -243,47 +243,7 @@ export function renderLayers(
       colorRange: COLOR_RANGE
     });
 
-  // const column =
-  // settings.geography.includes(Geography.FACILITY) &&
-  // new HexagonLayer({
-  //   onHover,
-  //   data: points,  
-  //   radius: 5000,
-  //   elevationScale: 125,
-  //   elevationDomain: [0, 25],
-  //   extruded: true,
-  //   filled: true,
-    // getElevationValue: d => {
-    //   try {
-    //     return maxCanFacilitiesArray(d) 
-    //   } catch(err) {
-    //     return 0
-    //   }
-    // },
-  //   getPosition: d => {
-  //   try {
-  //     const { latitude, longitude } = d;
-  //     return [longitude, latitude];
-  //   } catch (err) {}
-  // },
-  //   getColorValue: d => {
-  //     try {
-  //       return maxCanFacilitiesArray(d);
-  //     } catch(err) {
-  //       console.error(err);
-  //     }
-  //   },
-  //   wireframe: false,
-
-  //   autoHighlight: true,
-  //   // highlightColor: [0, 0, 128, 128],
-  //   opacity: 25,
-  //   pickable: true,
-  //   // lightSettings: LIGHT_SETTINGS,
-  //   colorRange: COLOR_RANGE
-  // });
-
-    const heatmap =  settings.geography.includes(Geography.POPULATION) && new HeatmapLayer({
+    const heatmap =  settings.geography == Geography.POPULATION && new HeatmapLayer({
       id: 'heatmapLayer',
       data: points,
       radiusPixels: 10,
@@ -306,7 +266,7 @@ export function renderLayers(
       aggregation: 'SUM'
     });
 
-    const heatmap2 =  settings.geography.includes(Geography.FIFTEEN_MINUTE_HEATMAP) && new HeatmapLayer({
+    const heatmap2 =  settings.geography == Geography.FIFTEEN_MINUTE_HEATMAP && new HeatmapLayer({
       id: 'heatmapLayer',
       data: points,
       getPosition: d => {
