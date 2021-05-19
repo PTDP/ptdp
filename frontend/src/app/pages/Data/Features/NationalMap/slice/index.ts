@@ -18,9 +18,10 @@ export const initialState: NationalMapState = {
   facilities: [],
   counties: { features: [] },
   boundaries: { features: [] },
+  states: { features: [] },
   filters: {
     call_type: CallType.IN_STATE,
-    geography: [Geography.FACILITY, Geography.COUNTY],
+    geography: Geography.FACILITY,
     company: [FilterCompanies.SECURUS, FilterCompanies.ICS, FilterCompanies.GTL],
     facility_type: [
       FacilityType.LOCAL,
@@ -70,6 +71,9 @@ const slice = createSlice({
     },
     countiesLoaded(state, action: PayloadAction<any>) {
       state.counties = action.payload;
+    },
+    statesLoaded(state, action: PayloadAction<any>) {
+      state.states = action.payload;
     },
     boundariesLoaded(state, action: PayloadAction<any>) {
       state.boundaries = action.payload;

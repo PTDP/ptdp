@@ -12,6 +12,7 @@ import data from './facilities_data.json';
 // import geo_data from './boundaries.json';
 import * as topojson from 'topojson-client';
 import counties from 'us-atlas/counties-10m.json';
+import states from 'us-atlas/states-10m.json';
 
 /**
  * Github repos request/response handler
@@ -60,6 +61,8 @@ export function* loadFacilities() {
       yield put(actions.facilitiesLoaded(facilities));
       const geojson = topojson.feature(counties, counties.objects.counties);
       yield put(actions.countiesLoaded(geojson));
+      const stateGeojson = topojson.feature(states, states.objects.states);
+      yield put(actions.statesLoaded(stateGeojson));
 
       // yield put(actions.boundariesLoaded(geo_data))
       // yield put(actions.boundariesLoaded(topojson.feature(topo_data, (topo_data as any).objects['Prison_Boundaries'])));

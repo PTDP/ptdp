@@ -9,6 +9,7 @@ import {
 } from './controls';
 import { tooltipStyle } from './style';
 import DeckGL from 'deck.gl';
+import StateData from "./state_data";
 // import taxiData from './taxi.js';
 import {
   renderLayers,
@@ -22,15 +23,12 @@ import Charts from './charts';
 /* Data Fetching */
 import { useSelector, useDispatch } from 'react-redux';
 import { useNationalMapSlice } from './slice';
-import { selectFacilities, selectLoading, selectError, selectFilters, selectCounties, selectBoundaries } from './slice/selectors';
+import { selectFacilities, selectLoading, selectError, selectFilters, selectCounties, selectBoundaries, selectStates } from './slice/selectors';
 import { Filters, FilterCompanies, Geography, CallType, FacilityType, SecureLVL } from './slice/types';
 import { Facility } from 'types/Facility'
-import { createImmutableStateInvariantMiddleware } from '@reduxjs/toolkit';
-import counties from 'us-atlas/counties-10m.json';
-import * as topojson from 'topojson-client';
 import yj from 'yieldable-json';
-import { from } from '@apollo/client';
 import { fifteenMinuteRate, maxCanonicalFacilityRate, stats } from './utils';
+import stateNormalizer from 'us-state-codes';
 
 const INITIAL_VIEW_STATE = {
   longitude: -98.5795,
@@ -136,8 +134,11 @@ export const NationalMap = props => {
   const facilities = useSelector(selectFacilities);
   const filters = useSelector(selectFilters);
   const counties = useSelector(selectCounties);
+  const states = useSelector(selectStates);
 
   const [chartExpanded, setChartExpanded] = useState(false);
+  const [stateExpanded, setStateExpanded] = useState(false);
+  const [selectedState, setSelectedState] = useState(null);
 
   useEffect(() => {
     dispatch(actions.loadFacilities());
@@ -148,9 +149,46 @@ export const NationalMap = props => {
     onFilterUpdate();
   }, [filters, facilities])
 
+  const sortByState = () => {
+    const stateFacilitiesByState = {};
+    layers.points.forEach((f) => {
+      if (f.hifldByHifldid.type == "STATE") {
+        const state = stateNormalizer.getStateNameByStateCode(f.hifldByHifldid.state).toUpperCase()
+        if (stateFacilitiesByState[state]) {
+          stateFacilitiesByState[state].push(f)
+        } else {
+          stateFacilitiesByState[state] = [f]
+        }
+      }
+    });
+    let filteredStateGeoJSON = { ...states };
+
+    filteredStateGeoJSON = (filteredStateGeoJSON.features as any).map((g) => {
+      let max = 0;
+      if (stateFacilitiesByState[g.properties.name.toUpperCase()]) {
+        try {
+          stateFacilitiesByState[g.properties.name.toUpperCase()].forEach((f) => {
+            max = Math.max(max, maxCanonicalFacilityRate(f));
+          });
+        } catch (err) { }
+      }
+
+      if (max === 0) return null;
+      else {
+        return {
+          ...g,
+          properties: {
+            ...g.properties,
+            fifteenMinute: max
+          }
+        }
+      }
+    }).filter((el) => !!el);
+
+    layers.states = filteredStateGeoJSON;
+  }
   const sortByCounty = () => {
     const facilitiesByFips = {};
-
     layers.points.forEach((f) => {
       const paddedFips = ("00000" + f.hifldByHifldid.countyfips).slice(-5)
 
@@ -159,7 +197,8 @@ export const NationalMap = props => {
       } else {
         facilitiesByFips[`${paddedFips}-${f.hifldByHifldid.county}`] = [f];
       }
-    })
+    });
+
     let filteredGeoJSON = { ...counties };
     filteredGeoJSON = (filteredGeoJSON.features as any).map((g) => {
       let max = 0;
@@ -192,6 +231,7 @@ export const NationalMap = props => {
     setLoading(true);
     await setFilters(filters)
     await sortByCounty();
+    await sortByState();
     forceUpdate();
     setLoading(false);
   }
@@ -281,7 +321,14 @@ export const NationalMap = props => {
       }
       return
     };
-    const label = layer.id === 'geojson-layer' ? `${object.properties.name} County` : `${object?.points?.map(p => p?.source?.hifldByHifldid?.name).filter((elt, i, arr) => arr.indexOf(elt) === i).join('</br>')}`;
+    let label = "";
+    if (layer.id == "states-layer") {
+      label = object.properties.name
+    } else if (layer.id == "geojson-layer") {
+      label = `${object.properties.name} County`
+    } else {
+      label = `${object?.points?.map(p => p?.source?.hifldByHifldid?.name).filter((elt, i, arr) => arr.indexOf(elt) === i).join('</br>')}`
+    }
     setState({ hover: { x, y, hoveredObject: object?.points ? object?.points : object, label, hoveredLayer: layer.id } });
   };
 
@@ -306,6 +353,16 @@ export const NationalMap = props => {
 
   const _onClick = (e) => {
     const { hoveredObject, hoveredLayer } = state?.hover;
+    if (hoveredLayer == "states-layer") {
+      const source = hoveredObject;
+      if (!source) {
+        console.error('No source for hoveredObject found');
+        return;
+      }
+      const stateName = source.properties.name;
+      setSelectedState(stateName);
+      return setStateExpanded(true);
+    }
     if (hoveredLayer !== 'geojson-layer') {
       const source = hoveredObject;
       if (!source) {
@@ -371,6 +428,7 @@ export const NationalMap = props => {
                 fifteen_minute_percentiles: filters.fifteen_minute_percentiles,
                 points: layers.points,
                 geojson: layers.gj,
+                states: layers.states,
                 settings: layers.settings,
                 onHover: hover => _onHover(hover),
                 hexagonRadius
@@ -378,22 +436,6 @@ export const NationalMap = props => {
               initialViewState={INITIAL_VIEW_STATE}
               viewState={viewState}
               controller={controller}
-
-            // onViewStateChange={(e) => {
-            //   const { oldViewState, viewState } = e;
-            //   console.log('viewstate', viewState)
-            //   if (viewState.zoom > 5 && oldViewState.zoom < 5) {
-            //     setState({
-            //       ...state,
-            //       hexagonRadius: 500
-            //     })
-            //   } else if (viewState.zoom < 5 && oldViewState.zoom > 5) {
-            //     setState({
-            //       ...state,
-            //       hexagonRadius: 2000
-            //     })
-            //   }
-            // }}
             >
               <StaticMap
                 mapStyle={state.style}
@@ -405,14 +447,16 @@ export const NationalMap = props => {
           </div>
           {loading && <Loader />}
           <Charts
-            // {...state}
             highlight={() => { }}
             select={() => { }}
             selectedFacilities={state.selectedFacilities}
             chartExpanded={chartExpanded}
             setChartExpanded={setChartExpanded}
-          // highlight={hour => _onHighlight(hour)}
-          // select={hour => _onSelect(hour)}
+          />
+          <StateData
+            selectedState={selectedState}
+            expanded={stateExpanded}
+            setExpanded={setStateExpanded}
           />
         </div>
       </div >

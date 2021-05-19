@@ -3,7 +3,7 @@ import { Facility } from 'types/Facility';
 
 export interface Filters {
   call_type: CallType;
-  geography: Geography[];
+  geography: Geography;
   company: FilterCompanies[];
   facility_type: FacilityType[];
   secure_level: SecureLVL[];
@@ -55,6 +55,7 @@ export interface NationalMapState {
   facilities: Facility[];
   counties: { features: any[] };
   boundaries: { features: any[] };
+  states: { features: any[] };
   filters: Filters;
   loading: boolean;
   error?: RepoErrorType | null;
