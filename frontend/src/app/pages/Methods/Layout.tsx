@@ -1,7 +1,10 @@
+/* eslint-disable prettier/prettier */
+// eslint-disable-next-line prettier/prettier
 import React from 'react';
 
 const Link = ({ link, text }) => {
   return (
+    // eslint-disable-next-line jsx-a11y/anchor-is-valid
     <a
       className="cursor-pointer underline"
       onClick={e => {
