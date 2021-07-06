@@ -4,6 +4,7 @@
 
 const Apify = require("apify");
 const PendingXHR = require("./pendingXHR");
+const axios = require("axios");
 
 const env = {
   BASE_URL: "https://securustech.online",
@@ -83,10 +84,11 @@ const process = async (page, input, output) => {
     })
     .filter(Boolean);
 
-  for (const state of states) {
+  for (const state of [states[0]]) {
     try {
       await processState(state, page, input, output);
     } catch (err) {
+      console.error(err);
       output.errors.push({
         createdAt: Date.now(),
         state,
@@ -99,18 +101,19 @@ const process = async (page, input, output) => {
 };
 
 const processState = async (state, page, input, output) => {
-  const pendingXHR = new PendingXHR(page, () => {});
-  await page.select(rate_selectors.states_dropdown, state.value);
-  await pendingXHR.waitForAllXhrFinished();
+  const {
+    data: { resultList },
+  } = await axios.get(
+    `https://securustech.online/ffws/api/sites/?state=${state.stusab}&acctType=ALL`
+  );
 
   // Time for API response to propagate
   await new Promise((resolve) => setTimeout(resolve, 100));
 
-  const facilities = await page.$$eval(rate_selectors.sites, (nodes) => {
-    return nodes
-      .map((node) => ({ value: node.value, label: node.innerText.trim() }))
-      .filter((node) => node.label !== "Select");
-  });
+  const facilities = resultList.map((r) => ({
+    value: r.siteId,
+    label: r.siteName,
+  }));
 
   for (const facility of facilities) {
     try {
@@ -139,12 +142,10 @@ const processState = async (state, page, input, output) => {
 };
 
 const oncomplete = async (
-  response,
+  resp,
   results,
   { scraper, phone, service, facility, state }
 ) => {
-  const isXhr = ["xhr", "fetch"].includes(response.request().resourceType());
-  const resp = await response.json();
   const isSuccessResp = resp && resp.result && resp.result.surCharge;
   const isFailureResp = resp && resp.errorMsg !== "Success";
   const duplicate = isSuccessResp && results.find((r) => r.number === phone);
@@ -205,40 +206,35 @@ const processFacility = async (facility, state, page, input, output) => {
 
   await page.select(rate_selectors.sites_dropdown, facility.value);
 
-  const services = await page.$$eval(rate_selectors.services, (nodes) => {
-    return nodes.map((node) => ({
-      value: node.value,
-      label: node.innerText.trim(),
-    }));
-  });
+  const ADVANCED_CONNECT_ENUM = 2;
+  const services = [ADVANCED_CONNECT_ENUM];
 
   for (const service of services) {
-    await page.select(rate_selectors.service_dropdown, service.value);
-
     for (const phone of [state.in_state_phone, state.out_state_phone]) {
-      await page.focus(rate_selectors.phone);
-      await clearFocused(page);
-      await page.type(rate_selectors.phone, phone.slice(1));
-
-      const pendingXHR = new PendingXHR(
-        page,
-        async (response) =>
-          await oncomplete(response, results, {
-            scraper: input.uuid,
-            phone,
-            service,
-            facility,
-            state,
-          })
+      const result = await axios.get(
+        `https://securustech.online/ffws/api/sites/rate/${
+          facility.value
+        }?phoneNumber=${phone.slice(1)}&countryCode=1&serviceId=${service}`
       );
-      await page.click(rate_selectors.submit);
-      await pendingXHR.waitForAllXhrFinished();
 
-      // Time for API response to propagate
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      console.log("result", result);
+
+      /*
+     { surCharge: '$0.000',
+        initalAmount: '$0.050',
+        additionalAmount: '$0.050',
+        totalAmount: '$0.050',
+        quoteRule: false,
+        feeName: null,
+        ratePerMinute: '$0.000' },
+      */
+
+      oncomplete(result, results, { scraper, phone, service, facility, state });
+      results.push(result.data.result);
     }
   }
 
+  console.log("results", results);
   return results;
 };
 
