@@ -26,6 +26,7 @@ module.exports = {
       indigo: colors.indigo,
       purple: colors.violet,
       pink: colors.pink,
+      purple: 'rgb(100, 0, 128)'
     },
     spacing: {
       px: '1px',
@@ -171,6 +172,7 @@ module.exports = {
     },
     fontFamily: {
       sans: [
+        'Sofia Pro',
         'ui-sans-serif',
         'system-ui',
         '-apple-system',

@@ -41,24 +41,22 @@ export const Layout = () => {
                     <div></div>
                     <div>
                         <div className="space-y-5 sm:space-y-4">
-                            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">About Us</h2>
-                            <p className="text-xl text-gray-500">We are a group of activists using automated data collection and visualization to shine a light on the prison telecom industry.</p>
-                            <div className="text-md text-gray-500"><span>We hope to serve as a technical resource for the community of organizers working on prison profiteering. Get in touch!</span>
+                            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">About</h2>
+                            <p className="text-xl text-gray-500">The #ConnectFamiliesNow Data Project is a project of <a className="underline" href="https://worthrises.org/">Worth Rises</a> and its volunteers.</p>
+                            {/* <div className="text-md text-gray-500"><span>We hope to serve as a technical resource for the community of organizers working on prison profiteering. Get in touch!</span>
                                 <span style={{ position: 'relative' }}>
-                                    {/* <div style={{ top: '-4px', position: 'absolute' }}> */}
                                     <CicularButton style={{ top: '-3px', position: 'absolute' }} className="ml-2" onClick={() => window.open('mailto:prison.telecom.data.project@gmail.com')}>
                                         <Mail _style={{ height: 16, width: 16 }} />
                                     </CicularButton>
-                                    {/* </div> */}
                                 </span>
-                            </div>
+                            </div> */}
                         </div>
-                        <div className="col-span-1 space-y-5 sm:space-y-4 sm:col-span-1">
+                        {/* <div className="col-span-1 space-y-5 sm:space-y-4 sm:col-span-1">
                             <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl mt-8">Our Mission</h2>
                             <p className="text-xl text-gray-500">Make prison and jail communication free, nationwide.</p>
                             <p className="text-md text-gray-500">We draw our mission from <a className="underline cursor-pointer" onClick={() => window.open("https://connectfamiliesnow.com/")}>#ConnectFamiliesNow</a>.</p>
                             <p className="text-md text-gray-500">We believe that in a time of ubiquitous, free telecommunications products, it is unconscionable for incarcerated people and their families to be forced to pay to communicate.</p>
-                        </div>
+                        </div> */}
                         <div className="col-span-2 sm:col-span-2">
                             <div>
                                 <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl mt-8">Team</h2>

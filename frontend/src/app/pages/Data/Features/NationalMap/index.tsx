@@ -36,7 +36,6 @@ const INITIAL_VIEW_STATE = {
   zoom: 4,
   minZoom: 1,
   maxZoom: 16,
-  pitch: 55,
   bearing: 0,
 };
 
@@ -319,15 +318,15 @@ export const NationalMap = props => {
           }
         });
       }
-      return
+      return // object.properties.fifteenMinute
     };
     let label = "";
     if (layer.id == "states-layer") {
-      label = object.properties.name
+      label = object.properties.name + '<br/>' + `Average Fifteen Minute Rate: $${object.properties.fifteenMinute.toFixed(2)}`
     } else if (layer.id == "geojson-layer") {
-      label = `${object.properties.name} County`
+      label = `${object.properties.name} County` + '<br/>' + `Average Fifteen Minute Rate: $${object.properties.fifteenMinute.toFixed(2)}`
     } else {
-      label = `${object?.points?.map(p => p?.source?.hifldByHifldid?.name).filter((elt, i, arr) => arr.indexOf(elt) === i).join('</br>')}`
+      label = `${object?.hifldByHifldid?.name}` + '<br/>' + `Fifteen Minute Rate: $${maxCanonicalFacilityRate(object).toFixed(2)}`
     }
     setState({ hover: { x, y, hoveredObject: object?.points ? object?.points : object, label, hoveredLayer: layer.id } });
   };
@@ -355,9 +354,9 @@ export const NationalMap = props => {
     const { hoveredObject, hoveredLayer } = state?.hover;
     if (hoveredLayer == "states-layer") {
       const source = hoveredObject;
+      return;
       if (!source) {
         console.error('No source for hoveredObject found');
-        return;
       }
       const stateName = source.properties.name;
       setSelectedState(stateName);
@@ -365,15 +364,13 @@ export const NationalMap = props => {
     }
     if (hoveredLayer !== 'geojson-layer') {
       const source = hoveredObject;
+      return;
       if (!source) {
         console.error('No source for hoveredObject found');
-        return;
       }
-      const hiflds = Array.from(new Set(source.map(f => f.source.hifldid)));
+      const hiflds = [source.hifldid];
 
-      console.log('hiflds', hiflds)
       const selectedFacilities = facilities.filter((f) => hiflds.includes(f.hifldid));
-      console.log('selectedFacilities', selectedFacilities)
       setState({ ...state, selectedFacilities })
       if (selectedFacilities.length) {
         setChartExpanded(true);
@@ -406,7 +403,7 @@ export const NationalMap = props => {
         style={{
           // position: 'fixed',/
           //marginTop: '64px',
-          height: 'calc(100vh - 64px)'
+          height: 'calc(100vh - 8px)'
         }}
       >
         <div id="national-map" className="relative w-full h-full">

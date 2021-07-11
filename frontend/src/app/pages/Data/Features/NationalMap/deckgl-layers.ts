@@ -1,12 +1,12 @@
-import { ScatterplotLayer, HeatmapLayer, HexagonLayer, GeoJsonLayer,ColumnLayer, H3HexagonLayer } from 'deck.gl';
+import { ScatterplotLayer, HeatmapLayer, HexagonLayer, GeoJsonLayer, ColumnLayer, H3HexagonLayer } from 'deck.gl';
 import { Service } from 'types/Service';
 import { Facility } from 'types/Facility';
 import { GeospatialAppBarChartXDomain } from './examples';
 import { Filters, Geography } from './slice/types';
 import { scaleThreshold } from 'd3-scale';
 import { maxCanonicalFacilityRate } from './utils';
-import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-import {CubeGeometry} from '@luma.gl/core'
+import { SimpleMeshLayer } from '@deck.gl/mesh-layers';
+import { CubeGeometry } from '@luma.gl/core'
 import PTDPHexagon from './hexagonLayer';
 
 const COLOR_RANGE_COUNTY = [
@@ -47,7 +47,7 @@ export const COLOR_SCALE = scaleThreshold()
   .domain(COLOR_DOMAIN)
   .range(COLOR_RANGE_COUNTY);
 
-  export const COLOR_SCALE_FACILITY = scaleThreshold()
+export const COLOR_SCALE_FACILITY = scaleThreshold()
   .domain(COLOR_DOMAIN)
   .range(COLOR_RANGE);
 
@@ -105,7 +105,7 @@ const HEATMAP_COLORS = [
 
 const LIGHT_SETTINGS = {
   lightsPosition: [-122.45, 37.75, 8000, -122.0, 38.00, 5000],
-  ambientRatio:  0.3,
+  ambientRatio: 0.3,
   diffuseRatio: 0.5,
   specularRatio: 0.9,
   lightsStrength: [2.0, 0, 0, 0],
@@ -146,16 +146,16 @@ export function renderLayers(
   if (!settings) return;
 
   const geo =
-    settings.geography == Geography.COUNTY &&
+    (settings.geography == Geography.COUNTY || settings.geography == Geography.LOCAL) &&
     new GeoJsonLayer({
       id: 'geojson-layer',
       data: geojson,
       pickable: true,
       // stroked: true,
       // filled: true,
-      extruded: true,
+      // extruded: true,
       wireframe: true,
-      
+
 
       lineWidthScale: .5,
       // lineWidthMinPixels: 1,
@@ -169,21 +169,21 @@ export function renderLayers(
     });
 
   const stateGeojson =
-      settings.geography == Geography.STATE &&
-      new GeoJsonLayer({
-        id: 'states-layer',
-        data: states,
-        pickable: true,
-        extruded: true,
-        wireframe: true,
-        lineWidthScale: .5,
-        getFillColor: d => COLOR_SCALE(d.properties.fifteenMinute),
-        getElevation: 0,
-        getLineColor: [0,0,0],
-        getRadius: 100,
-        getLineWidth: 200,
-        onHover
-      });
+    settings.geography == Geography.STATE &&
+    new GeoJsonLayer({
+      id: 'states-layer',
+      data: states,
+      pickable: true,
+      // extruded: true,
+      wireframe: true,
+      lineWidthScale: .5,
+      getFillColor: d => COLOR_SCALE(d.properties.fifteenMinute),
+      getElevation: 0,
+      getLineColor: [0, 0, 0],
+      getRadius: 100,
+      getLineWidth: 200,
+      onHover
+    });
 
   const maxCanFacilitiesArray = (arr: Facility[]) => {
     let max = 0;
@@ -193,7 +193,7 @@ export function renderLayers(
     return max;
   }
 
-  const maxCanFacilitiesPoints = (points: { source: Facility}[]) => {
+  const maxCanFacilitiesPoints = (points: { source: Facility }[]) => {
     let max = 0;
     points.forEach((point) => {
       max = Math.max(maxCanonicalFacilityRate(point.source), max);
@@ -201,24 +201,54 @@ export function renderLayers(
     return max;
   }
 
-  const column =
+  const scatter =
     settings.geography == Geography.FACILITY &&
-    new PTDPHexagon({
+    new ScatterplotLayer({
       onHover,
-      data: points,  
+      data: points,
       radius: 1000,
-      elevationScale: 200,
-      elevationDomain: [0, 25],
-      extruded: true,
+      stroked: true,
       filled: true,
-      getElevationValue: d => {
+      getRadisu: d => {
         try {
-          return maxCanFacilitiesArray(d) 
-        } catch(err) {
+          return maxCanFacilitiesArray(d)
+        } catch (err) {
           return 0
         }
       },
       getPosition: d => {
+        try {
+          const { latitude, longitude } = d.hifldByHifldid;
+          return [longitude, latitude];
+        } catch (err) {
+          console.error(err);
+        }
+      },
+      autoHighlight: true,
+      opacity: 25,
+      pickable: true,
+      getFillColor: d => {
+        return COLOR_SCALE_FACILITY(maxCanFacilitiesPoints(d.points))
+      },
+      colorRange: COLOR_RANGE
+    });
+
+  const layer = new ScatterplotLayer({
+    id: 'scatterplot-layer',
+    data: points,
+    pickable: true,
+    opacity: 0.8,
+    // stroked: true,
+    filled: true,
+    onHover: (e) => {
+      console.log('e', e);
+      onHover(e);
+    },
+    radiusScale: 500,
+    radiusMinPixels: 2,
+    radiusMaxPixels: 10000,
+    lineWidthMinPixels: 1,
+    getPosition: d => {
       try {
         const { latitude, longitude } = d.hifldByHifldid;
         return [longitude, latitude];
@@ -226,71 +256,18 @@ export function renderLayers(
         console.error(err);
       }
     },
-      wireframe: false,
-      autoHighlight: true,
-      opacity: 25,
-      pickable: true,
-      getColorValue: d => {
-        try {
-          return maxCanFacilitiesArray(d);
-        } catch(err) {
-          console.error(err);
-        }
-      },
-      getFillColor: d => {
-        return COLOR_SCALE_FACILITY(maxCanFacilitiesPoints(d.points))
-      },
-      colorRange: COLOR_RANGE
-    });
+    getRadius: d => {
+      try {
+        // return 2000;
+        return maxCanonicalFacilityRate(d)
+      } catch (err) {
+        return 0
+      }
+    },
+    // getFillColor: d => COLOR_SCALE_FACILITY(maxCanonicalFacilityRate(d.object)),
+    getFillColor: d => [0, 128, 255]
+  });
 
-    const heatmap =  settings.geography == Geography.POPULATION && new HeatmapLayer({
-      id: 'heatmapLayer',
-      data: points,
-      radiusPixels: 10,
-      getPosition: d => {
-        try {
-          const { latitude, longitude } = d.hifldByHifldid;
-          return [longitude, latitude];
-        } catch (err) {
-          console.error(err);
-        } 
-      },
-      getWeight: d => {
-        try {
-          const { population, capacity } = d.hifldByHifldid;
-          return population || capacity;
-        } catch (err) {
-          console.error(err);
-        } 
-      },
-      aggregation: 'SUM'
-    });
-
-    const heatmap2 =  settings.geography == Geography.FIFTEEN_MINUTE_HEATMAP && new HeatmapLayer({
-      id: 'heatmapLayer',
-      data: points,
-      getPosition: d => {
-        try {
-          const { latitude, longitude } = d.hifldByHifldid;
-          return [longitude, latitude];
-        } catch (err) {
-          console.error(err);
-        } 
-      },
-      threshold:  .5,
-      radiusPixels: 10,
-      getWeight: d => {
-        try {
-          return maxCanFacilitiesArray([d]) 
-        } catch (err) {
-          console.error(err);
-        } 
-      },
-      colorDomain: [0, .2],
-      colorRange: COLOR_RANGE_COUNTY,
-      aggregation: 'MEAN'
-    });
-  
-
-  return [stateGeojson, geo, column, heatmap, heatmap2];
+  // stateGeojson, geo,
+  return [stateGeojson, geo, layer];
 }

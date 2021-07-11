@@ -21,14 +21,14 @@ export const initialState: NationalMapState = {
   states: { features: [] },
   filters: {
     call_type: CallType.IN_STATE,
-    geography: Geography.FACILITY,
+    geography: Geography.COUNTY,
     company: [FilterCompanies.SECURUS, FilterCompanies.ICS, FilterCompanies.GTL],
     facility_type: [
-      FacilityType.LOCAL,
+      // FacilityType.LOCAL,
       FacilityType.COUNTY,
-      FacilityType.STATE,
-      FacilityType.FEDERAL,
-      FacilityType.MULTI,
+      // FacilityType.STATE,
+      // FacilityType.FEDERAL,
+      // FacilityType.MULTI,
     ],
     secure_level: [
       SecureLVL.CLOSE,
@@ -67,6 +67,18 @@ const slice = createSlice({
       state.loading = false;
     },
     updateFilters(state, action: PayloadAction<Filters>) {
+      console.log(action.payload)
+
+      if (action.payload.geography === Geography.COUNTY) {
+        action.payload.facility_type = [FacilityType.COUNTY];
+      } else if (action.payload.geography === Geography.LOCAL) {
+        action.payload.facility_type = [FacilityType.LOCAL];
+      } else if (action.payload.geography === Geography.STATE) {
+        action.payload.facility_type = [FacilityType.STATE];
+      }
+
+      console.log(action.payload)
+
       state.filters = action.payload;
     },
     countiesLoaded(state, action: PayloadAction<any>) {

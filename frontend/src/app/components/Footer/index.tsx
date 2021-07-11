@@ -64,7 +64,7 @@ export const Footer = () => {
                         </a>
                     </div> */}
                     <p className="sm:mt-8 text-base text-gray-400 md:mt-0 md:order-1">
-                        &copy; {new Date().getFullYear()} Prison Telecom Data Project
+                        &copy; {new Date().getFullYear()} #ConnectFamiliesNow
             </p>
                     {/* <p className="w-2/5 mt-8 text-base text-gray-400 md:mt-0 md:order-1">
                         By signing up for our mailing list, you are agreeing to receive periodic communications from the Prison Telecom Data Project and its affiliates concerning news and action opportunities. You can unsubscribe at any time.

@@ -124,7 +124,7 @@ const Toggle = ({ name, options }) => {
 const SideBar = () => {
     return (
         <div className="flex flex-col h-0 flex-1 border-r border-gray-200 bg-white">
-            <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
+            <div className="flex-1 flex flex-col pt-24 pb-4 overflow-y-auto">
                 <nav className="flex-1 px-2 bg-white space-y-1 mb-24">
                     <a href="#" className="bg-gray-100 text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:text-gray-900 hover:bg-gray-100">
                         <svg className="text-gray-400 group-hover:text-gray-500 mr-3 h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -144,7 +144,25 @@ const SideBar = () => {
                         </div>
                     </div>
                     <div className="flex-col">
-                        <Radio name="Data" options={[
+                          <Radio name="Facility Types" options={[
+                            {
+                                id: Geography.LOCAL,
+                                name: 'geography',
+                                label: "Local"
+                            },
+                            {
+                                id: Geography.COUNTY,
+                                name: 'geography',
+                                label: "County"
+                            },
+                            {
+                                id: Geography.STATE,
+                                name: 'geography',
+                                label: "State"
+                            }
+                        ]}
+                        />
+                        <Radio name="Call Type" options={[
                             {
                                 id: CallType.IN_STATE,
                                 name: 'call_type',
@@ -157,24 +175,6 @@ const SideBar = () => {
                             }
                         ]} />
                         {/* <Range name={"15 Minute Rate Percentile"} property={"fifteen_minute_percentiles"} /> */}
-                        <Radio name="Layers" options={[
-                            {
-                                id: Geography.FACILITY,
-                                name: 'geography',
-                                label: "All Facilities"
-                            },
-                            {
-                                id: Geography.COUNTY,
-                                name: 'geography',
-                                label: "County Facilities"
-                            },
-                            {
-                                id: Geography.STATE,
-                                name: 'geography',
-                                label: "State Facilities"
-                            }
-                        ]}
-                        />
                         <Toggle name="Company" options={[
                             {
                                 id: FilterCompanies.ICS,
@@ -202,7 +202,7 @@ const SideBar = () => {
 
                         {/* <Range name={"Min / Max"} property={"capacity_bounds"} /> */}
 
-                        <Toggle name="Facility Type" options={[
+                        {/* <Toggle name="Facility Type" options={[
                             {
                                 id: FacilityType.LOCAL,
                                 name: 'facility_type',
@@ -218,29 +218,29 @@ const SideBar = () => {
                                 name: 'facility_type',
                                 label: "State"
                             },
-                            {
-                                id: FacilityType.FEDERAL,
-                                name: 'facility_type',
-                                label: "Federal"
-                            },
-                            {
-                                id: FacilityType.MULTI,
-                                name: 'facility_type',
-                                label: "Multi"
-                            },
+                            // {
+                            //     id: FacilityType.FEDERAL,
+                            //     name: 'facility_type',
+                            //     label: "Federal"
+                            // },
+                            // {
+                            //     id: FacilityType.MULTI,
+                            //     name: 'facility_type',
+                            //     label: "Multi"
+                            // },
 
-                        ]} />
+                        ]} /> */}
                         <Toggle name="Secure Level" options={[
-                            {
-                                id: SecureLVL.CLOSE,
-                                name: 'secure_level',
-                                label: "Close"
-                            },
-                            {
-                                id: SecureLVL.JUVENILE,
-                                name: 'secure_level',
-                                label: "Juvenile"
-                            },
+                            // {
+                            //     id: SecureLVL.CLOSE,
+                            //     name: 'secure_level',
+                            //     label: "Close"
+                            // },
+                            // {
+                            //     id: SecureLVL.JUVENILE,
+                            //     name: 'secure_level',
+                            //     label: "Juvenile"
+                            // },
                             {
                                 id: SecureLVL.MINIMUM,
                                 name: 'secure_level',

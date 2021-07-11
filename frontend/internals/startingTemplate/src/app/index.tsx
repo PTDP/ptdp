@@ -21,11 +21,11 @@ export function App() {
   return (
     <BrowserRouter>
       <Helmet
-        titleTemplate="%s - Prison Telecom Data Project"
-        defaultTitle="Prison Telecom Data Project"
+        titleTemplate="%s - #ConnectFamiliesNow Data Project"
+        defaultTitle="#ConnectFamiliesNow Data Project"
         htmlAttributes={{ lang: i18n.language }}
       >
-        <meta name="description" content="Prison Telecom Data Project" />
+        <meta name="description" content="#ConnectFamiliesNow Data Project" />
       </Helmet>
 
       <Switch>
