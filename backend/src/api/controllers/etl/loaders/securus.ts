@@ -88,7 +88,7 @@ class Securus extends ETL {
           hidden_override: false,
         };
 
-        tf.push(partial);
+        tf.push(partial as any);
       }
     }
 

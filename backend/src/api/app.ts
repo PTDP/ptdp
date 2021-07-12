@@ -8,7 +8,7 @@ const app = express();
 
 app.use(cors());
 // // https://www.graphile.org/postgraphile/
-app.use(postgraphile);
+app.use("/", postgraphile);
 
 app.use("/etl", etl);
 app.use("/scrape", scrape);
