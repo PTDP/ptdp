@@ -141,7 +141,7 @@ const Toggle = ({ name, options, filters, setFilters }) => {
           return (
             <div className="relative flex items-start">
               <div className="flex items-center h-5">
-                <input onClick={handleClick} id={`${o.id}___${o.name}`} name={o.name} checked={filters && filters[`${o.id}`] === true} type="checkbox" className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded" />
+                <input onClick={handleClick} id={`${o.id}___${o.name}`} name={o.name} checked={filters && filters[`${o.id}`] === true} type="checkbox" className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded" style={{color: 'red', backgroundColor: 'red'}}/>
               </div>
               <div className="ml-3 text-xs">
                 <label htmlFor={`${o.id}___${o.name}`} className="font-medium text-gray-700">{o.label}</label>

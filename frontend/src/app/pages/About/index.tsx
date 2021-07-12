@@ -14,7 +14,7 @@ export const About = () => {
             </Helmet>
             <NavBar />
             <Layout />
-            <Footer />
+            {/* <Footer /> */}
         </div>
     )
 }

@@ -14,7 +14,7 @@ export const Resources = () => {
             </Helmet>
             <NavBar />
             <Layout />
-            <Footer />
+            {/* <Footer /> */}
         </div>
     )
 }

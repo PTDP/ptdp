@@ -14,7 +14,7 @@ export const Methods = () => {
             </Helmet>
             <NavBar />
             <Layout />
-            <Footer />
+            {/* <Footer /> */}
         </div>
     )
 }

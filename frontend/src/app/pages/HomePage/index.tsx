@@ -22,7 +22,7 @@ export function HomePage() {
       <Masthead />
       {/* <Features /> */}
       {/* </PageWrapper> */}
-      <Footer />
+      {/* <Footer /> */}
     </>
   );
 }

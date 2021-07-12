@@ -44,7 +44,7 @@ const Radio = ({ name, options }) => {
                 {options.map((o) => {
                     return (
                         <div className="flex items-center">
-                            <input onClick={handleClick} data-object-id={o.id} checked={o.id === filters[o.name]} id={`${o.name}-${o.id}`} name={o.name} type="radio" className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300" />
+                            <input onClick={handleClick} data-object-id={o.id} checked={o.id === filters[o.name]} id={`${o.name}-${o.id}`} name={o.name} type="radio" className="focus:ring-purple-500 h-4 w-4 text-purple-600 border-gray-300" />
                             <label htmlFor={`${o.name}-${o.id}`} className="ml-3 block text-sm font-medium text-gray-700">
                                 {o.label}
                             </label>
@@ -110,7 +110,7 @@ const Toggle = ({ name, options }) => {
                     return (
                         <div className="relative flex items-start">
                             <div className="flex items-center h-5">
-                                <input onClick={handleClick} id={o.id} name={o.name} checked={filters && filters[`${o.name}`].includes(o.id)} type="checkbox" className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded" />
+                                <input onClick={handleClick} id={o.id} name={o.name} checked={filters && filters[`${o.name}`].includes(o.id)} type="checkbox" className="focus:ring-purple-500 h-4 w-4 text-purple-600 border-gray-300 rounded" />
                             </div>
                             <div className="ml-3 text-sm">
                                 <label htmlFor={o.id} className="font-medium text-gray-700">{o.label}</label>

@@ -262,10 +262,10 @@ export function renderLayers(
         return maxCanonicalFacilityRate(d)
       } catch (err) {
         return 0
-      }
+      } // 
     },
     // getFillColor: d => COLOR_SCALE_FACILITY(maxCanonicalFacilityRate(d.object)),
-    getFillColor: d => [0, 128, 255]
+    getFillColor: d => [100, 0, 128]
   });
 
   // stateGeojson, geo,
