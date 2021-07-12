@@ -144,7 +144,7 @@ const SideBar = () => {
                         </div>
                     </div>
                     <div className="flex-col">
-                          <Radio name="Facility Types" options={[
+                          <Radio name="Facility Type" options={[
                             {
                                 id: Geography.LOCAL,
                                 name: 'geography',
