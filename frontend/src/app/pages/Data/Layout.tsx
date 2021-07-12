@@ -124,8 +124,8 @@ const Toggle = ({ name, options }) => {
 const SideBar = () => {
     return (
         <div className="flex flex-col h-0 flex-1 border-r border-gray-200 bg-white">
-            <div className="flex-1 flex flex-col pt-24 pb-4 overflow-y-auto">
-                <nav className="flex-1 px-2 bg-white space-y-1 mb-24">
+            <div className="flex flex-col pb-4 overflow-y-auto">
+                <nav className="mt-10 px-2 bg-white space-y-1 mb-24" >
                     <a href="#" className="bg-gray-100 text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:text-gray-900 hover:bg-gray-100">
                         <svg className="text-gray-400 group-hover:text-gray-500 mr-3 h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -137,7 +137,7 @@ const SideBar = () => {
                             Hover facilities or counties to get basic information about them.
                         </div>
                         <div className="mt-2">
-                            Click highlighted facilities to view all rate data since January 2021.
+                            Click highlighted facilities to view detailed rate data.
                         </div>
                         <div className="mt-2">
                             For more information about where our data comes from, and why not all facilities are represented read about our <Link link="/methods" text="methods" />.

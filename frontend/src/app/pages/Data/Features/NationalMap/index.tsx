@@ -42,7 +42,7 @@ const INITIAL_VIEW_STATE = {
 
 const navControlStyle= {
   left: 10,
-  top: 100
+  top: 50
 };
 
 const Loader = () => (
@@ -408,7 +408,8 @@ export const NationalMap = props => {
         style={{
           // position: 'fixed',/
           //marginTop: '64px',
-          height: 'calc(100vh - 8px)'
+          // height: 'calc(100vh - 8px)'
+          height: '100vh'
         }}
       >
         <div id="national-map" className="relative w-full h-full">
