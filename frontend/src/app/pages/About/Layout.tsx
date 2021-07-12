@@ -1,3 +1,5 @@
+import { useHistory } from 'react-router-dom';
+
 import React from 'react';
 import Hayden from './hayden.jpeg';
 import Kevin from './kevin.jpeg';
@@ -33,14 +35,22 @@ const CicularButton = ({ children, className, onClick, style }) => {
 }
 
 export const Layout = () => {
+    const history = useHistory();
+
+    const handleClick = (e, path) => {
+      e.preventDefault();
+      history.push(path)
+  }
 
     return (
         <div className="bg-white mb-16" style={{ minHeight: '70vh' }}>
             <div className="mx-auto py-12 px-4 max-w-4xl sm:px-6 lg:px-8 lg:py-12">
                 <div className="grid grid-cols-1 gap-12 lg:gap-8 about-container">
-                    <div></div>
                     <div>
-                        <div className="space-y-5 sm:space-y-4">
+                    <button className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded" onClick={(e) => handleClick(e, "/")}>
+                         Back
+                 </button>
+                        <div className="space-y-5 sm:space-y-4 mt-4">
                             <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">About</h2>
                             <p className="text-xl text-gray-500">The #ConnectFamiliesNow Data Project is a project of <a className="underline" href="https://worthrises.org/">Worth Rises</a> and volunteers.</p>
                             {/* <div className="text-md text-gray-500"><span>We hope to serve as a technical resource for the community of organizers working on prison profiteering. Get in touch!</span>

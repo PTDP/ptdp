@@ -1,4 +1,5 @@
 import React from 'react';
+import { useHistory } from 'react-router-dom';
 
 const Link = ({ link, text }) => {
   return (
@@ -15,13 +16,25 @@ const Link = ({ link, text }) => {
 };
 
 export const Layout = () => {
+  const history = useHistory();
+
+  const handleClick = (e, path) => {
+    e.preventDefault();
+    history.push(path)
+}
+
   return (
     <div className="bg-white mb-16" style={{ minHeight: '70vh' }}>
       <div className="mx-auto py-12 px-4 max-w-4xl sm:px-6 lg:px-8 lg:py-12">
         <div className="grid grid-cols-1 gap-12 lg:gap-8 about-container">
-          <div></div>
+          <div>
+          <button className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded" onClick={(e) => handleClick(e, "/")}>
+            Back
+         </button>
+          </div>
           <div>
             <div className="space-y-5 sm:space-y-4">
+
               <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
                 Methodology
               </h2>

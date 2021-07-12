@@ -63,7 +63,7 @@ const chartsStyleExpanded = {
 }
 
 const chartsStyleNotExpanded = {
-  height: 50,
+  height: 50
 }
 
 const ChartMinimized = ({ handleClick }) => (
@@ -406,7 +406,8 @@ export default function Charts({
   }
 
   if (!chartExpanded) return (
-    <ChartMinimized handleClick={handleClick} />
+    // <ChartMinimized handleClick={handleClick} />
+    <div></div>
   )
 
   const JAN_1_2021 = 1609459200 * 1000;

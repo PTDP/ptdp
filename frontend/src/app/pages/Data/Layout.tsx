@@ -1,6 +1,8 @@
 import React from "react";
 import { NationalMap } from "./Features/NationalMap/index";
 import { useSelector, useDispatch } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+
 import { useNationalMapSlice } from './Features/NationalMap/slice';
 import { selectFilters } from './Features/NationalMap/slice/selectors';
 import { FilterCompanies, Geography, CallType, FacilityType, SecureLVL } from './Features/NationalMap/slice/types';
@@ -122,6 +124,13 @@ const Toggle = ({ name, options }) => {
 }
 
 const SideBar = () => {
+    const history = useHistory();
+
+    const handleClick = (e) => {
+        e.preventDefault();
+        history.push(new URL(e.target.href).pathname)
+    }
+
     return (
         <div className="flex flex-col h-0 flex-1 border-r border-gray-200 bg-white">
             <div className="flex flex-col pb-4 overflow-y-auto">
@@ -139,8 +148,13 @@ const SideBar = () => {
                         <div className="mt-2">
                             Click highlighted facilities to view detailed rate data.
                         </div>
+                        
                         <div className="mt-2">
-                            For more information about where our data comes from, and why not all facilities are represented read about our <Link link="/methods" text="methods" />.
+                            For more information about where our data comes from, and why not all facilities are represented read about our <a className="underline" href="/methods" onClick={handleClick}>methods</a>.
+                        </div>
+
+                        <div className="mt-2">
+                            The #ConnectFamiliesNow Data Project is driven by <a className="underline" href="/about" onClick={handleClick}>volunteers</a>.
                         </div>
                     </div>
                     <div className="flex-col">
