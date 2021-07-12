@@ -116,9 +116,9 @@ export function Nav() {
                     {/* <a href="/contact" onClick={handleClick} className={getNavClass("/contact")}>
                       Get Involved
                   </a> */}
-                    <a href="/about" onClick={handleClick} className={getNavClass("/about")}>
+                    {/* <a href="/about" onClick={handleClick} className={getNavClass("/about")}>
                       About
-                  </a>
+                  </a> */}
                   </div>
                 </div>
               </div>

@@ -42,7 +42,7 @@ export const Layout = () => {
                     <div>
                         <div className="space-y-5 sm:space-y-4">
                             <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">About</h2>
-                            <p className="text-xl text-gray-500">The #ConnectFamiliesNow Data Project is a project of <a className="underline" href="https://worthrises.org/">Worth Rises</a> and its volunteers.</p>
+                            <p className="text-xl text-gray-500">The #ConnectFamiliesNow Data Project is a project of <a className="underline" href="https://worthrises.org/">Worth Rises</a> and volunteers.</p>
                             {/* <div className="text-md text-gray-500"><span>We hope to serve as a technical resource for the community of organizers working on prison profiteering. Get in touch!</span>
                                 <span style={{ position: 'relative' }}>
                                     <CicularButton style={{ top: '-3px', position: 'absolute' }} className="ml-2" onClick={() => window.open('mailto:prison.telecom.data.project@gmail.com')}>
