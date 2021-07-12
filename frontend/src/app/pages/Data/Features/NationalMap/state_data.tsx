@@ -35,12 +35,12 @@ const styleNotExpanded = {
 
 const ChartMinimized = ({ handleClick }) => (
     <div className={" bottom-4 left-4 absolute bg-white rounded-sm shadow-sm text-xs p-4 flex items-center"} style={styleNotExpanded} >
-        <div className="flex items-center justify-center">
+        {/* <div className="flex items-center justify-center">
             <h2 className="mr-2">Facility Details</h2>
             <CicularButton className="" onClick={handleClick}>
                 <ArrowsExpand _style={{ height: 20, width: 20 }} />
             </CicularButton>
-        </div>
+        </div> */}
     </div>
 )
 

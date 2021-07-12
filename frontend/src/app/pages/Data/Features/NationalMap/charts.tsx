@@ -53,11 +53,11 @@ const CicularButton = ({ children, className, onClick }) => {
   )
 }
 
-const charts = "bg-white rounded-sm shadow-sm text-xs h-80 p-4 absolute bottom-4 right-8"
+const charts = "bg-white rounded-sm shadow-sm text-xs h-80 p-4 absolute bottom-24 left-16"
 
 const chartsStyleExpanded = {
   width: '65%',
-  height: '85%',
+  height: '80%',
   overflow: 'scroll',
   minWidth: '530px'
 }

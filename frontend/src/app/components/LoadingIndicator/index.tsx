@@ -19,17 +19,17 @@ const rotate = keyframes`
 
 const dash = keyframes`
   0% {
-    stroke: rgb(19,185,129);
+    stroke: rgb(100, 0, 128);
     stroke-dasharray: 0, 150;
     stroke-dashoffset: 0;
   }
   50% {
-    stroke: rgb(19,185,129);
+    stroke: rgb(100, 0, 128);
     stroke-dasharray: 100, 150;
     stroke-dashoffset: -24;
   }
   100% {
-    stroke: rgb(19,185,129);
+    stroke: rgb(100, 0, 128);
     stroke-dasharray: 0, 150;
     stroke-dashoffset: -124;
   }
