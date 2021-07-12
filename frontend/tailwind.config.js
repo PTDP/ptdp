@@ -171,6 +171,7 @@ module.exports = {
     },
     fontFamily: {
       sans: [
+        'Sofia Pro',
         'ui-sans-serif',
         'system-ui',
         '-apple-system',

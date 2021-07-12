@@ -3,6 +3,7 @@ import { request } from 'utils/request';
 import { nationalMapActions as actions } from '.';
 import { RepoErrorType } from './types';
 import { Facility } from 'types/Facility';
+import { SecureLVL } from '../../../Features/NationalMap/slice/types';
 import { Rate } from 'types/Rate';
 import client from '../../../../../../api';
 import { FACILITIES_QUERY } from '../../../../../../api/queries';
@@ -47,13 +48,22 @@ export function* loadFacilities() {
     // match all
     // console.log(f_response[0]);
 
-    let facilities : Facility[] = f_response?.data?.allCanonicalFacilities?.nodes;
+    let facilities: Facility[] = f_response?.data?.allCanonicalFacilities?.nodes;
 
     // filter facilities we should never see
     facilities = facilities.filter((elt) => {
       if (elt.hifldByHifldid.status === "CLOSED") return false;
       if (elt.hidden) return false;
       return true;
+    }).map((elt) => {
+      if (elt.hifldByHifldid.securelvl === "JUVENILE" || elt.hifldByHifldid.securelvl === "CLOSE") return {
+        ...elt,
+        hifldByHifldid: {
+          ...elt.hifldByHifldid,
+          securelvl: SecureLVL.NOT_AVAILABLE
+        }
+      }
+      return elt;
     });
 
 

@@ -28,16 +28,16 @@ export function App() {
   return (
     <BrowserRouter>
       <Helmet
-        titleTemplate="%s - Prison Telecom Data Project"
-        defaultTitle="Prison Telecom Data Project"
+        titleTemplate="%s - #ConnectFamiliesNow Data Project"
+        defaultTitle="#ConnectFamiliesNow Data Project"
         htmlAttributes={{ lang: i18n.language }}
       >
-        <meta name="description" content="Prison Telecom Data Project" />
+        <meta name="description" content="#ConnectFamiliesNow Data Project" />
       </Helmet>
       <Switch>
         <Route exact path={process.env.PUBLIC_URL + '/about'} component={About} />
         <Route exact path={process.env.PUBLIC_URL + '/data'} component={Data} />
-        <Route exact path={process.env.PUBLIC_URL + '/'} component={HomePage} />
+        <Route exact path={process.env.PUBLIC_URL + '/'} component={Data} />
         <Route exact path={process.env.PUBLIC_URL + '/resources'} component={Resources} />
         <Route exact path={process.env.PUBLIC_URL + '/methods'} component={Methods} />
         <Route component={NotFoundPage} />

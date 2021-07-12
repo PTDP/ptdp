@@ -53,11 +53,11 @@ const CicularButton = ({ children, className, onClick }) => {
   )
 }
 
-const charts = "bg-white rounded-sm shadow-sm text-xs h-80 p-6 absolute bottom-4 left-4"
+const charts = "bg-white rounded-sm shadow-sm text-xs h-80 p-4 absolute bottom-4 right-8"
 
 const chartsStyleExpanded = {
   width: '65%',
-  height: '90%',
+  height: '85%',
   overflow: 'scroll',
   minWidth: '530px'
 }
@@ -459,7 +459,7 @@ export default function Charts({
       <div id="chart-details-wrapper" className="flex mt-4">
         <div className="flex-col w-1/2 mr-2">
           <div className="flex-col w-50 bg-gray-50 rounded-sm p-4 pr-8 mt-2">
-            <div className="mr-1 text-md text-gray-900 font-medium flex mr-2" ><div>Select Vendor Facility Data{" "}</div>
+            <div className="mr-1 text-md text-gray-900 font-medium flex mr-2" ><div>Select Data{" "}</div>
               <div className="ml-1">
                 <a data-tip data-for='product-info'><InfoIcon /> </a>
                 <ReactTooltip multiline={true} id='product-info' className="w-60">
@@ -492,7 +492,7 @@ export default function Charts({
                 )
               })}
               <div className="mt-2 font-medium">
-                Service
+                Phone Service
                 <Toggle
                   name="Services"
                   filters={productFilters}
@@ -560,6 +560,7 @@ export default function Charts({
             <VerticalGridLines />
             <XAxis
               tickFormat={(d: Date) => d.toLocaleDateString('en-US')}
+              tickTotal={3}
             />
             <YAxis />
             <ChartLabel

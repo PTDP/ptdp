@@ -1,6 +1,6 @@
 /* global window */
 import React, { Component, useEffect, useState, useReducer, CSSProperties } from 'react';
-import { StaticMap } from 'react-map-gl';
+import { StaticMap, NavigationControl, _MapContext as MapContext } from 'react-map-gl';
 import {
   LayerControls,
   MapStylePicker,
@@ -36,8 +36,13 @@ const INITIAL_VIEW_STATE = {
   zoom: 4,
   minZoom: 1,
   maxZoom: 16,
-  pitch: 55,
   bearing: 0,
+  pitch: 0
+};
+
+const navControlStyle= {
+  left: 10,
+  top: 100
 };
 
 const Loader = () => (
@@ -319,15 +324,15 @@ export const NationalMap = props => {
           }
         });
       }
-      return
+      return // object.properties.fifteenMinute
     };
     let label = "";
     if (layer.id == "states-layer") {
-      label = object.properties.name
+      label = object.properties.name + '<br/>' + `Average Fifteen Minute Rate: $${object.properties.fifteenMinute.toFixed(2)}`
     } else if (layer.id == "geojson-layer") {
-      label = `${object.properties.name} County`
+      label = `${object.properties.name} County` + '<br/>' + `Average Fifteen Minute Rate: $${object.properties.fifteenMinute.toFixed(2)}`
     } else {
-      label = `${object?.points?.map(p => p?.source?.hifldByHifldid?.name).filter((elt, i, arr) => arr.indexOf(elt) === i).join('</br>')}`
+      label = `${object?.hifldByHifldid?.name}` + '<br/>' + `Fifteen Minute Rate: $${maxCanonicalFacilityRate(object).toFixed(2)}`
     }
     setState({ hover: { x, y, hoveredObject: object?.points ? object?.points : object, label, hoveredLayer: layer.id } });
   };
@@ -355,9 +360,9 @@ export const NationalMap = props => {
     const { hoveredObject, hoveredLayer } = state?.hover;
     if (hoveredLayer == "states-layer") {
       const source = hoveredObject;
+      return;
       if (!source) {
         console.error('No source for hoveredObject found');
-        return;
       }
       const stateName = source.properties.name;
       setSelectedState(stateName);
@@ -367,13 +372,10 @@ export const NationalMap = props => {
       const source = hoveredObject;
       if (!source) {
         console.error('No source for hoveredObject found');
-        return;
       }
-      const hiflds = Array.from(new Set(source.map(f => f.source.hifldid)));
+      const hiflds = [source?.hifldid];
 
-      console.log('hiflds', hiflds)
       const selectedFacilities = facilities.filter((f) => hiflds.includes(f.hifldid));
-      console.log('selectedFacilities', selectedFacilities)
       setState({ ...state, selectedFacilities })
       if (selectedFacilities.length) {
         setChartExpanded(true);
@@ -406,7 +408,7 @@ export const NationalMap = props => {
         style={{
           // position: 'fixed',/
           //marginTop: '64px',
-          height: 'calc(100vh - 64px)'
+          height: 'calc(100vh - 8px)'
         }}
       >
         <div id="national-map" className="relative w-full h-full">
@@ -436,7 +438,11 @@ export const NationalMap = props => {
               initialViewState={INITIAL_VIEW_STATE}
               viewState={viewState}
               controller={controller}
+              ContextProvider={MapContext.Provider}
             >
+                  <div style={{position: 'absolute'}}>
+                    <NavigationControl style={navControlStyle} />
+                </div>
               <StaticMap
                 mapStyle={state.style}
                 mapboxApiAccessToken={

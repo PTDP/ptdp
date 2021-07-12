@@ -44,8 +44,8 @@ main {
 
 .nav-link-active {
     @apply 
-    border-green-500 
-    text-gray-900 
+    border-white
+    text-white
     inline-flex 
     items-center 
     px-1 
@@ -58,9 +58,9 @@ main {
 .nav-link-inactive {
     @apply 
     border-transparent 
-    text-gray-500 
+    text-white
     hover:border-gray-300 
-    hover:text-gray-700 
+    hover:text-white 
     inline-flex 
     items-center 
     px-1 
@@ -118,6 +118,10 @@ body {
   100% {
     transform: rotate(360deg);
   }
+}
+
+.bg-purple {
+  background-color: rgb(100, 0, 128);
 }
 
 @import "tailwindcss/utilities";

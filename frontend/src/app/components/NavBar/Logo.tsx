@@ -4,7 +4,7 @@ import styled from 'styled-components/macro';
 export function Logo() {
   return (
     <Wrapper>
-      <Title>Prison Telecom Data Project</Title>
+      <Title>#ConnectFamiliesNow Data Project</Title>
       <Description></Description>
     </Wrapper>
   );
