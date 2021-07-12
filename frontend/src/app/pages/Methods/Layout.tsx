@@ -28,7 +28,7 @@ export const Layout = () => {
       <div className="mx-auto py-12 px-4 max-w-4xl sm:px-6 lg:px-8 lg:py-12">
         <div className="grid grid-cols-1 gap-12 lg:gap-8 about-container">
           <div>
-          <button style={{backgroundColor: 'rgb(91,23,123)'}} className="bg-purple-700 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded" onClick={(e) => handleClick(e, "/")}>
+          <button style={{backgroundColor: '#640080'}} className="bg-purple-700 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded" onClick={(e) => handleClick(e, "/")}>
             Back
          </button>
           </div>
