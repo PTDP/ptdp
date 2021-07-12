@@ -245,7 +245,7 @@ export function renderLayers(
       onHover(e);
     },
     radiusScale: 500,
-    radiusMinPixels: 2,
+    radiusMinPixels: 0,
     radiusMaxPixels: 10000,
     lineWidthMinPixels: 1,
     getPosition: d => {

@@ -1,6 +1,6 @@
 /* global window */
 import React, { Component, useEffect, useState, useReducer, CSSProperties } from 'react';
-import { StaticMap } from 'react-map-gl';
+import { StaticMap, NavigationControl, _MapContext as MapContext } from 'react-map-gl';
 import {
   LayerControls,
   MapStylePicker,
@@ -37,6 +37,12 @@ const INITIAL_VIEW_STATE = {
   minZoom: 1,
   maxZoom: 16,
   bearing: 0,
+  pitch: 0
+};
+
+const navControlStyle= {
+  left: 10,
+  top: 100
 };
 
 const Loader = () => (
@@ -364,11 +370,10 @@ export const NationalMap = props => {
     }
     if (hoveredLayer !== 'geojson-layer') {
       const source = hoveredObject;
-      return;
       if (!source) {
         console.error('No source for hoveredObject found');
       }
-      const hiflds = [source.hifldid];
+      const hiflds = [source?.hifldid];
 
       const selectedFacilities = facilities.filter((f) => hiflds.includes(f.hifldid));
       setState({ ...state, selectedFacilities })
@@ -433,7 +438,11 @@ export const NationalMap = props => {
               initialViewState={INITIAL_VIEW_STATE}
               viewState={viewState}
               controller={controller}
+              ContextProvider={MapContext.Provider}
             >
+                  <div style={{position: 'absolute'}}>
+                    <NavigationControl style={navControlStyle} />
+                </div>
               <StaticMap
                 mapStyle={state.style}
                 mapboxApiAccessToken={
