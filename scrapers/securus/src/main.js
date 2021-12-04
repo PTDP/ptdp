@@ -205,12 +205,12 @@ const processFacility = async (facility, state, page, input, output) => {
 
   await page.select(rate_selectors.sites_dropdown, facility.value);
 
-  const services = await page.$$eval(rate_selectors.services, (nodes) => {
+  const services = [(await page.$$eval(rate_selectors.services, (nodes) => {
     return nodes.map((node) => ({
       value: node.value,
       label: node.innerText.trim(),
     }));
-  });
+  }))[0]]; // only AdvancedConnect
 
   for (const service of services) {
     await page.select(rate_selectors.service_dropdown, service.value);
