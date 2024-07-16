@@ -154,7 +154,7 @@ const SideBar = () => {
                         </div>
 
                         <div className="mt-2">
-                            The #ConnectFamiliesNow Data Project is driven by <a className="underline" href="/about" onClick={handleClick}>volunteers</a>.
+                            The #ConnectFamiliesNow Data Project is driven by volunteers.
                         </div>
                     </div>
                     <div className="flex-col">
