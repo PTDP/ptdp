@@ -3,7 +3,7 @@
 
 # Prison Telecom Data Project
 
-For more background about The Prison Telecom Data Project visit our [website](https://prisontelecom.org).
+For more background about The Prison Telecom Data Project visit our [website](https://prisontelecom.org). 
 
 ## Our Data 
 
@@ -12,7 +12,7 @@ You can download a CSV with our latest rate data [here](https://github.com/PTDP/
 ## Our Methodology  
 You can read the complete details of our methodogy [here](https://prisontelecom.org/methods).
 
-**Contributors**: You can see our [team page](https://prisontelecom.org/team) for an updated list of contributors. Please reach out at prison.telcom.data.project@gmail.com if you would like to contribute code, data, or time. We always welcome additional contributors!                                                                              |
+**Contributors**: Please reach out at prison.telcom.data.project@gmail.com if you would like to contribute code, data, or time. We always welcome additional contributors!                                                                              |
 
 ## Citations
 
